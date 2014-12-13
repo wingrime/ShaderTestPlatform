@@ -21,7 +21,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 #set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Werror -g -Wextra -Wshadow -pedantic ${CMAKE_CXX_FLAGS}")
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
-set(CMAKE_CXX_FLAGS "-std=c++11  -static-libstdc++ ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -g -ggdb -static-libstdc++ -Wl,-Bstatic -lwinpthread${CMAKE_CXX_FLAGS}")
 
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
