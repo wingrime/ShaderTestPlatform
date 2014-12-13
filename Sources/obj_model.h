@@ -1,4 +1,5 @@
 #pragma once
+#include "MTLParser.h"
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -113,45 +114,7 @@ struct CObjSubmesh {
         ar(CEREAL_NVP(name),CEREAL_NVP(m_name),CEREAL_NVP(flag_normals),CEREAL_NVP(v),CEREAL_NVP(vn));
     }
 };
-struct CMTLColor {
-    float r = 0.0;
-    float g = 0.0;
-    float b = 0.0;
-    /*serialize support */
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar(CEREAL_NVP(r),CEREAL_NVP(g),CEREAL_NVP(b));
-    }
-};
 
-struct CMTLMaterial {
-    CMTLColor Ka; /* ambient color   */
-    CMTLColor Kd; /* diffuse color   */
-    CMTLColor Ks; /* specular color  */
-    CMTLColor Ke; /* emmission color */
-    CMTLColor Tf; /* transmission filter color */
-    float     Ns = 0.0;  /* specular coeff*/
-    float     Ni = 0.0; /* IOR */
-    float     d = 0.0; /*dissolve (transpernt) */
-    int illum = 0;   /*illumination model */
-
-    std::string map_Ka; /*ambient map */
-    std::string map_Kd; /*diffuse map*/
-    std::string map_Ns; /*Specular shinnes map*/
-    std::string map_d; /*alpha mask*/
-    std::string map_bump; /*bump */
-
-    /*serialize support */
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar( CEREAL_NVP(Ka),CEREAL_NVP(Kd),CEREAL_NVP(Ks),CEREAL_NVP(Ke),CEREAL_NVP(Tf),CEREAL_NVP(Ns),CEREAL_NVP(Ni),CEREAL_NVP(d), CEREAL_NVP(illum),
-            CEREAL_NVP(map_Ka),CEREAL_NVP(map_Kd),CEREAL_NVP(map_Ns),CEREAL_NVP(map_d),CEREAL_NVP(map_bump));
-    }
-};
 
 
 class CObjMeshParser {
@@ -166,10 +129,10 @@ public:
     long int getVertexCount() const {return d_vertex_count;};
 
 private:
-    std::vector<CObjVertex> BuildVerts(std::vector<CObjV3> &glv,std::vector<CObjV2> &glt , const CObjFaceI& face);
-    std::vector<CObjVertexN> BuildVertsN(std::vector<CObjV3> &glv,std::vector<CObjV2> &glt,std::vector<CObjV3> &gln , const CObjFaceI& face);
-    CObjVertex BuildVert(CObjV3 &p, CObjV2 &tc);
-    CObjVertexN BuildVertN(CObjV3 &p, CObjV2 &tc,CObjV3 &n);
+    std::vector<CObjVertex> BuildVerts(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt , const CObjFaceI& face);
+    std::vector<CObjVertexN> BuildVertsN(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt, const std::vector<CObjV3> &gln , const CObjFaceI& face);
+    CObjVertex BuildVert(const CObjV3 &p, const CObjV2 &tc);
+    CObjVertexN BuildVertN(const CObjV3 &p, const CObjV2 &tc, const CObjV3 &n);
     std::string ParseG(const std::string& str);
     std::string ParseUSEMTL(const std::string& str);
     std::string ParseMTLLIB(const std::string& str);
@@ -192,16 +155,16 @@ private:
 
 };
 
-CObjVertex CObjMeshParser::BuildVert(CObjV3 &p, CObjV2 &tc) {
+CObjVertex CObjMeshParser::BuildVert(const CObjV3 &p, const CObjV2 &tc) {
     CObjVertex  v = { p , tc }; 
     return v;
 }
-CObjVertexN CObjMeshParser::BuildVertN(CObjV3 &p, CObjV2 &tc,CObjV3 &n) {
+CObjVertexN CObjMeshParser::BuildVertN(const CObjV3 &p, const CObjV2 &tc,const CObjV3 &n) {
     CObjVertexN  v = { p , n , tc}; 
     return v;
 }
 
-std::vector<CObjVertex> CObjMeshParser::BuildVerts(std::vector<CObjV3> &glv,std::vector<CObjV2> &glt , const CObjFaceI& face) {
+std::vector<CObjVertex> CObjMeshParser::BuildVerts(const std::vector<CObjV3> &glv,const std::vector<CObjV2> &glt , const CObjFaceI& face) {
     std::vector<CObjVertex> res;
     if (face.f[0].vt_idx == 0) /* no texture coords case*/  {
         CObjV2 empty_v2;
@@ -243,7 +206,7 @@ std::vector<CObjVertex> CObjMeshParser::BuildVerts(std::vector<CObjV3> &glv,std:
 
 
 
-std::vector<CObjVertexN> CObjMeshParser::BuildVertsN(std::vector<CObjV3> &glv,std::vector<CObjV2> &glt ,std::vector<CObjV3> &gln, const CObjFaceI& face) {
+std::vector<CObjVertexN> CObjMeshParser::BuildVertsN(const std::vector<CObjV3> &glv,const std::vector<CObjV2> &glt ,const std::vector<CObjV3> &gln, const CObjFaceI& face) {
     std::vector<CObjVertexN> res;
 
     if (face.f[0].vt_idx == 0) /* no texture coords case*/  {
@@ -478,161 +441,7 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
     IsReady = true;
 }
 
-class MTLParser {
-public:
-     MTLParser(const std::string& fname);
-     std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
 
-private:
-
-    float Parsed(const std::string &v_desc);
-     std::string ParseNEWMTL(const std::string &str);
-     float ParseNs(const std::string &v_desc);
-     float ParseNi(const std::string &v_desc);
-     int Parseillum(const std::string &v_desc);
-     CMTLColor ParseKa(const std::string &v_desc);
-     std::string Parsemap_bump(const std::string &str);
-     CMTLColor ParseKd(const std::string &v_desc);
-     std::string Parsemap_d(const std::string &str);
-     CMTLColor ParseKs(const std::string &v_desc);
-     CMTLColor ParseKe(const std::string &v_desc);
-     CMTLColor ParseTf(const std::string &v_desc);
-     std::string Parsemap_Ka(const std::string &str);
-     std::string Parsemap_Kd(const std::string &str);
-};
-MTLParser::MTLParser(const std::string& fname) {
-    printf("Load MTL file %s \n",fname.c_str());
-    std::ifstream tst;
-
-    std::string mtln("default_mtl");
-
-    tst.open(fname);
-    if (tst) {
-        for( std::string line; getline( tst, line ); ) {
-            if (!line.find("newmtl") ){
-                    mtln = ParseNEWMTL(line);
-                    if (d_materials.count(mtln) == 0 ) {/* all materials are unique*/
-                        d_materials[mtln] = std::unique_ptr<CMTLMaterial>(new CMTLMaterial());
-                    }
-            } else if (line.find("map_Ka" ) != std::string::npos) {
-                    d_materials[mtln]->map_Ka = Parsemap_Ka(line);
-            } else if (line.find("map_Kd") != std::string::npos) {
-                    d_materials[mtln]->map_Kd = Parsemap_Kd(line);
-            } else if (line.find("map_bump")!= std::string::npos ) {
-                    d_materials[mtln]->map_bump = Parsemap_bump(line);
-            } else if (line.find("map_d")!= std::string::npos ) {
-                    d_materials[mtln]->map_d = Parsemap_d(line);
-            //} else if (line.find("Ns") != std::string::npos) {
-            //        res[mtln]->Ns = ParseNs(line);
-            //} else if (line.find("Ni") != std::string::npos) {
-            //        res[mtln]->Ni = ParseNi(line);
-            // } else if (line.find("d") != std::string::npos) {
-            //         res[mtln]->Ni = Parsed(line);
-            //} else if (line.find("Ka") != std::string::npos) {
-            //        res[mtln]->Ka = ParseKa(line);
-            //} else if (!line.find("Kd") != std::string::npos) {
-            //        res[mtln]->Kd = ParseKd(line);
-            //} else if (line.find("Ks") != std::string::npos) {
-            //        res[mtln]->Ks = ParseKs(line);
-            //} else if (line.find("Ke") != std::string::npos) {
-            //        res[mtln]->Ke = ParseKe(line);
-            //} else if (line.find("Tf") != std::string::npos) {
-            //        res[mtln]->Tf = ParseTf(line);
-            //} else if (line.find("illum") != std::string::npos) {
-            //        res[mtln]->illum = Parseillum(line);
-
-
-            }
-        }
-    } else {
-        printf ("Unable open MTL file %s\n", fname.c_str());
-    }
-
-    tst.close();
-
-
-    if (d_materials.empty()) {
-        printf ("Add empty material\n");
-        d_materials["default"] = (std::unique_ptr<CMTLMaterial>(new CMTLMaterial()));
-    }
-
-
-}
-std::string MTLParser::ParseNEWMTL(const std::string& str) {
-    char buf[256];
-    sscanf(str.c_str(),"newmtl %80s",buf);
-    return std::string(buf);
-}
-
-float MTLParser::ParseNs(const std::string& v_desc) {
-    float r = 0.0;
-    sscanf(v_desc.c_str()," Ns %f", &r);
-    return r;
-}
-float MTLParser::ParseNi(const std::string& v_desc) {
-    float r = 0.0;
-    sscanf(v_desc.c_str()," Ni %f", &r);
-    return r;
-}
-float MTLParser::Parsed(const std::string& v_desc) {
-    float r = 0.0;
-    sscanf(v_desc.c_str()," d %f", &r);
-    return r;
-}
-
-int MTLParser::Parseillum(const std::string& v_desc) {
-    int r = 0;
-    sscanf(v_desc.c_str()," illum %d", &r);
-    return r;
-}
-
-CMTLColor MTLParser::ParseKa(const std::string& v_desc) {
-    CMTLColor c;
-    sscanf(v_desc.c_str()," Ka %f %f %f", &c.r, &c.g, &c.b);
-    return c;
-}
-CMTLColor MTLParser::ParseKd(const std::string& v_desc) {
-    CMTLColor c;
-    sscanf(v_desc.c_str()," Kd %f %f %f", &c.r, &c.g, &c.b);
-    return c;
-}
-CMTLColor MTLParser::ParseKs(const std::string& v_desc) {
-    CMTLColor c;
-    sscanf(v_desc.c_str()," Ks %f %f %f", &c.r, &c.g, &c.b);
-    return c;
-}
-CMTLColor MTLParser::ParseKe(const std::string& v_desc) {
-    CMTLColor c;
-    sscanf(v_desc.c_str()," Ke %f %f %f", &c.r, &c.g, &c.b);
-    return c;
-}
-CMTLColor MTLParser::ParseTf(const std::string& v_desc) {
-    CMTLColor c;
-    sscanf(v_desc.c_str()," Tf %f %f %f", &c.r, &c.g, &c.b);
-    return c;
-}
-
-std::string MTLParser::Parsemap_Ka(const std::string& str) {
-    char buf[256];
-    sscanf(str.c_str()," map_Ka %80s",buf);
-    return std::string(buf);
-}
-std::string  MTLParser::Parsemap_Kd(const std::string& str) {
-    char buf[256];
-    sscanf(str.c_str()," map_Kd %80s",buf);
-    return std::string(buf);
-}
-std::string MTLParser::Parsemap_d(const std::string& str) {
-    char buf[256];
-    sscanf(str.c_str()," map_d %80s",buf);
-    return std::string(buf);
-}
-std::string MTLParser::Parsemap_bump(const std::string& str) {
-    char buf[256];
-    
-    sscanf(str.c_str()," map_bump %80s",buf);
-    return std::string(buf);
-}
 
 
 class SObjModel {
