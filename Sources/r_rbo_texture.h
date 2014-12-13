@@ -1,0 +1,150 @@
+#pragma once
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+#include <GL/gl.h>
+#include <GL/wglew.h>
+
+
+#include "e_base.h"
+#include "string_format.h"
+
+#include <string.h>
+
+/*serialization*/
+#include <cereal/access.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/archives/binary.hpp>
+#include <fstream>
+
+enum RTType  {
+    RT_NONE, /* empty slot*/
+    RT_SCREEN, /* render to screen*/
+    RT_TEXTURE_FLOAT,
+    RT_TEXTURE_RGBA,
+    RT_TEXTURE_DEPTH,
+    RT_TEXTURE_MSAA, /*float always ??*/
+    RT_TEXTURE_DEPTH_MSAA,
+};
+
+
+class SRBOTexture {
+public:
+    /* simple empty texture */
+    SRBOTexture(int _x, int _y)
+    :SRBOTexture(_x,_y,RT_TEXTURE_FLOAT)
+    {};
+    SRBOTexture(int _x, int _y, RTType t);
+    SRBOTexture(const SRBOTexture&) = delete;
+     ~SRBOTexture();
+    int Bind(uint sampler) const;
+    unsigned int getGLId() const;
+    int x,y;
+
+    bool IsReady = false;
+    RTType type;
+    /*serialize support */
+    friend class cereal::access;
+    template <class Archive>
+    void serialize( Archive & ar )
+    {
+        ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(IsReady),CEREAL_NVP(type));
+    }
+    bool IsMSAA();
+private:
+    GLuint tex;
+    int ConfigureTexture(const BorderType t) const;
+    bool d_isMSAA = false;
+
+  
+};
+unsigned int SRBOTexture::getGLId() const {
+    return tex;
+}
+
+bool SRBOTexture::IsMSAA()
+{
+    return d_isMSAA;
+}
+int SRBOTexture::Bind(uint sampler) const {
+    if (IsReady) {
+
+        glActiveTexture(GL_TEXTURE0+sampler);
+        if (d_isMSAA) {
+            glBindTexture( GL_TEXTURE_2D_MULTISAMPLE,tex);
+        } else {
+            glBindTexture( GL_TEXTURE_2D,tex);
+        }
+        return ESUCCESS;
+	}
+    else {
+        printf("unable bind non-exists texture\n");
+        return EFAIL;
+        }
+
+}
+int SRBOTexture::ConfigureTexture(const BorderType t) const {
+        if (t == TEX_REPEAT) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        } else  { /*TEX_CLAMP */
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        }
+        /* interpolation settings */
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//GL_NEAREST
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    return 0;
+}
+SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
+    :type(t) , x(_x) ,y (_y)
+ {
+    glGenTextures(1, &tex);
+
+    if (t  ==  RT_TEXTURE_DEPTH) {
+
+        glBindTexture(GL_TEXTURE_2D,tex);
+        glTexStorage2D(GL_TEXTURE_2D, 4, GL_DEPTH_COMPONENT32, x, y);
+        ConfigureTexture(TEX_CLAMP); // ???
+        glBindTexture(GL_TEXTURE_2D,0);
+        d_isMSAA  = false;
+
+    } else if (t == RT_TEXTURE_FLOAT) {
+        glBindTexture(GL_TEXTURE_2D,tex);
+        glTexStorage2D(GL_TEXTURE_2D, 4, GL_RGBA16F, x, y);
+        ConfigureTexture(TEX_CLAMP);
+        glBindTexture(GL_TEXTURE_2D,0);
+        d_isMSAA  = false;
+
+    } else if (t == RT_TEXTURE_RGBA) {
+        glBindTexture(GL_TEXTURE_2D,tex);
+        glTexStorage2D(GL_TEXTURE_2D, 4, GL_RGBA8, x, y);
+        ConfigureTexture(TEX_CLAMP);
+        glBindTexture(GL_TEXTURE_2D,0);
+
+        d_isMSAA  = false;
+
+    } else if (t == RT_TEXTURE_MSAA) {
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,tex);
+        glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, GL_RGBA16F, x, y,true);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
+        d_isMSAA  = true;
+
+    }else if  (t  ==  RT_TEXTURE_DEPTH_MSAA) {
+
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,tex);
+        glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, GL_DEPTH_COMPONENT32, x, y,true);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
+        d_isMSAA  = true;
+
+    }
+    IsReady = true;
+}
+SRBOTexture::~SRBOTexture() {
+    glDeleteTextures(1,&tex);
+}
+
+

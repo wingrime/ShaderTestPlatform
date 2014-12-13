@@ -1,0 +1,103 @@
+#pragma once
+#include "mat_math.h"
+class SPerspectiveProjectionMatrix: public SMat4x4 {
+public: 
+    	SPerspectiveProjectionMatrix(float Near, float Far,float Aspect, float FOV) : SMat4x4() {
+         
+        //float FOV  = toRad(26.0);/* based on angle*/
+        float focal_length = 1.0 / tan(  FOV / 2.0);
+
+
+         mat.a11 = focal_length;
+         mat.a22  = focal_length/Aspect;
+         mat.a33 = -( (Far + Near) / (Far - Near));
+         mat.a34 =  -((2 *Far * Near) / ( Far- Near));
+         mat.a43 = -1.0f;
+         mat.a44 = 0.0f;
+
+         /*Orto*/
+/*
+         float f = 1000;
+         float n = 1;
+         float r = 1;
+         float t = 1;
+         float l = -1;
+         float b = -1;
+         mat.a11 = 2*n / (r - l );
+         mat.a13 = (r+l)/ (r-l );
+         mat.a22  = 2*n/ (t -b);
+         mat.a23 = (t+b) / (t-b);
+         mat.a33 = -((f+n)/ (f-n));
+         mat.a34 =  -((2 *f*n) / ( f-n));
+         mat.a43 = -1.0f;
+         mat.a44 = 0.0f;
+*/
+         /*
+        //infinity far;
+         mat.a11 = focal_length;
+         mat.a22  = (focal_length/Aspect);
+         mat.a33 = -1.0;
+         mat.a34 = -2.0* (1.0f);
+         mat.a43 = -1.0f;
+         mat.a44 = 0.0f;
+         printf("proj\n");
+         Reflect();
+*/
+    };
+};
+
+class SOrtoProjectionMatrix: public SMat4x4 {
+public: 
+        SOrtoProjectionMatrix(float Near, float Far) : SMat4x4() {
+         
+
+         /*Orto*/
+
+         float f = Far;
+         float n = Near;
+         float r = 1;
+         float t = 1;
+         float l = -1;
+         float b = -1;
+         mat.a11 = 2*n / (r - l );
+         mat.a13 = (r+l)/ (r-l );
+         mat.a22  = 2*n/ (t -b);
+         mat.a23 = (t+b) / (t-b);
+         mat.a33 = -((f+n)/ (f-n));
+         mat.a34 =  -((2 *f*n) / ( f-n));
+         mat.a43 = -1.0f;
+         mat.a44 = 0.0f;
+
+    };
+};
+class SInfinityFarMatrix: public SMat4x4 {
+public:
+    SInfinityFarMatrix(float FOV) : SMat4x4() {
+
+        float focal_length = 1.0 / tan(  FOV / 2.0);
+         mat.a11 = focal_length;
+         mat.a22  = (focal_length/FOV);
+         mat.a33 = -1.0;
+         mat.a34 = -2.0* (1.0f);
+         mat.a43 = -1.0f;
+
+    };
+};
+
+/* http://www.cg.tuwien.ac.at/~scherzer/files/papers/LispSM_survey.pdf */
+class SLispSMProjectionMatrix: public SMat4x4 {
+public: 
+        SLispSMProjectionMatrix(float Near, float Far) : SMat4x4() {
+         
+
+         /*Orto*/
+
+         float f = Far;
+         float n = Near;
+
+         mat.a22  = (f+n)/ (f-n);
+         mat.a42 =  -((2.0 *f*n) / ( f-n));
+         mat.a44 = 0.0;
+         mat.a24 = 1.0;
+    };
+};
