@@ -55,6 +55,7 @@ Global TODOs:
 #include "r_rbo_texture.h"
 #include "viewport.h"
 #include <windows.h>
+#include "MAssert.h"
 class BaseCommand
 {
 public:
@@ -847,14 +848,7 @@ uniform mat4 cam_view_matrix;
 
 void display ()
 {   
-    try {
-        sc->Render();
-    }
-    
-    catch (BaseError a) {
-        printf("Render exception!\n");
-    }
-    
+    sc->Render();
     glutSwapBuffers ();
 }
 
@@ -983,7 +977,6 @@ int main ( int argc, char * argv [] )
 {
     /*backtrace on windows*/
     LoadLibraryA("backtrace.dll");
-
     Viewport v(1000,1000);
 
 
@@ -999,7 +992,7 @@ int main ( int argc, char * argv [] )
     glutInitContextProfile ( GLUT_CORE_PROFILE  );
 
     glutCreateWindow ("m_proj Shestacov Alexsey 2014 (c)" );
-    glewExperimental = GL_TRUE;   
+    glewExperimental = GL_TRUE;
     
     glewInit ();
 
