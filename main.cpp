@@ -998,7 +998,7 @@ int main ( int argc, char * argv [] )
     glutInitContextFlags   ( GLUT_FORWARD_COMPATIBLE| GLUT_DEBUG);
     glutInitContextProfile ( GLUT_CORE_PROFILE  );
 
-    glutCreateWindow ( __FILE__ );
+    glutCreateWindow ("m_proj Shestacov Alexsey 2014 (c)" );
     glewExperimental = GL_TRUE;   
     
     glewInit ();
