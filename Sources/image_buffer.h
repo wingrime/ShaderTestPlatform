@@ -15,7 +15,7 @@ public:
     bool IsReady = false;
 };
 ImageBuffer::ImageBuffer(const std::string& fname) {
-    buffer = stbi_load(fname.c_str(), &x, &y, &comp, 4); //fix me ARGB only for now
+    buffer = stbi_load(fname.c_str(), &x, &y, &comp, 3);
     if (buffer)
     	IsReady = true;
 }
