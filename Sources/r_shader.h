@@ -242,7 +242,7 @@ int SProg::SetUniform(const std::string& name, const SVec4& vec)
 
 int SProg::SetAttrib (const std::string& name, int numComponents, GLsizei stride, void * ptr, GLenum type )
 {
-
+    MASSERT(!ptr);
     int loc = glGetAttribLocation ( d_program, name.c_str() );
 
     if ( loc < 0 )
