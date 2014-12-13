@@ -14,7 +14,7 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/binary.hpp>
 #include <fstream>
-
+#include "MAssert.h"
 //TODO
 // && operator
 // == operator
@@ -83,12 +83,14 @@ public:
 };
 SVec4 SVec4::Normalize() const {
     float norm = Length();
+    MASSERT(norm==0.0);
     return SVec4(vec.x/norm,vec.y/norm, vec.z/norm, vec.w/norm);
 }
 
 SVec4 SVec4::Normalize(const SVec4 &a)
 {
     float l = a.Length();
+    MASSERT(l==0.0);
     return SVec4(a.vec.x / l , a.vec.y /l , a.vec.z /l , a.vec.w / l);
 }
 /*just too stupid I need add some delta*/
@@ -439,6 +441,7 @@ SVec4 operator* (const SMat4x4& m, const SVec4& v){
 }
 template <typename T>
 SVec4 operator/ (const SVec4& v,T num){
+    MASSERT(num = 0.0);
     return SVec4(v.vec.x / num , v.vec.y / num  , v.vec.z/ num , v.vec.w/ num);
 }
 
