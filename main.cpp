@@ -54,7 +54,7 @@ Global TODOs:
 #include "r_texture.h"
 #include "r_rbo_texture.h"
 #include "viewport.h"
-
+#include <windows.h>
 class BaseCommand
 {
 public:
@@ -981,6 +981,9 @@ void APIENTRY openglCallbackFunction(GLenum source,
 
 int main ( int argc, char * argv [] )
 {
+    /*backtrace on windows*/
+    LoadLibraryA("backtrace.dll");
+
     Viewport v(1000,1000);
 
 
