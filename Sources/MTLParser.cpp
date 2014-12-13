@@ -1,7 +1,6 @@
 #include "MTLParser.h"
 
 MTLParser::MTLParser(const std::string& fname) {
-    printf("Load MTL file %s \n",fname.c_str());
     std::ifstream tst;
 
     std::string mtln("default_mtl");
@@ -59,7 +58,7 @@ MTLParser::MTLParser(const std::string& fname) {
 
 }
 std::string MTLParser::ParseNEWMTL(const std::string& str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str(),"newmtl %80s",buf);
     return std::string(buf);
 }
@@ -113,22 +112,22 @@ CMTLColor MTLParser::ParseTf(const std::string& v_desc) {
 }
 
 std::string MTLParser::Parsemap_Ka(const std::string& str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str()," map_Ka %80s",buf);
     return std::string(buf);
 }
 std::string  MTLParser::Parsemap_Kd(const std::string& str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str()," map_Kd %80s",buf);
     return std::string(buf);
 }
 std::string MTLParser::Parsemap_d(const std::string& str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str()," map_d %80s",buf);
     return std::string(buf);
 }
 std::string MTLParser::Parsemap_bump(const std::string& str) {
-    char buf[256];
+    char buf[90];
 
     sscanf(str.c_str()," map_bump %80s",buf);
     return std::string(buf);
