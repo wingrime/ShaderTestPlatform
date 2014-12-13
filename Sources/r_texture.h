@@ -20,7 +20,7 @@
 #include <cereal/archives/binary.hpp>
 #include <fstream>
 
-#include "image_buffer.h"
+#include "ImageBuffer.h"
 
 enum TextureType {
     TEX_RGBA = 0,
@@ -48,7 +48,7 @@ public:
     STexture(int _x, int _y, TextureType t);
     STexture(const STexture&) = delete;
      ~STexture();
-    int Bind(uint sampler) const;
+    int Bind(unsigned int sampler) const;
     unsigned int getGLId() const;
     int x,y;
 
@@ -74,7 +74,7 @@ unsigned int STexture::getGLId() const {
     return tex;
 }
 
-int STexture::Bind(uint sampler) const {
+int STexture::Bind(unsigned int sampler) const {
     if (IsReady) {
 
         glActiveTexture(GL_TEXTURE0+sampler);

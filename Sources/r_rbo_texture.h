@@ -39,7 +39,7 @@ public:
     SRBOTexture(int _x, int _y, RTType t);
     SRBOTexture(const SRBOTexture&) = delete;
      ~SRBOTexture();
-    int Bind(uint sampler) const;
+    int Bind(unsigned int sampler) const;
     unsigned int getGLId() const;
     int x,y;
 
@@ -68,7 +68,7 @@ bool SRBOTexture::IsMSAA()
 {
     return d_isMSAA;
 }
-int SRBOTexture::Bind(uint sampler) const {
+int SRBOTexture::Bind(unsigned int sampler) const {
     if (IsReady) {
 
         glActiveTexture(GL_TEXTURE0+sampler);

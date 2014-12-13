@@ -13,14 +13,9 @@
 
 
 #include "string_format.h"
+#include "AbstractBuffer.h"
 
 
-class AbstractBuffer {
-public:
-    void * buffer;
-    int size;
-
-};
 class FileBuffer :public AbstractBuffer{
     public:
         FileBuffer(const std::string& srcfile);
