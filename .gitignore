@@ -25,3 +25,7 @@
 *.tlog*
 
 
+#CMake stuff
+CMakeCache.txt
+Makefile
+CMakeFiles
