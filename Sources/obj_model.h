@@ -22,7 +22,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-
+#include <map>
 #include "string_format.h"
 #include "r_context.h"
 
@@ -37,19 +37,40 @@
 
 #include <algorithm>
 
-
+#include "MAssert.h"
+#include "mat_math.h"
 struct CObjV3 {
     float x = 0.0;
     float y = 0.0;
     float z = 0.0;
     // TODO: try use external
     /*serialize support */ 
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(z));
-    }
+//    friend class cereal::access;
+//    template <class Archive>
+//    void serialize( Archive & ar )
+//    {
+//        ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(z));
+//    }
+
+    bool operator<(const CObjV3& p) const {
+        if (x != p.x )
+            return (x < p.x);
+        if (y != p.y )
+            return (y < p.y);
+
+        return (z < p.z);
+
+    };
+    bool operator!=(const CObjV3& p) const {
+        if (x != p.x )
+            return true;
+        if (y != p.y )
+            return true;
+        if (z != p.z )
+            return true;
+        return false;
+
+    };
 };
 struct CObjV2 {
     float u = 0.0;
@@ -61,7 +82,18 @@ struct CObjV2 {
     {
         ar(CEREAL_NVP(u),CEREAL_NVP(v));
     }
-
+    bool operator<(const CObjV2& p) const {
+        if (u != p.u )
+            return (u < p.u);
+        return (v < p.v);
+    };
+    bool operator!=(const CObjV2& p) const {
+        if (u != p.u )
+            return true;
+        if (v != p.v )
+            return true;
+        return false;
+    };
 
 };
 
@@ -74,17 +106,6 @@ struct CObjFaceI {
     CObjIdx  f [4];
 };
 
-struct CObjVertex {
-    CObjV3 p;
-    CObjV2 tc;
-    /*serialize support */
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar(CEREAL_NVP(p),CEREAL_NVP(tc));
-    }
-};
 struct CObjVertexN {
     CObjV3 p;
     CObjV3 n;
@@ -97,21 +118,30 @@ struct CObjVertexN {
         ar(CEREAL_NVP(p),CEREAL_NVP(n),CEREAL_NVP(tc));
     }
 
+    bool operator<(const CObjVertexN& o) const {
+        if (p != o.p )
+            return (p < o.p );
+        if (n != o.n )
+            return (n < o.n );
+       // if (tc != o.tc )
+         return (tc < o.tc );
+    };
+
 };
 
 struct CObjSubmesh {
     std::string name; /* submesh name*/
     std::string m_name; /* material name*/
     bool flag_normals; /* is normals used */
-    std::vector<CObjVertex> v; /* vertex list without normals*/
     std::vector<CObjVertexN> vn; /* vertex list with normals*/
+    std::vector<unsigned int> indexes; /*indexed mesh*/
    
     /*serialize support */
     friend class cereal::access;
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar(CEREAL_NVP(name),CEREAL_NVP(m_name),CEREAL_NVP(flag_normals),CEREAL_NVP(v),CEREAL_NVP(vn));
+        ar(CEREAL_NVP(name),CEREAL_NVP(m_name),CEREAL_NVP(flag_normals),CEREAL_NVP(vn),CEREAL_NVP(indexes));
     }
 };
 
@@ -129,9 +159,8 @@ public:
     long int getVertexCount() const {return d_vertex_count;};
 
 private:
-    std::vector<CObjVertex> BuildVerts(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt , const CObjFaceI& face);
+    std::vector<CObjVertexN> BuildVerts(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt , const CObjFaceI& face);
     std::vector<CObjVertexN> BuildVertsN(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt, const std::vector<CObjV3> &gln , const CObjFaceI& face);
-    CObjVertex BuildVert(const CObjV3 &p, const CObjV2 &tc);
     CObjVertexN BuildVertN(const CObjV3 &p, const CObjV2 &tc, const CObjV3 &n);
     std::string ParseG(const std::string& str);
     std::string ParseUSEMTL(const std::string& str);
@@ -142,6 +171,8 @@ private:
     CObjV3 ParseVn(const std::string& v_desc);
     std::string ParseO(const std::string& str);
     void SortByMaterial();
+
+    CObjV3 CalcNormal(const CObjV3 &v1, const CObjV3 &v2, const CObjV3 &v3);
 
     long int d_vertex_count; /* total vertex count */
 
@@ -155,50 +186,48 @@ private:
 
 };
 
-CObjVertex CObjMeshParser::BuildVert(const CObjV3 &p, const CObjV2 &tc) {
-    CObjVertex  v = { p , tc }; 
-    return v;
-}
 CObjVertexN CObjMeshParser::BuildVertN(const CObjV3 &p, const CObjV2 &tc,const CObjV3 &n) {
     CObjVertexN  v = { p , n , tc}; 
     return v;
 }
 
-std::vector<CObjVertex> CObjMeshParser::BuildVerts(const std::vector<CObjV3> &glv,const std::vector<CObjV2> &glt , const CObjFaceI& face) {
-    std::vector<CObjVertex> res;
+std::vector<CObjVertexN> CObjMeshParser::BuildVerts(const std::vector<CObjV3> &glv,const std::vector<CObjV2> &glt , const CObjFaceI& face) {
+    std::vector<CObjVertexN> res;
+    CObjV3 normal = CalcNormal(glv[ face.f[0].v_idx - 1.0 ],glv[ face.f[1].v_idx - 1.0 ],glv[ face.f[2].v_idx - 1.0 ]);
     if (face.f[0].vt_idx == 0) /* no texture coords case*/  {
         CObjV2 empty_v2;
 
         if ( face.f[3].v_idx == 0 ) { 
         // consider this is single triangle 
-            res.push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2 ) );
-            res.push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  , empty_v2  ) );
-            res.push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2  ) );
+
+            res.push_back(BuildVertN(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2 ,normal) );
+            res.push_back(BuildVertN(glv[ face.f[1].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2 ,normal ) );
         } else {
         // consider this is face
-            res.push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2  ) );
-            res.push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  , empty_v2  ) );
-            res.push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2  ) );
+            res.push_back(BuildVertN(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[1].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2 ,normal ) );
 
-            res.push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2  ) );
-            res.push_back(BuildVert(glv[ face.f[3].v_idx - 1.0 ]  , empty_v2  ) );
-            res.push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2  ) );
+            res.push_back(BuildVertN(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[3].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2 ,normal ) );
         }
     } else {
                 if ( face.f[3].v_idx == 0 ) { 
         // consider this is single triangle 
-            res.push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ]  ) );
-            res.push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ]  ) );
-            res.push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ]  ) );
+            res.push_back(BuildVertN(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ] ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ] ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ] ,normal) );
         } else {
         // consider this is face
-            res.push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ]  ) );
-            res.push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ]  ) );
-            res.push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ]  ) );
+            res.push_back(BuildVertN(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ] ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ]  ,normal) );
+            res.push_back(BuildVertN(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ]  ,normal) );
 
-            res.push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ]  ) );
-            res.push_back(BuildVert(glv[ face.f[3].v_idx - 1.0 ]  ,glt[ face.f[3].vt_idx - 1.0 ]  ) );
-            res.push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ]  ) );
+            res.push_back(BuildVertN(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ] ,normal ) );
+            res.push_back(BuildVertN(glv[ face.f[3].v_idx - 1.0 ]  ,glt[ face.f[3].vt_idx - 1.0 ]  ,normal) );
+            res.push_back(BuildVertN(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ]  ,normal) );
         }
     }
     return res;
@@ -248,13 +277,13 @@ std::vector<CObjVertexN> CObjMeshParser::BuildVertsN(const std::vector<CObjV3> &
 }
 
 std::string CObjMeshParser::ParseG(const std::string &str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str(),"g %80s",buf);
     return std::string(buf);
 }
 
 std::string CObjMeshParser::ParseO(const std::string &str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str(),"o %80s",buf);
     return std::string(buf);
 }
@@ -263,13 +292,31 @@ void CObjMeshParser::SortByMaterial()
 {
     std::sort(d_sm.begin(), d_sm.end(), [](std::shared_ptr<CObjSubmesh> a , std::shared_ptr<CObjSubmesh>  b) -> bool  { return (a->m_name >  b->m_name);} );
 }
+
+CObjV3 CObjMeshParser::CalcNormal(const CObjV3& v1, const CObjV3& v2, const CObjV3& v3)
+{
+    SVec4 vec1(v1.x,v1.y,v1.z,0.0);
+
+    SVec4 vec2(v2.x,v2.y,v2.z,0.0);
+
+    SVec4 vec3(v3.x,v3.y,v3.z,0.0);
+
+    SVec4 n = SVec4::Normalize( SVec4::Cross( (vec1 - vec2) ,(vec1 - vec3)) );
+
+    CObjV3 e;
+    e.x = n.vec.x;
+    e.y = n.vec.y;
+    e.z = n.vec.z;
+    return e;
+
+}
 std::string CObjMeshParser::ParseUSEMTL(const std::string &str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str(),"usemtl %80s",buf);
     return std::string(buf);
 }
 std::string CObjMeshParser::ParseMTLLIB(const std::string &str) {
-    char buf[256];
+    char buf[90];
     sscanf(str.c_str(),"mtllib %80s",buf);
     return std::string(buf);
 }
@@ -343,7 +390,7 @@ void CObjMeshParser::Reflect() {
     printf("Reflect for CObjMeshParser\n");
     printf("Total vertexes %lu\n",getVertexCount());
     for (auto it = d_sm.begin(); it != d_sm.end();++it) {
-        printf("SubMesh name=%s m_name=%s c =%d cn = %d \n", (*it)->name.c_str() ,  (*it)->m_name.c_str() , (*it)->v.size(),(*it)->vn.size() );
+        printf("SubMesh name=%s m_name=%s c =%d \n", (*it)->name.c_str() ,  (*it)->m_name.c_str() ,(*it)->vn.size() );
 
            // for (std::vector<CObjVertex>::iterator it2 = (*it)->v.begin(); it2 != (*it)->v.end();++it2) {
            // auto &v = (*it2);
@@ -389,7 +436,7 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
             } else if (!line.find("usemtl")) {
                 const std::string& mtl = ParseUSEMTL(line);
                 /* sometimes can use different materials for single submesh*/
-                if (subm->m_name != "") {
+                if (!subm->m_name.empty()) {
                     /*begin new submesh*/
                     std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
                     s->flag_normals = d_normals;
@@ -409,9 +456,9 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                     d_vertex_count += a_v.size();
                     o_v.insert(o_v.end(), a_v.begin(), a_v.end());
                 } else {
-                    std::vector<CObjVertex> a_v = BuildVerts(d_glv,d_gltc,fi);
+                    std::vector<CObjVertexN> a_v = BuildVerts(d_glv,d_gltc,fi);
                     d_vertex_count += a_v.size();
-                    std::vector<CObjVertex> &o_v = subm->v;
+                    std::vector<CObjVertexN> &o_v = subm->vn;
                     o_v.insert(o_v.end(), a_v.begin(), a_v.end());
                 }
             } else if (!line.find("v")) {
@@ -442,8 +489,48 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
 }
 
 
+class MeshIndexer {
+public:
+    MeshIndexer(const std::shared_ptr<CObjSubmesh> &submesh)
+        :d_inmesh(submesh)
+    {}
+    std::shared_ptr<CObjSubmesh> Do();
+private:
+    const std::shared_ptr<CObjSubmesh> d_inmesh;
+};
+
+std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
+{
+
+    CObjSubmesh *mesh = new CObjSubmesh ;
+
+    mesh->m_name = d_inmesh->m_name;
+    mesh->flag_normals = d_inmesh->flag_normals;
+    mesh->name = d_inmesh->name;
+    unsigned int current_index = 0;
+
+    std::map<CObjVertexN, unsigned int  > vn_map;
 
 
+    for( auto it = std::begin(d_inmesh->vn); it != std::end(d_inmesh->vn); ++it) {
+        std::map<CObjVertexN, unsigned int  >::const_iterator k = vn_map.find(*it);
+        if (k == vn_map.end()) {
+        /* if there is no index, then add new index*/
+            vn_map[*it] = current_index;
+            mesh->vn.push_back(*it);
+            mesh->indexes.push_back(current_index);
+            current_index++;
+        } else {
+            /*if it is in index*/
+            mesh->indexes.push_back(vn_map[*it]);
+        }
+
+
+
+    }
+    return  std::shared_ptr<CObjSubmesh>(mesh);
+
+}
 class SObjModel {
     public: 
         SObjModel(const std::string& fname);
@@ -465,15 +552,15 @@ class SObjModel {
         void SetModelMat(const SMat4x4& m);
     private:
         
-        void BindTextures(std::shared_ptr<CObjSubmesh> submesh);
-        /*Remorval?*/
+        void BindTextures(const std::shared_ptr<CObjSubmesh> &submesh);
         
+        std::vector<std::shared_ptr<CObjSubmesh> > d_sm;
 
 
-        std::unique_ptr<CObjMeshParser> parser;
 
         std::unordered_map<std::string, unsigned int > submesh_vbo;
         std::unordered_map<std::string, unsigned int > submesh_vao;
+        std::unordered_map<std::string, unsigned int > submesh_ibo;
         std::unordered_map<std::string, std::unique_ptr<STexture> > d_textures;
         std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
 
@@ -487,7 +574,6 @@ class SObjModel {
             ar( CEREAL_NVP(IsReady),
                 CEREAL_NVP(model),
                 CEREAL_NVP(d_materials),
-                CEREAL_NVP(parser), //to big for output
                 CEREAL_NVP(d_textures)
                 );
         }
@@ -500,21 +586,15 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     if (!IsReady)
         return EFAIL;
     sprog.Bind();
-    for (auto it = parser->d_sm.begin(); it != parser->d_sm.end();++it) {
+    for (auto it = d_sm.begin(); it != d_sm.end();++it) {
         auto &submesh =  (*it);
         glBindVertexArray( submesh_vao[(*it)->name] );
         glBindBuffer ( GL_ARRAY_BUFFER, submesh_vbo[(*it)->name] );
 
-        if (flag_normals) {
             sprog.SetAttrib( "position", 3, sizeof(CObjVertexN), offsetof(CObjVertexN,p),GL_FLOAT);
             sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
             sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
-        } else {
-            sprog.SetAttrib( "position", 3, sizeof(CObjVertex),  offsetof(CObjVertex,p),GL_FLOAT);
-            sprog.SetAttrib( "normal", 3, sizeof(CObjVertex),  (0),GL_FLOAT);
-            sprog.SetAttrib( "UV", 2, sizeof(CObjVertex),  offsetof(CObjVertex,tc),GL_FLOAT);
-        }
-        if (flag_normals)
+
             sprog.SetUniform("mesh_flags",1);
         sprog.SetUniform("texIMG",0);
         sprog.SetUniform("texBUMP",1);
@@ -532,26 +612,36 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     return 0;
 }
 SObjModel::SObjModel(const std::string&  fname) 
-    :parser(new CObjMeshParser(fname))
 {
-    if (!parser->IsReady)
+    CObjMeshParser parser(fname);
+    if (!parser.IsReady)
         {
             //EMSGS(std::string("Unable open model :") + fname);
             std::cout <<   std::string("Unable open model :") << fname << std::endl;
         return;
         }
+    printf("Indexing mesh\n");
+
+    for (auto it = parser.d_sm.begin(); it != parser.d_sm.end();++it) {
+        MeshIndexer idx(*it);
+        d_sm.push_back(std::shared_ptr<CObjSubmesh>(idx.Do()));
+        (*it).reset();
+    }
+    printf("Load materials\n");
+
     /* load descriptor*/
     unsigned int temp_vao;
     unsigned int temp_vbo;
+    unsigned int temp_ibo;
     {
-        if (parser->d_mtllibs.empty())
+        if (parser.d_mtllibs.empty())
         {
             MTLParser mtl_p("default.mtl");
             d_materials = mtl_p.d_materials; //OMG copy!! FIX ME
         }
         else
         {
-             MTLParser mtl_p(parser->d_mtllibs[0]);
+             MTLParser mtl_p(parser.d_mtllibs[0]);
             d_materials = mtl_p.d_materials; //OMG copy!! FIX ME
         }
     }
@@ -571,7 +661,7 @@ SObjModel::SObjModel(const std::string&  fname)
     /*configure mesh prop*/
     printf("loaded shader\n");
 
-    for (auto it = parser->d_sm.begin(); it != parser->d_sm.end();++it) {
+    for (auto it = d_sm.begin(); it != d_sm.end();++it) {
 
         auto &submesh =  (*it);
         flag_normals = submesh->flag_normals;
@@ -621,18 +711,23 @@ SObjModel::SObjModel(const std::string&  fname)
         /*vertixes*/
         temp_vao = 0;
         temp_vbo = 0;
+        temp_ibo = 0;
         glGenVertexArrays ( 1, &temp_vao );
         glGenBuffers ( 1, &temp_vbo );
         glBindVertexArray(temp_vao);
         glBindBuffer(GL_ARRAY_BUFFER,temp_vbo);
-        if (flag_normals)
-            glBufferData ( GL_ARRAY_BUFFER, submesh->vn.size() *sizeof(CObjVertexN) , submesh->vn.data(), GL_STATIC_DRAW);
-        else
-            glBufferData ( GL_ARRAY_BUFFER, submesh->v.size() *sizeof(CObjVertex) , submesh->v.data(), GL_STATIC_DRAW);
-     
+        glGenBuffers(1, &temp_ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, temp_ibo);
+
+        MASSERT(submesh->vn.empty());
+        glBufferData ( GL_ARRAY_BUFFER, submesh->vn.size() *sizeof(CObjVertexN) , submesh->vn.data(), GL_STATIC_DRAW);
+
+        MASSERT(submesh->indexes.empty());
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
         
         submesh_vbo [ submesh->name ] = temp_vbo;
         submesh_vao [submesh->name] = temp_vao; 
+        submesh_ibo [submesh->name] = temp_ibo;
 
 
         glBindVertexArray(0);
@@ -647,7 +742,7 @@ void SObjModel::SetModelMat(const SMat4x4& m){
 	/*update shader variable*/ 
    // sprog->SetUniform("model",model);
 }
-void SObjModel::BindTextures(std::shared_ptr<CObjSubmesh> submesh) {
+void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
     
     /*texture diffuse*/
     if (d_materials.find(submesh->m_name) != d_materials.end()) {
@@ -696,7 +791,7 @@ void SObjModel::Render(RenderContext& r) {
     /*activate shader and load model matrix*/
     glDepthMask(GL_TRUE);
     if (r.shader->IsReady) {
-        for (auto it = parser->d_sm.begin(); it != parser->d_sm.end();++it) {
+        for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
 
             BindTextures(submesh);
@@ -722,10 +817,15 @@ void SObjModel::Render(RenderContext& r) {
             r.shader->SetUniform("cam_proj",r.camera->getProjMatrix());
             r.shader->Bind();
 
-            if (submesh->flag_normals)
-               glDrawArrays(GL_TRIANGLES,0,submesh->vn.size());
-            else
-               glDrawArrays(GL_TRIANGLES,0,submesh->v.size());
+           // if (submesh->flag_normals)
+             //  glDrawArrays(GL_TRIANGLES,0,submesh->vn.size());
+
+           // else
+           //    glDrawArrays(GL_TRIANGLES,0,submesh->v.size());
+
+
+            int idx_c = submesh->indexes.size();
+            glDrawElements(GL_TRIANGLES, idx_c, GL_UNSIGNED_INT, (GLvoid *)0);
             glBindVertexArray ( 0 );
 
 
