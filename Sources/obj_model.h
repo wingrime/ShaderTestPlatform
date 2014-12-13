@@ -685,13 +685,13 @@ int SObjModel::ConfigureProgram(SShader& sprog){
         glBindBuffer ( GL_ARRAY_BUFFER, submesh_vbo[(*it)->name] );
 
         if (flag_normals) {
-            sprog.SetAttrib( "position", 3, sizeof(CObjVertexN), (void *) offsetof(CObjVertexN,p),GL_FLOAT);
-            sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN), (void *) offsetof(CObjVertexN,n),GL_FLOAT);
-            sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN), (void *) offsetof(CObjVertexN,tc),GL_FLOAT);
+            sprog.SetAttrib( "position", 3, sizeof(CObjVertexN), offsetof(CObjVertexN,p),GL_FLOAT);
+            sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
+            sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
         } else {
-            sprog.SetAttrib( "position", 3, sizeof(CObjVertex), (void *) offsetof(CObjVertex,p),GL_FLOAT);
-            sprog.SetAttrib( "normal", 3, sizeof(CObjVertex), (void *) (0),GL_FLOAT);
-            sprog.SetAttrib( "UV", 2, sizeof(CObjVertex), (void *) offsetof(CObjVertex,tc),GL_FLOAT);
+            sprog.SetAttrib( "position", 3, sizeof(CObjVertex),  offsetof(CObjVertex,p),GL_FLOAT);
+            sprog.SetAttrib( "normal", 3, sizeof(CObjVertex),  (0),GL_FLOAT);
+            sprog.SetAttrib( "UV", 2, sizeof(CObjVertex),  offsetof(CObjVertex,tc),GL_FLOAT);
         }
         if (flag_normals)
             sprog.SetUniform("mesh_flags",1);

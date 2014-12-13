@@ -36,7 +36,7 @@ class SProg {
 
         int Bind();
         //TODO: Make this hidden
-        int SetAttrib(const std::string& name, int numComponents, GLsizei stride, void * ptr, GLenum type);
+        int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type);
         bool IsReady = false;
 
     private:
@@ -240,9 +240,8 @@ int SProg::SetUniform(const std::string& name, const SVec4& vec)
 
 
 
-int SProg::SetAttrib (const std::string& name, int numComponents, GLsizei stride, void * ptr, GLenum type )
+int SProg::SetAttrib (const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type )
 {
-    MASSERT(!ptr);
     int loc = glGetAttribLocation ( d_program, name.c_str() );
 
     if ( loc < 0 )
@@ -256,7 +255,7 @@ int SProg::SetAttrib (const std::string& name, int numComponents, GLsizei stride
                            	type,                 // type (GL_FLOAT)
                             GL_FALSE,       /*fixed point data not used*/
                             stride,               // stride (offset to next vertex data)
-                     		(const GLvoid*) ptr );
+                            (const GLvoid*) offset );
         
     glEnableVertexAttribArray ( loc );
     

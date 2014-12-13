@@ -140,7 +140,7 @@ SProcedureSky::SProcedureSky(Viewport *vp) {
  
     glEnableVertexAttribArray(0);
 
-    sky_prog->SetAttrib( "initial_vertex_coord", 3, 0, (void *) (0),GL_FLOAT);
+    sky_prog->SetAttrib( "initial_vertex_coord", 3, 0,0,GL_FLOAT);
     //n_tex -> Select();
  
     sky_prog->SetUniform("turbidity",(float)2.0);

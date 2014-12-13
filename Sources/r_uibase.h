@@ -117,7 +117,7 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
   ui_prog->Bind();
   ui_prog->SetUniform("tex",0);
   ui_prog->SetUniform("color",SVec4(1,1,1,1));
-  ui_prog->SetAttrib( "coord", 2, sizeof(float)*2, (void *) (0),GL_FLOAT);
+  ui_prog->SetAttrib( "coord", 2, sizeof(float)*2, 0,GL_FLOAT);
 
  glBindVertexArray ( 0 );
 

@@ -75,7 +75,7 @@ SPostProcess::SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRB
  
     glEnableVertexAttribArray(0);
 
-    p_prog->SetAttrib( "vCord", 3, 0, (void *) (0),GL_FLOAT);
+    p_prog->SetAttrib( "vCord", 3, 0,0,GL_FLOAT);
     /*configure windows size*/
     p_prog->SetUniform("vp",SVec4(w,h,0,0));
 

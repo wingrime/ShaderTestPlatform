@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "r_shader.h"
+#include "MAssert.h"
 /*Hi-level interface to shader program*/
 /*
 Objectives:
@@ -40,10 +41,9 @@ public:
     int SetUniform(const std::string& var,const SVec4& vec );
 
     //mesh settings
-    int SetAttrib(const std::string& name, int numComponents, GLsizei stride, void * ptr, GLenum type){
-
+    int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type){
         if(ESUCCESS == prog->Bind()) {
-            prog->SetAttrib(name, numComponents, stride, ptr,  type);
+            prog->SetAttrib(name, numComponents, stride, offset,  type);
             return ESUCCESS;
         } else {
             return EFAIL;
