@@ -1,14 +1,10 @@
-
 /*
 Global TODOs:
-- version control
 - cubemaps
 - more accurate rendering path control for more flexability
 - online attribute control
 - skybox
 */
-
-#define M_BUILD
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
@@ -304,7 +300,6 @@ private:
    bool d_toggle_fullscreen = false;
    bool d_toggle_MSAA = true;
 public:
-    int ToggleFullscreen();
     int UpdateScene();
 };
 
@@ -521,17 +516,7 @@ SScene::SScene(Viewport *v)
 
 }
 
-int SScene::ToggleFullscreen() {
-    d_toggle_fullscreen = !d_toggle_fullscreen;
 
-    if (d_toggle_fullscreen) {
-        glutFullScreen();
-    } else {
-        glutReshapeWindow(1000,1000); //FIX ME
-
-    }
-    return 0;
-} 
 
 int SScene::upCfgItem() {
     if (d_cfg_current > 0)
@@ -966,7 +951,17 @@ sc->UpdateCfgLabel();
 void mouse(int button, int state, int x, int y)  {
   
 }
+int ToggleFullscreen() {
+    static bool d_toggle_fullscreen  = false;
+    d_toggle_fullscreen  = !d_toggle_fullscreen;
+    if (d_toggle_fullscreen) {
+        glutFullScreen();
+    } else {
+        glutReshapeWindow(1000,1000);
+    }
 
+    return 0;
+}
 void refresh() {
     glutPostRedisplay();
 }
@@ -986,15 +981,6 @@ void APIENTRY openglCallbackFunction(GLenum source,
 
 int main ( int argc, char * argv [] )
 {
-
-    /*unit test run*/
-
-    //SMat4x4::utest();
-    //SVec4::utest();
-    /*lua link test */
-
-
-
     Viewport v(1000,1000);
 
 
@@ -1062,7 +1048,7 @@ int main ( int argc, char * argv [] )
     s_input->BindKey('s',"back");
 
     s_input->AddCommand("toogle_fullscreen", InputCommandHandler::InputCommand([=] (void) -> void {
-        sc->ToggleFullscreen();
+        ToggleFullscreen();
     }));
 
     s_input->BindKey('f',"toogle_fullscreen");
