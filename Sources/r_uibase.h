@@ -244,6 +244,7 @@ public:
 
 	UIFont *Construct(const std::string& fnt_name,unsigned const int sz);
   UIFont *Construct(unsigned const int sz);
+  int Release( UIFont * fnt);
 	FT_Library ft;
 };
 UIFontFactory::UIFontFactory() {
@@ -257,5 +258,11 @@ UIFont *UIFontFactory::Construct(const std::string& fnt_name, unsigned const int
 }
 
 UIFont *UIFontFactory::Construct( unsigned const int sz) {
-  return new UIFont(ft,DEF_fontname,sz);
+    return new UIFont(ft,DEF_fontname,sz);
+}
+
+int UIFontFactory::Release(UIFont *fnt)
+{
+    delete fnt;
+
 }

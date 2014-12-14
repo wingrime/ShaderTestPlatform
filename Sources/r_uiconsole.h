@@ -13,6 +13,7 @@ public:
 class UIConsole {
 public:
     UIConsole(Viewport *v, std::shared_ptr<AbstractCommandHandler> cmd_h);
+    ~UIConsole();
     /*Draw console*/
     void Draw();
     /*Add simple message*/ 
@@ -53,6 +54,11 @@ UIConsole::UIConsole(Viewport *v, std::shared_ptr<AbstractCommandHandler> cmd_h)
 
     fnt = ft.Construct(16);
     v_port = v;
+}
+
+UIConsole::~UIConsole()
+{
+    ft.Release(fnt);
 }
 void UIConsole::Draw() {
 
@@ -144,7 +150,7 @@ void UIConsole::RebuildOut()
     d_output_cache.clear();
     if (!con.empty()) {
 
-        std::vector<std::string>::iterator it;
+        std::vector<std::string>::const_iterator it;
         unsigned int n;
 
 
