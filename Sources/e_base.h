@@ -9,7 +9,6 @@
 
 #include "string_format.h"
 
-#define ASSERT ( a,b) (if (a) trow BaseError(b);)
 #define EMSG(a) {if (BaseError::DefHandler) {BaseError::DefHandler->MessageOut(string_format(a)); } else {printf(a);puts("\n");}}
 #define EMSGS(a) {if (BaseError::DefHandler) {BaseError::DefHandler->MessageOut(a);} else {printf(std::string(a).c_str());puts("\n");}}
 
