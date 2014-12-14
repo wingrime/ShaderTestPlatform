@@ -20,9 +20,9 @@
 class SPostProcess {
 public:
     /*refactoring in process*/
-    SPostProcess (SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> texSRC1, std::shared_ptr<SRBOTexture> texSRC2,std::shared_ptr<SRBOTexture> texSRC3);
-    SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> texSRC1, const std::shared_ptr<SRBOTexture> texSRC2) :SPostProcess(prog,w,h,texSRC1,texSRC2, 0) {}
-    SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> texSRC1) :SPostProcess(prog,w,h,texSRC1, 0, 0) {}
+    SPostProcess (SShader *prog, int w, int h, const std::shared_ptr<SRBOTexture>& texSRC1, const std::shared_ptr<SRBOTexture>& texSRC2, const std::shared_ptr<SRBOTexture>& texSRC3);
+    SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> &texSRC1, const std::shared_ptr<SRBOTexture> &texSRC2) :SPostProcess(prog,w,h,texSRC1,texSRC2, 0) {}
+    SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> &texSRC1) :SPostProcess(prog,w,h,texSRC1, 0, 0) {}
     SPostProcess(SShader *prog,int w, int h) :SPostProcess(prog,w,h, 0, 0, 0) {} 
 
     SPostProcess(const SPostProcess&) = delete;
@@ -44,10 +44,9 @@ private:
 
 };
 
-SPostProcess::SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> texSRC1, const std::shared_ptr<SRBOTexture> texSRC2, const std::shared_ptr<SRBOTexture> texSRC3)
+SPostProcess::SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> &texSRC1, const std::shared_ptr<SRBOTexture> &texSRC2, const std::shared_ptr<SRBOTexture> &texSRC3)
 
     :p_prog(prog), texSRC1(texSRC1), texSRC2(texSRC2),texSRC3(texSRC3) {
-    //new  SShader("pp_shader.v","pp_shader.f");
   
     GLfloat vertices[] = { -1, -1, 0, //bottom left corner
                            -1,  1, 0, //top left corner
@@ -98,7 +97,6 @@ void SPostProcess::Draw() {
     /*If shader usable other wice we will get error*/
     if (p_prog->IsReady)
     {
-        //glDepthMask(GL_FALSE);
         glBindVertexArray ( vao );
         p_prog-> Bind();
         if (texSRC1)
