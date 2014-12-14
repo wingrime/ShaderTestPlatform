@@ -21,11 +21,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 option(DEBUG_BUILD "Build test programs" ON)
 if(DEBUG_BUILD)
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
+#set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -g -ggdb -static-libstdc++ -Wl,-Bstatic -lwinpthread  ${CMAKE_CXX_FLAGS}")
 else()
 add_definitions(-D__BUILD_DROP_ASSERT__)
-set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -static-libstdc++ -Wl,-Bstatic -lwinpthread -O3 -flto ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -static-libstdc++ -Wl,-Bstatic -lwinpthread -Ofast -flto -msse2  -mfpmath=sse,387 -msse -fomit-frame-pointer ${CMAKE_CXX_FLAGS}")
 #todo ?
 #set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Werror -g -Wextra -Wshadow -pedantic ${CMAKE_CXX_FLAGS}")
 endif()
