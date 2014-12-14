@@ -135,7 +135,7 @@ struct CObjSubmesh {
     bool flag_normals; /* is normals used */
     std::vector<CObjVertexN> vn; /* vertex list with normals*/
     std::vector<unsigned int> indexes; /*indexed mesh*/
-   
+    unsigned int id;/* number of submesh in obj*/
     /*serialize support */
     friend class cereal::access;
     template <class Archive>
@@ -406,7 +406,7 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
  :d_vertex_count(0)
  {
     std::ifstream tst;
-
+    unsigned int sm_id = 0 ;
     std::vector<CObjV3> d_glv; /*list of vectors*/
     std::vector<CObjV2> d_gltc; /*list of texture coordinates*/
     std::vector<CObjV3> d_gln; /*list of normals*/
@@ -429,6 +429,7 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                     s->flag_normals = true;
                     d_normals = true; /* thats crap*/
                     s->name = ParseO(line);
+                    s->id  = sm_id++;
                     d_sm.push_back(s);
 
             } else if (!line.find("s")) {
@@ -442,6 +443,7 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                     s->flag_normals = d_normals;
                     s->name = subm->name + std::string("_mat_") + mtl;
                     s->m_name = mtl;
+                    s->id  = sm_id++;
                     d_sm.push_back(s);
                 } else
                     subm->m_name = mtl;
@@ -466,6 +468,7 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
             } else if (!line.find("g")) {
                 std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
                 s->flag_normals = d_normals;
+                s->id  = sm_id++;
                 s->name = ParseG(line);
                 d_sm.push_back(s);
                 //d_normals = true;
@@ -507,6 +510,7 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
     mesh->m_name = d_inmesh->m_name;
     mesh->flag_normals = d_inmesh->flag_normals;
     mesh->name = d_inmesh->name;
+    mesh->id = d_inmesh->id;
     unsigned int current_index = 0;
 
     std::map<CObjVertexN, unsigned int  > vn_map;
@@ -558,9 +562,9 @@ class SObjModel {
 
 
 
-        std::unordered_map<std::string, unsigned int > submesh_vbo;
-        std::unordered_map<std::string, unsigned int > submesh_vao;
-        std::unordered_map<std::string, unsigned int > submesh_ibo;
+        std::unordered_map<unsigned int , unsigned int > submesh_vbo;
+        std::unordered_map<unsigned int , unsigned int > submesh_vao;
+        std::unordered_map<unsigned int , unsigned int > submesh_ibo;
         std::unordered_map<std::string, std::unique_ptr<STexture> > d_textures;
         std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
 
@@ -588,8 +592,8 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     sprog.Bind();
     for (auto it = d_sm.begin(); it != d_sm.end();++it) {
         auto &submesh =  (*it);
-        glBindVertexArray( submesh_vao[(*it)->name] );
-        glBindBuffer ( GL_ARRAY_BUFFER, submesh_vbo[(*it)->name] );
+        glBindVertexArray( submesh_vao[(*it)->id] );
+        glBindBuffer ( GL_ARRAY_BUFFER, submesh_vbo[(*it)->id] );
 
             sprog.SetAttrib( "position", 3, sizeof(CObjVertexN), offsetof(CObjVertexN,p),GL_FLOAT);
             sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
@@ -725,9 +729,9 @@ SObjModel::SObjModel(const std::string&  fname)
         MASSERT(submesh->indexes.empty());
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
         
-        submesh_vbo [ submesh->name ] = temp_vbo;
-        submesh_vao [submesh->name] = temp_vao; 
-        submesh_ibo [submesh->name] = temp_ibo;
+        submesh_vbo [ submesh->id ] = temp_vbo;
+        submesh_vao [submesh->id] = temp_vao;
+        submesh_ibo [submesh->id] = temp_ibo;
 
 
         glBindVertexArray(0);
@@ -789,13 +793,13 @@ void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
 }
 void SObjModel::Render(RenderContext& r) {
     /*activate shader and load model matrix*/
-    glDepthMask(GL_TRUE);
+    //glDepthMask(GL_TRUE); // no need disable or enable depth buffer
     if (r.shader->IsReady) {
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
 
             BindTextures(submesh);
-            glBindVertexArray ( submesh_vao[submesh->name] );
+            glBindVertexArray ( submesh_vao[submesh->id] );
             /*shader*/
             /*shadow mapping*/
             if (r.sm_texture) {
