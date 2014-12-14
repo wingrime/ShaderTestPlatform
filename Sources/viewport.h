@@ -31,7 +31,6 @@ public:
     int Bind() const {return Bind(true);}
 
     RTType type;
-    SRBOTexture* targ;
 
     std::shared_ptr<SRBOTexture> texIMG; /*color attachment 0*/
     std::shared_ptr<SRBOTexture> texIMG1; /*color attachment 1*/
