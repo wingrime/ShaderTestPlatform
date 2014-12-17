@@ -68,25 +68,32 @@ if(FREEGLUT_FOUND)
 		link_directories(${FREEGLUT_LINK_DIRS})
 		list(APPEND CORE_LINK_LIBS ${FREEGLUT_LIBRARY})
 endif()
-
+# cereal
 include_directories(${PROJECT_SOURCE_DIR}/External/cereal/include)
-
+# gtest
+include_directories(${PROJECT_SOURCE_DIR}/External/gtest/include)
+# for gtest-all.cc
+include_directories(${PROJECT_SOURCE_DIR}/External/gtest/)
 
 #add to "-I"
 include_directories(${PROJECT_SOURCE_DIR}/Sources)
-
-
+include_directories(${PROJECT_SOURCE_DIR}/Sources/Tests)
 
 #add to deps
 AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources RENDER_HEADERS) 
 
-
+AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources/Tests RENDER_TESTS)
 
 message ("${RENDER_HEADERS}")
 
 
+message ("${RENDER_TESTS}")
+
+
+
 
 add_executable("main" main.cpp ${RENDER_HEADERS})
+
 target_link_libraries(main "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
 target_link_libraries(main OpenGL32)
@@ -100,3 +107,4 @@ add_custom_command(TARGET main
           COMMAND ${CMAKE_COMMAND} -E copy "${GLEW_LIBRARY}/../bin/libglew.dll" "${PROJECT_SOURCE_DIR}/Build/"
           COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
           )
+add_executable("tests"  "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
