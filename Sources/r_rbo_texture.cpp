@@ -1,5 +1,13 @@
 #include "r_rbo_texture.h"
 #include "ErrorCodes.h"
+
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/wglew.h>
+
+#include "r_texture.h"
+#include "string_format.h"
+
 unsigned int SRBOTexture::getGLId() const {
     return tex;
 }
