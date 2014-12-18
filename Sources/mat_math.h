@@ -1,18 +1,15 @@
 #pragma once
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <memory>
-#include "string_format.h"
+
+
 #ifndef M_PI
 #define M_PI           3.14159265358979323846
 #endif
-#include <cmath>
+
 /*serialization*/
 #include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
+
 #include "MAssert.h"
 //TODO
 // && operator

@@ -1,5 +1,6 @@
 #pragma once
 #include "mat_math.h"
+#include <cmath>
 class SPerspectiveProjectionMatrix: public SMat4x4 {
 public: 
     	SPerspectiveProjectionMatrix(float Near, float Far,float Aspect, float FOV) : SMat4x4() {

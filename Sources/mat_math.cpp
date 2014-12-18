@@ -1,3 +1,9 @@
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <memory>
+#include <cmath>
+#include "string_format.h"
 #include "mat_math.h"
 
 
