@@ -1,4 +1,14 @@
 #include "r_sprog.h"
+
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/wglew.h>
+
+#include <unordered_map>
+#include <vector>
+#include <string>
+
+
 /*Hi-level interface to shader program*/
 /*
 Objectives:
