@@ -3,14 +3,6 @@
 */
 #pragma once
 
-
-
-#include    <stdio.h>
-#include    <stdlib.h>
-#include    <string.h>
-#include    <vector>
-
-
 #include "string_format.h"
 #include "AbstractBuffer.h"
 

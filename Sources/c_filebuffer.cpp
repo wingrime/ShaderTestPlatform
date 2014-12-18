@@ -1,6 +1,10 @@
 /*
 	c++ wrapper for file loaded into memory
 */
+#include    <stdio.h>
+#include    <stdlib.h>
+#include    <string.h>
+#include    <vector>
 
 #include "c_filebuffer.h"
 
