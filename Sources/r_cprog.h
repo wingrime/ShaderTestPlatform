@@ -68,7 +68,7 @@ SCProg::SCProg(AbstractBuffer* src)
         glGetShaderInfoLog(d_shader,compileLogsz,&logRecived, errorLog);
         std::string e_log(errorLog);
         free(errorLog);
-        EMSGS(std::string("Compute shader build failed:\n")+e_log);
+        //EMSGS(std::string("Compute shader build failed:\n")+e_log);
         /*TODO proper cleanup*/
         return;
     }
@@ -88,7 +88,7 @@ SCProg::SCProg(AbstractBuffer* src)
         glGetProgramInfoLog(d_program,linkLogsz,&logRecived, errorLog);
         std::string e_log(errorLog);
         free(errorLog);
-        EMSGS(std::string("Compute shader link failed:\n")+e_log);
+        //EMSGS(std::string("Compute shader link failed:\n")+e_log);
         return;
     }
     d_ready = true;

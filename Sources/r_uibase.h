@@ -7,8 +7,6 @@ TODOs:
 */
 #include <string>
 #include <map>
-/*error classes */
-#include "e_base.h"
 
 /*file buffer class*/
 #include "c_filebuffer.h"
@@ -69,8 +67,8 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
 
 	/*TODO use filebuffer*/
 	if(FT_New_Face(UIFont::ft, fnt_name.c_str(), 0, &face))
-		throw FontLoadError("Could not open font\n");
-
+    //	throw FontLoadError("Could not open font\n");
+    printf("font not loaded");
  //FT_Select_Charmap( face, ft_encoding_unicode  );
 
 	FT_Set_Pixel_Sizes(face, sz, 0);
@@ -250,7 +248,7 @@ public:
 UIFontFactory::UIFontFactory() {
 		if(FT_Init_FreeType(&ft)) 
 	
-		throw FontLoadError("Could not init freetype library\n");
+        printf("freetype init error!\n");
 }
 
 UIFont *UIFontFactory::Construct(const std::string& fnt_name, unsigned const int sz) {

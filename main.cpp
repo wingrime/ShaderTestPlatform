@@ -15,8 +15,6 @@ Global TODOs:
 #include <math.h>
 /* STL */
 #include <vector>
-/*error handling classes*/
-#include "e_base.h"
 /*filebuffer interface*/
 #include "c_filebuffer.h"
 /*hand made matrix math*/
@@ -31,7 +29,7 @@ Global TODOs:
 
 #include <stdarg.h>  // for va_start, etc
 #include <memory>    // for std::unique_ptr
-#include "obj_model.h"
+#include "ObjModel.h"
 #include "viewport.h"
 #include "sky_model.h"
 #include "post_process.h"
@@ -100,10 +98,10 @@ int BaseCommandHandler::ExecuteCommand(const std::string& cmd_n, ArgTypes... arg
         Command<ArgTypes...> * c = static_cast<  Command < ArgTypes...>  *   >(cmd.get());
         if (c) {
             (*c)(args...);
-        } else
-            EMSGS("Invalid cmd type!\n");
-    } else
-        EMSGS("No cmd: " + cmd_n + " \n");
+        }// else
+            //EMSGS("Invalid cmd type!\n");
+    }// else
+        //EMSGS("No cmd: " + cmd_n + " \n");
     return 0;
 }
 
@@ -350,7 +348,7 @@ SScene::SScene(Viewport *v)
     
 {
     /*Setup error handler*/
-    BaseError::DefHandler = err_con; 
+    //BaseError::DefHandler = err_con;
     int w = rtHDRScene->w;
     int h = rtHDRScene->h;
     /*ssao shaders*/

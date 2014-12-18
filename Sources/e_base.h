@@ -13,8 +13,7 @@
 #define EMSGS(a) {if (BaseError::DefHandler) {BaseError::DefHandler->MessageOut(a);} else {printf(std::string(a).c_str());puts("\n");}}
 
 
-#define ESUCCESS 0
-#define EFAIL  0xBADC00
+
 /*Proxy class for all error definition*/
 class AbstractErrorHandler {
 public:
@@ -46,15 +45,5 @@ public:
 };
    
 
-AbstractErrorHandler* BaseError::DefHandler = 0;
+//AbstractErrorHandler* BaseError::DefHandler = 0;
 
-//TODO inheritance 
-#define IOError BaseError
-#define ShaderError BaseError
-#define ConfigError BaseError
-#define UTestError BaseError 
-#define ImageLoadError BaseError 
-#define FontLoadError BaseError
-#define MatrixError BaseError 
-#define VectorError BaseError 
-#define JSONError BaseError 

@@ -2,7 +2,6 @@
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
-#include "e_base.h"
 /*OpenGL performant monitor*/
 class SPerfMan {
 public: 
