@@ -10,7 +10,7 @@ Global TODOs:
 #include <GL/gl.h>
 #include <GL/wglew.h>
 #include    <stdio.h>
-#include    <stdlib.h>
+
 #include    <string.h>
 #include <math.h>
 /* STL */
@@ -27,8 +27,6 @@ Global TODOs:
 /* shader class*/
 #include "r_sprog.h"
 
-#include <stdarg.h>  // for va_start, etc
-#include <memory>    // for std::unique_ptr
 #include "ObjModel.h"
 #include "viewport.h"
 #include "sky_model.h"
