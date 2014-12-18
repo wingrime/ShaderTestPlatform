@@ -7,9 +7,6 @@
 #include <GL/gl.h>
 #include <GL/wglew.h>
 
-#include <unordered_map>
-#include <string>
-#include <vector>
 
 /*LowLevel interface to shader program*/
 class SProg {

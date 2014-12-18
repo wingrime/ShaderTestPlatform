@@ -1,12 +1,8 @@
 #pragma once
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/wglew.h>
+
+#include <string>
 
 #include "r_texture.h"
-#include "string_format.h"
-
-#include <string.h>
 
 /*serialization*/
 #include <cereal/access.hpp>
@@ -52,7 +48,7 @@ public:
     }
     bool IsMSAA();
 private:
-    GLuint tex;
+    unsigned int tex;
     int ConfigureTexture(const BorderType t) const;
     bool d_isMSAA = false;
 

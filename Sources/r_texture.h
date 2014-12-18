@@ -64,7 +64,7 @@ public:
         ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(IsReady),CEREAL_NVP(d_fname),CEREAL_NVP(type));
     }
 private:
-    GLuint tex;
+    unsigned int tex;
     int CreateTexture(GLsizei num_mipmaps, GLenum internalformat);
     int ConfigureTexture(const BorderType t) const;
 

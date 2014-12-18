@@ -1,6 +1,9 @@
 #include "r_shader.h"
 #include "ErrorCodes.h"
 
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/wglew.h>
 
 int SProg::Bind() {
     if (IsReady) {

@@ -1,29 +1,7 @@
 #pragma once
+
+#include "r_context.h"
 #include "MTLParser.h"
-
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/wglew.h>
-
-/* shader class*/
-#include "r_sprog.h"
-#include "mat_math.h"
-#include "viewport.h"
-#include "r_texture.h"
-
-#include "r_projmat.h"
-
-#include "r_context.h"
-
-#include <vector>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <map>
-#include "string_format.h"
-#include "r_context.h"
 
 /*serialization*/
 #include <cereal/access.hpp>

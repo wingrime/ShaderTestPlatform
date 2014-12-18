@@ -1,4 +1,31 @@
 #include "ObjModel.h"
+
+
+
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/wglew.h>
+
+/* shader class*/
+#include "r_sprog.h"
+#include "mat_math.h"
+#include "viewport.h"
+#include "r_texture.h"
+
+#include "r_projmat.h"
+
+
+
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <map>
+#include "string_format.h"
+
+
 CObjVertexN CObjMeshParser::BuildVertN(const CObjV3 &p, const CObjV2 &tc,const CObjV3 &n) {
     CObjVertexN  v = { p , n , tc}; 
     return v;
