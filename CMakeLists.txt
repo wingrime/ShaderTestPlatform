@@ -11,6 +11,8 @@ project (m_proj)
 set(BUILD_OUTDIR,"${PROJECT_SOURCE_DIR}/Build")
 
 
+set(EXECUTABLE_OUTPUT_PATH,"${PROJECT_SOURCE_DIR}/Build")
+
 set (CMAKE_CXX_COMPILER "g++")
 set (CMAKE_C_COMPILER "gcc") 
 set (CMAKE_RC_COMPILER "windres") 
@@ -108,3 +110,14 @@ add_custom_command(TARGET main
           COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
           )
 add_executable("tests"  "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
+target_link_libraries(tests "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
+target_link_libraries(tests "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
+target_link_libraries(tests OpenGL32)
+target_link_libraries(tests "${FREETYPE_LIBRARY}")
+#run tests
+add_custom_command(TARGET tests
+          POST_BUILD
+          # thast should not be there but seems cmake not build tests in right output
+          COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/tests.exe" "${PROJECT_SOURCE_DIR}/Build/"
+          COMMAND "${PROJECT_SOURCE_DIR}/Build/tests.exe"
+          )
