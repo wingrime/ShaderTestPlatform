@@ -52,6 +52,7 @@ Global TODOs:
 #include "viewport.h"
 #include <windows.h>
 #include "MAssert.h"
+#include "Log.h"
 class BaseCommand
 {
 public:
@@ -965,12 +966,21 @@ void APIENTRY openglCallbackFunction(GLenum source,
                                            const void* userParam){
  
  /* todo find  where it was called */
-    printf("OpenGL MSG:%s\n", message);
+    static Log gl_log("gl_log.log");
+    gl_log.LogW(message);
+    // nice feature;
+    //D_TRAP();
+
+
 }
 
 
 int main ( int argc, char * argv [] )
 {
+    std::ios::sync_with_stdio(false);
+    MainLog log;
+    Log gl_log("gl_log.log");
+
     /*backtrace on windows*/
     LoadLibraryA("backtrace.dll");
     Viewport v(1000,1000);
@@ -1003,9 +1013,10 @@ int main ( int argc, char * argv [] )
             0,
             &unusedIds,
             true);
+        LOGV("OpenGl debug callback installed");
     }
     else
-        printf("debug callback is not available\n");
+        LOGW("OpenGl debug callback not avaliable");
 
                        
    //*test compute shader*/
