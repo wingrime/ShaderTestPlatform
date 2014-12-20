@@ -92,8 +92,6 @@ void SVec4::Reflect() const{
 
 
 SMat4x4::~SMat4x4(){
-    //printf("~mat\n");
-    //nothing to do
 };
 
 
@@ -180,7 +178,6 @@ SMat4x4::SMat4x4(float v) {
     mat.a21 = 0.0f; mat.a22 = v;    mat.a23 = 0.0f; mat.a24 = 0.0f;
     mat.a31 = 0.0f; mat.a32 = 0.0f; mat.a33 = v;    mat.a34 = 0.0f;
     mat.a41 = 0.0f; mat.a42 = 0.0f; mat.a43 = 0.0f; mat.a44 = v;
-    //printf("mat\n");
 }
 SMat4x4::SMat4x4(float a11,float a12,float a13,float a14,
             float a21,float a22,float a23,float a24,
@@ -191,7 +188,6 @@ SMat4x4::SMat4x4(float a11,float a12,float a13,float a14,
     mat.a21 = a21; mat.a22 = a22; mat.a23 = a23; mat.a24 = a24;
     mat.a31 = a31; mat.a32 = a32; mat.a33 = a33; mat.a34 = a34;
     mat.a41 = a41; mat.a42 = a42; mat.a43 = a43; mat.a44 = a44;
-    //printf("mat\n");
 }
 
 SMat4x4::SMat4x4( const SMat4x4& i){
@@ -199,7 +195,6 @@ SMat4x4::SMat4x4( const SMat4x4& i){
     mat.a21 = i.mat.a21; mat.a22 = i.mat.a22; mat.a23 = i.mat.a23; mat.a24 = i.mat.a24;
     mat.a31 = i.mat.a31; mat.a32 = i.mat.a32; mat.a33 = i.mat.a33; mat.a34 = i.mat.a34;
     mat.a41 = i.mat.a41; mat.a42 = i.mat.a42; mat.a43 = i.mat.a43; mat.a44 = i.mat.a44;
-    //printf("mat\n");
 }
 bool SMat4x4::Eq(const SMat4x4& a,const SMat4x4& b){
     return (!memcmp(a.mat.raw,b.mat.raw,sizeof(float)*16));
@@ -397,36 +392,3 @@ void SVec4::utest() {
     U_TEST("CrossProduct", SVec4::Eq(SVec4(3,2,1,0)*SVec4(1,2,3,0),SVec4(4,-8,4,0)),true);
     U_TEST_REPORT;
 }
-/*
-void SMat4x4::utest()
-{
-    U_TEST_START("SMat4x4");
-    U_TEST("Eq",SMat4x4::Eq(SMat4x4(),SMat4x4()),true);
-    U_TEST("Eq",SMat4x4::Eq(SMat4x4(),SMat4x4(2.0)),false);
-    SMat4x4().Reflect();
-    U_TEST("Eq",SMat4x4::Eq(SMat4x4(2.0),SMat4x4(2.0)),true);
-    U_TEST("Eq",SMat4x4::Eq(SMat4x4(),SMat4x4(2.0)),false);
-
-    U_TEST("Add",SMat4x4::Eq(SMat4x4(1.0)+SMat4x4(1.0),SMat4x4(2.0)),true);
-    U_TEST("Mul",SMat4x4::Eq(SMat4x4(1.0)*SMat4x4(1.0),SMat4x4(1.0)),true);
-    U_TEST("Move",SMat4x4::Eq(SMat4x4(1.0).Move(1.0,2.0,3.0),SMat4x4(1.0)),false);
-    U_TEST("Move",SMat4x4::Eq(SMat4x4(1.0).Move(1.0,2.0,3.0),SMat4x4(1,0,0,0 ,0,1,0,0 ,0,0,1,0 , 1,2,3,1 )),true);
-    U_TEST("Move",SMat4x4::Eq(SMat4x4(1.0).Move(1.0,2.0,3.0).Move(-1.0,-2.0,-3.0),SMat4x4(1.0)),true);
-    //U_TEST("Rotate",SMat4x4::Eq(SMat4x4(1.0).RotX(1.0).RotX(-1.0),SMat4x4(1.0)),true);
-	U_TEST("Mul",SMat4x4::Eq(SMat4x4(1,2,3,4, 5,6,7,8,9, 10,11,12, 13,14,15,16)*SMat4x4(1,2,3,4, 5,6,7,8,9, 10,11,12, 13,14,15,16), \
-								SMat4x4(90,100,110,120,202,228,254,280,314,356,398,440,426,484,542,600)),true);
-
-	U_TEST("Mul",SMat4x4::Eq(SMat4x4(1,2,3,4, 5,6,7,8,9, 10,11,12, 13,14,15,16)*SMat4x4(16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1), \
-								SMat4x4(80,70,60,50,240,214,188,162,400,358,316,274,560,502,444,386)),true);
-
-	U_TEST("Mul",SMat4x4::Eq(SMat4x4(16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)*SMat4x4(1,2,3,4, 5,6,7,8,9, 10,11,12, 13,14,15,16), \
-								SMat4x4(386,444,502,560,274,316,358,400,162,188,214,240,50,60,70,80)),true);
-
-	U_TEST("Transpose",SMat4x4::Eq(SMat4x4(1,2,3,4, 5,6,7,8,9, 10,11,12, 13,14,15,16).Transpose(), \
-								SMat4x4(1,5,9,13,2,6,10,14,3,7,11,15,4,8,12,16)),true);
-
-
-    U_TEST_REPORT;
-
-}
-*/
