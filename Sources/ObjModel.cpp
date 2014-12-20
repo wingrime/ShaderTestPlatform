@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <map>
 #include "string_format.h"
-
+#include "Log.h"
 
 CObjVertexN CObjMeshParser::BuildVertN(const CObjV3 &p, const CObjV2 &tc,const CObjV3 &n) {
     CObjVertexN  v = { p , n , tc}; 
@@ -400,7 +400,7 @@ SObjModel::SObjModel(const std::string&  fname)
     CObjMeshParser parser(fname);
     if (!parser.IsReady)
         {
-            //EMSGS(std::string("Unable open model :") + fname);
+            LOGE(std::string("Unable open model :") + fname);
             std::cout <<   std::string("Unable open model :") << fname << std::endl;
         return;
         }
@@ -433,12 +433,12 @@ SObjModel::SObjModel(const std::string&  fname)
 
     texDiffuse.reset(new STexture("empty_texture.png"));
     if (!texDiffuse->IsReady) {
-        //EMSGS(std::string(" diffuse texture file not found"));
+        LOGE(std::string(" diffuse texture file not found"));
         return;
     }
     texNormal.reset(new STexture("empty_normal.png",false));
     if (!texNormal->IsReady) {
-       // EMSGS(std::string("normal texture file not found"));
+       LOGE(std::string("normal texture file not found"));
         return;
     }
 
@@ -450,7 +450,7 @@ SObjModel::SObjModel(const std::string&  fname)
         auto &submesh =  (*it);
         flag_normals = submesh->flag_normals;
         if (d_materials.find(submesh->m_name) == d_materials.end()) {
-           // printf("no material found - %s\n",submesh->m_name.c_str() );
+           LOGE(std::string("no material found - ") + submesh->m_name);
         } else {
             
             auto &material = d_materials[submesh->m_name];
@@ -460,7 +460,7 @@ SObjModel::SObjModel(const std::string&  fname)
                // printf("material %s Diffuse %s Bump %s Alpha %s \n",submesh->m_name.c_str(),  material->map_Kd.c_str(), material->map_bump.c_str(), material->map_d.c_str());
                 d_textures[diffuse] = std::unique_ptr<STexture>(new STexture(diffuse));
                 if (!d_textures[diffuse]->IsReady) {
-                   // EMSGS(string_format("OBJ:Diffuse texture load failed %s",diffuse.c_str()));
+                   LOGE(string_format("OBJ:Diffuse texture load failed %s",diffuse.c_str()));
                 }
             }
 
@@ -469,7 +469,7 @@ SObjModel::SObjModel(const std::string&  fname)
 
                 d_textures[bump] = std::unique_ptr<STexture>(new STexture(bump,false));
                 if (!d_textures[bump]->IsReady) {
-                  //  EMSGS(string_format("OBJ:Bump texture load failed %s",bump.c_str()));
+                  LOGE(string_format("OBJ:Bump texture load failed %s",bump.c_str()));
                 }
             }
             std::string &alpha = material->map_d; 
@@ -477,7 +477,7 @@ SObjModel::SObjModel(const std::string&  fname)
 
                 d_textures[alpha] = std::unique_ptr<STexture>(new STexture(alpha));
                 if (!d_textures[alpha]->IsReady) {
-                   // EMSGS(string_format("OBJ:Alpha mask texture load failed %s",alpha.c_str()));
+                   LOGE(string_format("OBJ:Alpha mask texture load failed %s",alpha.c_str()));
                 }
             }
 
