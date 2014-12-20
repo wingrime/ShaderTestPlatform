@@ -7,13 +7,14 @@
 #include    <vector>
 
 #include "c_filebuffer.h"
+#include "Log.h"
 
 FileBuffer::FileBuffer(const std::string& srcfile) {
     FILE *f_file;
     f_file = fopen(srcfile.c_str(),"rb");
     if (f_file == NULL)
     {
-        //EMSGS(string_format("%s: File not found! %s",__func__, srcfile.c_str()));
+        LOGE(string_format("%s: File not found! %s",__func__, srcfile.c_str()));
         return;
     }
     fseek(f_file,0,SEEK_END);
