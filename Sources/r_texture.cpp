@@ -12,7 +12,7 @@ int STexture::Bind(unsigned int sampler) const {
         return ESUCCESS;
 	}
     else {
-        printf("unable bind non-exists texture\n");
+        LOGE("Texture not ready for bind");
         return EFAIL;
         }
 
