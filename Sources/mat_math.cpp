@@ -379,16 +379,3 @@ UnitQuaterion UnitQuaterion::Conjugate() const{
 UnitQuaterion UnitQuaterion::Inverse() const{
     return UnitQuaterion(-q.x ,-q.y,-q.z , q.w);
 }
-#define U_TEST_START(nm) int _ut_number = 0; int _ut_error = 0; printf("UnitTest: %s\n",nm)
-#define U_TEST(test_name,res1,res2) printf(" Test %d : %s\n ",_ut_number++,test_name); if (res1 == res2) printf("PASS\n"); else { _ut_error++;printf("FAIL\n");}
-#define U_TEST_REPORT printf("Test results\n ------------\n "); printf(" %s: %d/%d\n",_ut_error?"FAILED":"PASSED" , (_ut_number - _ut_error),_ut_number);
-
-void SVec4::utest() {
-    U_TEST_START("SVec4");
-    U_TEST("Eq", SVec4::Eq(SVec4(),SVec4()),true );
-    U_TEST("Eq", SVec4::Eq(SVec4(1,2,3,4),SVec4(1,2,3,4)),true );
-    U_TEST("Eq", SVec4::Eq(SVec4(4,3,2,1),SVec4(1,2,3,4)),false );
-    U_TEST("CrossProduct", SVec4::Eq(SVec4(1,2,3,0)*SVec4(3,2,1,0),SVec4(-4,8,-4,0)),true);
-    U_TEST("CrossProduct", SVec4::Eq(SVec4(3,2,1,0)*SVec4(1,2,3,0),SVec4(4,-8,4,0)),true);
-    U_TEST_REPORT;
-}
