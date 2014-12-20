@@ -24,15 +24,6 @@ T inline toDeg(T rad){
     return (180.0f/M_PI) * rad;
 }
 
-class UnitTestError {
-public: 
-    UnitTestError() : message("UNK") {puts("UNK ERROR \n");}
-    UnitTestError(std::string msg) : message(msg) {puts(msg.c_str());}
-    std::string message ;
-};
-
-
-
 class SVec4 {
 public:
     SVec4(float x,float y, float z, float w);
@@ -62,8 +53,6 @@ public:
     static bool Eq(const SVec4& a,const SVec4& b);
 
     void Reflect() const;
-    /* self test */
-    static void utest();
 
     /*serialize support */
     template <class Archive>
@@ -72,9 +61,7 @@ public:
         ar( vec);
     }
 
-
     static SVec4 Cross(const SVec4 &a, const SVec4 &b);
-
     float Length() const;
 };
 
@@ -98,14 +85,10 @@ public:
 	SMat4x4(float a);
     SMat4x4( const SMat4x4& i);
 
-
-
     //reflect to stdout
     void Reflect() const;
     // out to string
     std::string ReflectStr() const;
-    //simple self test
-    static void utest();
 
 
     //internals
