@@ -19,15 +19,15 @@ SVec4 SVec4::Normalize(const SVec4 &a)
     MASSERT(l==0.0);
     return SVec4(a.vec.x / l , a.vec.y /l , a.vec.z /l , a.vec.w / l);
 }
-/*just too stupid I need add some delta*/
+
 bool SVec4::Eq(const SVec4& a,const SVec4& b) {
-    return ( a.vec.x == b.vec.x && a.vec.y == b.vec.y && a.vec.z == b.vec.z && a.vec.w == b.vec.w);
+    return ( fabs(a.vec.x - b.vec.x) < 0.0001 && fabs(a.vec.y - b.vec.y) < 0.0001 && fabs(a.vec.z - b.vec.z) < 0.0001 && fabs(a.vec.w - b.vec.w) < 0.0001);
 }
 float SVec4::Length() const{
-    return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z + + vec.w*vec.w);
+    return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z  + vec.w*vec.w);
 }
 float SVec4::Dot(const SVec4& a,const SVec4& b) {
-    return (a.vec.x *b.vec.x + a.vec.y *b.vec.y + a.vec.z *b.vec.z);
+    return (a.vec.x *b.vec.x + a.vec.y *b.vec.y + a.vec.z *b.vec.z + a.vec.w*a.vec.w);
 }
 SVec4::SVec4(){
     vec.x = 0.0f;
