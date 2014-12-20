@@ -1,9 +1,6 @@
 #include "r_shader.h"
 #include "ErrorCodes.h"
-
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/wglew.h>
+#include "Log.h"
 
 int SProg::Bind() {
     if (IsReady) {
@@ -33,7 +30,7 @@ GLuint  SProg::LoadShader (const char * source, GLenum type, const std::string &
         glGetShaderInfoLog(shader,log_size,&ret_len, error_log);
         std::string e_log(error_log);
         free(error_log);
-        //EMSGS(std::string("Shader compile failed:")+fname + std::string("\n")+e_log);
+        LOGE(std::string("Shader compile failed:")+fname + std::string("\n")+e_log);
         return EFAIL;      
         
     }
@@ -71,13 +68,13 @@ SProg::SProg(const std::string& vprog,const std::string& fprog)
     FileBuffer *vert = new FileBuffer(std::string(".\\shaders\\")+vprog);
     vs = LoadShader ( (const char *)vert->buffer, GL_VERTEX_SHADER, vprog  );
     if (vs == EFAIL) {
-       // EMSGS("Vertex Shader Build Failed");
+        LOGE("Vertex Shader Build Failed");
         IsReady = false;
         return;
     }
     fs = LoadShader ( (const char *)frag->buffer,GL_FRAGMENT_SHADER , fprog);
     if (fs == EFAIL) {
-       // EMSGS("Fragment Shader Build Failed");
+        LOGE("Fragment Shader Build Failed");
         IsReady = false;
         return;
     }
@@ -95,11 +92,11 @@ SProg::SProg(const std::string& vprog,const std::string& fprog)
         glGetProgramInfoLog(d_program,log_size,&ret_len, error_log);
         std::string err_m = std::string(error_log);
         free(error_log);
-        //EMSGS(std::string("Shader Link Failed, vfile:")+std::string(vprog) +std::string(",ffile:")+std::string(fprog)+std::string("\n")+err_m);
-            delete frag;
-            delete vert;
-            IsReady = false;
-            return;
+        LOGE(std::string("Shader Link Failed, vfile:")+std::string(vprog) +std::string(",ffile:")+std::string(fprog)+std::string("\n")+err_m);
+        delete frag;
+        delete vert;
+        IsReady = false;
+        return;
     }
     delete frag;
     delete vert;
@@ -111,8 +108,7 @@ SProg::~SProg(){
 int SProg::SetUniform(const std::string& name, float i) {
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        //return false;
-        //EMSGS(std::string("No uniform float ")+name + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW(std::string("No uniform float ")+name + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
         return EFAIL;
     }
 
@@ -122,7 +118,7 @@ int SProg::SetUniform(const std::string& name, float i) {
 int SProg::SetUniform(const std::string& name,int i) {
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        //EMSGS(std::string("No uniform int(or sampler) ")+name + std::string(" in  program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW(std::string("No uniform int(or sampler) ")+name + std::string(" in  program: ") +v_pname + std::string(", ") + f_pname );
         return EFAIL;
     }
 
@@ -134,7 +130,7 @@ int SProg::SetUniform( const std::string& name ,const SMat4x4& mat )
 
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        //EMSGS(string_format("No uniform mat4 \"%s\"", name.c_str()) + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW(string_format("No uniform mat4 \"%s\"", name.c_str()) + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
         return EFAIL;
     }
 
@@ -177,7 +173,7 @@ int SProg::SetUniform(const std::string& name, const SVec4& vec)
 {
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        //EMSGS(string_format("No uniform vec4 \"%s\"", name.c_str())+ std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW(string_format("No uniform vec4 \"%s\"", name.c_str())+ std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
         return EFAIL;
     }
     glUniform4fv(loc, 1, (float *)vec.vec.raw);
@@ -195,7 +191,7 @@ int SProg::SetAttrib (const std::string& name, int numComponents, GLsizei stride
 
     if ( loc < 0 )
     {
-        //EMSGS("No Vertex Attibute Find in:"+ name + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW("No Vertex Attibute Find in:"+ name + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
          return EFAIL;
     }   
 
