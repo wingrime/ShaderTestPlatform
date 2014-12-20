@@ -1,5 +1,6 @@
 #include "MTLParser.h"
-
+#include "string_format.h"
+#include "Log.h"
 MTLParser::MTLParser(const std::string& fname) {
     std::ifstream tst;
 
@@ -44,14 +45,14 @@ MTLParser::MTLParser(const std::string& fname) {
             }
         }
     } else {
-        printf ("Unable open MTL file %s\n", fname.c_str());
+        LOGE(string_format("Unable open MTL file %s\n", fname.c_str()));
     }
 
     tst.close();
 
 
     if (d_materials.empty()) {
-        printf ("Add empty material\n");
+         LOGE("Add empty default material\n");
         d_materials["default"] = (std::unique_ptr<CMTLMaterial>(new CMTLMaterial()));
     }
 
