@@ -1,5 +1,6 @@
 #include "r_texture.h"
 #include "ErrorCodes.h"
+#include "Log.h"
 unsigned int STexture::getGLId() const {
     return tex;
 }
