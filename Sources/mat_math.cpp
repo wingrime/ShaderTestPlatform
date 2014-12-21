@@ -57,13 +57,13 @@ SVec4::SVec4(const std::string& str){
 }
 /*not fully correct*/
 /*for 4D you need 3 vectors to do cross!, but if we set 3rd to (0,0,0,1)*/
-SVec4 SVec4::operator*(const SVec4& v) const {
-return (SVec4(vec.y * v.vec.z - vec.z * v.vec.y,
-             vec.z * v.vec.x - vec.x * v.vec.z,
-             vec.x * v.vec.y - vec.y * v.vec.x,
-            0.0f));
-}
-SVec4 SVec4::Cross(const SVec4& a, const SVec4& b)  {
+//SVec4 SVec4::operator*(const SVec4& v) const {
+//return (SVec4(vec.y * v.vec.z - vec.z * v.vec.y,
+//             vec.z * v.vec.x - vec.x * v.vec.z,
+//             vec.x * v.vec.y - vec.y * v.vec.x,
+//            0.0f));
+//}
+SVec4 SVec4::Cross3(const SVec4& a, const SVec4& b)  {
 return (SVec4(a.vec.y * b.vec.z - a.vec.z * b.vec.y,
               a.vec.z * b.vec.x - a.vec.x * b.vec.z,
               a.vec.x * b.vec.y - a.vec.y * b.vec.x,

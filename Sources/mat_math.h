@@ -43,7 +43,8 @@ public:
         };
     } vec;
 
-    SVec4 operator*(const SVec4& v) const;
+    //SVec4 operator*(const SVec4& v) const;
+    // not corrent, in R4 it will require 3 vector for cross product
     SVec4 operator+(const SVec4& v) const;
     SVec4 operator -(const SVec4 &v) const;
     SVec4 Normalize() const;
@@ -61,7 +62,7 @@ public:
         ar( vec);
     }
 
-    static SVec4 Cross(const SVec4 &a, const SVec4 &b);
+    static SVec4 Cross3(const SVec4 &a, const SVec4 &b);
     float Length() const;
 };
 
