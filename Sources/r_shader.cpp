@@ -52,9 +52,10 @@ int SProg::LookupUniformLocation(const std::string &name) {
         return d_location_lookup[name];
 }
 /*fragment with vertext prog*/
-SProg::SProg(const std::string& vprog,const std::string& fprog) 
-	: v_pname(vprog) ,
-	f_pname(fprog)
+SProg::SProg(const std::string& vprog,const std::string& fprog, const std::string& gprog)
+    :   v_pname(vprog) ,
+        f_pname(fprog) ,
+        g_pname(gprog)
     {
 
     //shaders source
@@ -62,10 +63,23 @@ SProg::SProg(const std::string& vprog,const std::string& fprog)
     char * error_log ;
     int ret_len;
     int log_size;
+    bool gs_used = false;
     d_program = glCreateProgram ();
     //fragement shader
     FileBuffer *frag = new FileBuffer(std::string(".\\shaders\\")+fprog);
     FileBuffer *vert = new FileBuffer(std::string(".\\shaders\\")+vprog);
+
+    if (!gprog.empty())
+    {
+        gs_used = true;
+        FileBuffer *geom = new FileBuffer(std::string(".\\shaders\\")+gprog);
+        gs = LoadShader ( (const char *)geom->buffer, GL_GEOMETRY_SHADER, gprog  );
+        if (vs == EFAIL) {
+            LOGE("Geometry Shader Build Failed");
+            IsReady = false;
+            return;
+        }
+    }
     vs = LoadShader ( (const char *)vert->buffer, GL_VERTEX_SHADER, vprog  );
     if (vs == EFAIL) {
         LOGE("Vertex Shader Build Failed");
@@ -80,6 +94,8 @@ SProg::SProg(const std::string& vprog,const std::string& fprog)
     }
     glAttachShader ( d_program, vs );
     glAttachShader ( d_program, fs );
+    if (gs_used)
+        glAttachShader( d_program, gs);
     
 
     glLinkProgram  ( d_program );

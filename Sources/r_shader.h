@@ -13,7 +13,8 @@ class SProg {
     public:
 
 
-        SProg(const std::string& vprog,const std::string& fprog);
+        SProg(const std::string& vprog, const std::string& fprog, const std::string &gprog);
+        SProg(const std::string& vprog , const std::string& fprog) :SProg(vprog,fprog,"") {}
         ~SProg();
 
         SProg(const SProg&) = delete;
@@ -41,8 +42,10 @@ class SProg {
         GLuint d_program;
         GLuint vs;
         GLuint fs;
+        GLuint gs;
         std::string v_pname;
         std::string f_pname;
+        std::string g_pname;
 
     private:
 
