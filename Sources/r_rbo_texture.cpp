@@ -88,6 +88,32 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
         d_isMSAA  = true;
 
+    }else if (t == RT_TEXTURE_CUBEMAP ) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP , tex);
+        /*configure */
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        for (unsigned int face = 0; face < 6; face++) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
+                x, y, 0, GL_RGBA, GL_FLOAT, NULL);
+        }
+
+    } else if (t == RT_TEXTURE_DEPTH_CUBEMAP ) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP , tex);
+        /*configure */
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        for (unsigned int face = 0; face < 6; face++) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_DEPTH_COMPONENT32,
+                x, y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        }
+
     }
     IsReady = true;
 }
