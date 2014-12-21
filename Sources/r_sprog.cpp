@@ -21,8 +21,8 @@ Objectives:
 
 
 
-SShader::SShader(const std::string &vprog, const std::string &fprog)
-    :prog(new SProg(vprog, fprog))
+SShader::SShader(const std::string &vprog, const std::string &fprog, const std::string &gprog)
+    :prog(new SProg(vprog, fprog, gprog))
 {
     IsReady =  prog->IsReady;
 }

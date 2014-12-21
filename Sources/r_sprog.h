@@ -28,7 +28,8 @@ class SShader {
 public:
 
     /*Shader in line creation*/
-    SShader(const std::string& vprog,const std::string& fprog);
+    SShader(const std::string& vprog,const std::string& fprog, const std::string& gprog);
+    SShader(const std::string& vprog,const std::string& fprog) :SShader(vprog, fprog, "") {}
     ~SShader();
     int Bind();
 
