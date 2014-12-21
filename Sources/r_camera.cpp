@@ -34,9 +34,9 @@ int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
 {
     SVec4 zaxis = (at - eye).Normalize();
     zaxis.Reflect();
-    SVec4 xaxis = (SVec4::Cross(up,zaxis)).Normalize();
+    SVec4 xaxis = (SVec4::Cross3(up,zaxis)).Normalize();
     xaxis.Reflect();
-    SVec4 yaxis(zaxis*xaxis);// SVec4::Cross(zaxis,yaxis);
+    SVec4 yaxis(SVec4::Cross3(zaxis,xaxis));// SVec4::Cross(zaxis,yaxis);
     yaxis.Reflect();
     SVec4 v1 (xaxis.vec.x , yaxis.vec.x , zaxis.vec.x,0.0);
     SVec4 v2 (xaxis.vec.y , yaxis.vec.y , zaxis.vec.y,0.0);
