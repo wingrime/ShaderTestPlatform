@@ -338,8 +338,8 @@ SScene::SScene(Viewport *v)
     ,rtHDRHorBlurResult(new Viewport((v->w)/4, (v->h)/4, RT_TEXTURE_RGBA))
     ,rtHDRVertBlurResult(new Viewport((v->w)/4, (v->h)/4, RT_TEXTURE_RGBA))
 
-    ,rtSSAOResult( new Viewport((v->w), (v->h), RT_TEXTURE_RGBA)) /*fix me some time*/
-    ,rtSSAOBLUR2(new Viewport((v->w), (v->h), RT_TEXTURE_RGBA))
+    ,rtSSAOResult( new Viewport((v->w), (v->h), RT_TEXTURE_RED)) /*fix me some time*/
+    ,rtSSAOBLUR2(new Viewport((v->w), (v->h), RT_TEXTURE_RED))
     ,rtVolumetric(new Viewport((v->w), (v->h), RT_TEXTURE_RGBA))
     ,sky_dome_model(new SObjModel("sky_dome.obj"))
     ,model(new SObjModel("sponza.obj"))
@@ -439,6 +439,7 @@ SScene::SScene(Viewport *v)
     d_console_cmd_handler->AddCommand("cls", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         con->Cls();
     }));
+
     d_console_cmd_handler->AddCommand("r_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[2]);
