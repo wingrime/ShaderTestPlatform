@@ -24,8 +24,6 @@ in mat4 MV_n;
 in vec4 o_light;
 in mat4 sm_mat;
 uniform int mesh_flags;
-const int MESH_V_TC_N = 1;
-const int MESH_V_TC = 0;
 /* Source texture */
 uniform float bump_amount = 50.0;
 uniform sampler2D texIMG;
@@ -117,6 +115,7 @@ float c_d(float a, float b) {
 	else
 		return 0.0;
 }
+/*TODO: offline */
 mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
 {
     // get edge vectors of the pixel triangle
@@ -265,14 +264,8 @@ poissonDisk[63] = vec2(-0.178564, -0.596057);
 
 
 	vec3 d_normal;
-	/*for model without normal we can try estimate it*/
-	if (mesh_flags == MESH_V_TC) {
-		vec3 X = dFdx(vPos);
-		vec3 Y = dFdy(vPos);
-		d_normal=normalize(cross(X,Y));
-	} else {
-		d_normal = t_normal; 
-	}
+
+	d_normal = t_normal; 
 	/* tangant basis matrix*/
 	mat3 TBN =  cotangent_frame(d_normal,normalize(vPos),uv);
 
