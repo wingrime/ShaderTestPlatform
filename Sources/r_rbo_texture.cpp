@@ -74,6 +74,13 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         glBindTexture(GL_TEXTURE_2D,0);
 
         d_isMSAA  = false;
+    }else if (t == RT_TEXTURE_RED) {
+        glBindTexture(GL_TEXTURE_2D,tex);
+        glTexStorage2D(GL_TEXTURE_2D, 4, GL_R8, x, y);
+        ConfigureTexture(TEX_CLAMP);
+        glBindTexture(GL_TEXTURE_2D,0);
+
+        d_isMSAA  = false;
 
     } else if (t == RT_TEXTURE_MSAA) {
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,tex);

@@ -18,6 +18,7 @@ enum RTType  {
     RT_SCREEN, /* render to screen*/
     RT_TEXTURE_FLOAT,
     RT_TEXTURE_RGBA,
+    RT_TEXTURE_RED,
     RT_TEXTURE_DEPTH,
     RT_TEXTURE_MSAA, /*float always ??*/
     RT_TEXTURE_DEPTH_MSAA,
