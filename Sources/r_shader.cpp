@@ -69,17 +69,7 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
     FileBuffer *frag = new FileBuffer(std::string(".\\shaders\\")+fprog);
     FileBuffer *vert = new FileBuffer(std::string(".\\shaders\\")+vprog);
 
-    if (!gprog.empty())
-    {
-        gs_used = true;
-        FileBuffer *geom = new FileBuffer(std::string(".\\shaders\\")+gprog);
-        gs = LoadShader ( (const char *)geom->buffer, GL_GEOMETRY_SHADER, gprog  );
-        if (vs == EFAIL) {
-            LOGE("Geometry Shader Build Failed");
-            IsReady = false;
-            return;
-        }
-    }
+
     vs = LoadShader ( (const char *)vert->buffer, GL_VERTEX_SHADER, vprog  );
     if (vs == EFAIL) {
         LOGE("Vertex Shader Build Failed");
@@ -91,6 +81,17 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
         LOGE("Fragment Shader Build Failed");
         IsReady = false;
         return;
+    }
+    if (!gprog.empty())
+    {
+        gs_used = true;
+        FileBuffer *geom = new FileBuffer(std::string(".\\shaders\\")+gprog);
+        gs = LoadShader ( (const char *)geom->buffer, GL_GEOMETRY_SHADER, gprog  );
+        if (vs == EFAIL) {
+            LOGE("Geometry Shader Build Failed");
+            IsReady = false;
+            return;
+        }
     }
     glAttachShader ( d_program, vs );
     glAttachShader ( d_program, fs );
@@ -108,7 +109,7 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
         glGetProgramInfoLog(d_program,log_size,&ret_len, error_log);
         std::string err_m = std::string(error_log);
         free(error_log);
-        LOGE(std::string("Shader Link Failed, vfile:")+std::string(vprog) +std::string(",ffile:")+std::string(fprog)+std::string("\n")+err_m);
+        LOGE(std::string("Shader Link Failed, vfile:")+vprog+std::string(",ffile:")+fprog+std::string("\n")+err_m);
         delete frag;
         delete vert;
         IsReady = false;
