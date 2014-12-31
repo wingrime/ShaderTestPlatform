@@ -59,8 +59,8 @@ STexture::STexture(const std::string& fname, bool sRGB)
 
     if (!img.IsReady)
     	return;
-    x = img.x;
-    y = img.y;
+    x = img.x();
+    y = img.y();
 
 
     glGenTextures(1, &tex); 
