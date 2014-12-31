@@ -40,7 +40,7 @@ public:
     
     STexture(const std::string& fname, bool sRGB);
     STexture(const std::string& fname)
-    : STexture( fname, true) {};
+    : STexture( fname, true) {}
     /* simple empty texture */
     STexture(int _x, int _y) 
     :STexture(_x,_y,TEX_RGBA)
