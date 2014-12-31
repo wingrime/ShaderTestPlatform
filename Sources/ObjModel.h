@@ -17,9 +17,9 @@
 #include "MAssert.h"
 
 struct CObjV3 {
-    float x = 0.0;
-    float y = 0.0;
-    float z = 0.0;
+    float x;
+    float y;
+    float z;
     // TODO: try use external
     /*serialize support */ 
 //    friend class cereal::access;
@@ -50,8 +50,8 @@ struct CObjV3 {
     };
 };
 struct CObjV2 {
-    float u = 0.0;
-    float v = 0.0;
+    float u;
+    float v;
     /*serialize support */
     friend class cereal::access;
     template <class Archive>
@@ -75,9 +75,9 @@ struct CObjV2 {
 };
 
 struct CObjIdx {
-    int v_idx = 0;
-    int vt_idx = 0;
-    int n_idx = 0;
+    int v_idx;
+    int vt_idx;
+    int n_idx;
 };
 struct CObjFaceI {
     CObjIdx  f [4];

@@ -11,9 +11,9 @@
 #include <cereal/archives/binary.hpp>
 #include <fstream>
 struct CMTLColor {
-    float r = 0.0;
-    float g = 0.0;
-    float b = 0.0;
+    float r;
+    float g;
+    float b;
     /*serialize support */
     friend class cereal::access;
     template <class Archive>

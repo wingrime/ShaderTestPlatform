@@ -117,14 +117,14 @@ std::vector<CObjVertexN> CObjMeshParser::BuildVertsN(const std::vector<CObjV3> &
 }
 
 std::string CObjMeshParser::ParseG(const std::string &str) {
-    char buf[90];
-    sscanf(str.c_str(),"g %80s",buf);
+    char buf[40];
+    sscanf(str.c_str(),"g %30s",buf);
     return std::string(buf);
 }
 
 std::string CObjMeshParser::ParseO(const std::string &str) {
-    char buf[90];
-    sscanf(str.c_str(),"o %80s",buf);
+    char buf[40];
+    sscanf(str.c_str(),"o %30s",buf);
     return std::string(buf);
 }
 
@@ -151,18 +151,25 @@ CObjV3 CObjMeshParser::CalcNormal(const CObjV3& v1, const CObjV3& v2, const CObj
 
 }
 std::string CObjMeshParser::ParseUSEMTL(const std::string &str) {
-    char buf[90];
-    sscanf(str.c_str(),"usemtl %80s",buf);
+    char buf[40];
+    sscanf(str.c_str(),"usemtl %30s",buf);
     return std::string(buf);
 }
 std::string CObjMeshParser::ParseMTLLIB(const std::string &str) {
-    char buf[90];
-    sscanf(str.c_str(),"mtllib %80s",buf);
+    char buf[40];
+    sscanf(str.c_str(),"mtllib %30s",buf);
     return std::string(buf);
 }
 // TODO: optimize
 CObjFaceI CObjMeshParser::ParseF(const std::string &v_desc) {
-    CObjFaceI obj;
+    CObjFaceI obj ;
+
+    for (int i = 0 ; i < 4; i++) {
+        obj.f[i].n_idx = 0;
+        obj.f[i].v_idx = 0;
+        obj.f[i].vt_idx = 0;
+    }
+
 
     if (v_desc.find("//") != std::string::npos)  /* vector//normal format  - no texture coordiates */ {
       
@@ -379,7 +386,6 @@ int SObjModel::ConfigureProgram(SShader& sprog){
             sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
             sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
 
-            sprog.SetUniform("mesh_flags",1);
         sprog.SetUniform("texIMG",0);
         sprog.SetUniform("texBUMP",1);
         sprog.SetUniform("texture_alpha_sampler",2);
