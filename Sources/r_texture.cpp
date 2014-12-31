@@ -70,7 +70,7 @@ STexture::STexture(const std::string& fname, bool sRGB)
 
     /*gl 4.2 required */
     glTexStorage2D(GL_TEXTURE_2D, num_mipmaps, sRGB?GL_SRGB8:GL_RGB8,(GLsizei)  x, (GLsizei)y);
-    glTexSubImage2D(GL_TEXTURE_2D,0, 0, 0,x,y, GL_RGB, GL_UNSIGNED_BYTE, img.buffer);
+    glTexSubImage2D(GL_TEXTURE_2D,0, 0, 0,x,y, GL_RGB, GL_UNSIGNED_BYTE, img.buffer());
     ConfigureTexture(TEX_REPEAT);
     glGenerateMipmap(GL_TEXTURE_2D);
 

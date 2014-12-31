@@ -18,14 +18,14 @@ FileBuffer::FileBuffer(const std::string& srcfile) {
         return;
     }
     fseek(f_file,0,SEEK_END);
-    size  = ftell(f_file);
+    d_size  = ftell(f_file);
     rewind(f_file);
-    buffer = (char *)calloc((size+1),sizeof(char));
-    fread((void *)buffer, sizeof(char), size,f_file);
+    d_buffer = (char *)calloc((d_size+1),sizeof(char));
+    fread((void *)d_buffer, sizeof(char), d_size,f_file);
     fclose(f_file);
     IsReady = true;
 }
 FileBuffer::~FileBuffer() {
-    free((void *)buffer);
+    free((void *)d_buffer);
 }
 

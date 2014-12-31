@@ -70,13 +70,13 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
     FileBuffer *vert = new FileBuffer(std::string(".\\shaders\\")+vprog);
 
 
-    vs = LoadShader ( (const char *)vert->buffer, GL_VERTEX_SHADER, vprog  );
+    vs = LoadShader ( (const char *)vert->buffer(), GL_VERTEX_SHADER, vprog  );
     if (vs == EFAIL) {
         LOGE("Vertex Shader Build Failed");
         IsReady = false;
         return;
     }
-    fs = LoadShader ( (const char *)frag->buffer,GL_FRAGMENT_SHADER , fprog);
+    fs = LoadShader ( (const char *)frag->buffer(),GL_FRAGMENT_SHADER , fprog);
     if (fs == EFAIL) {
         LOGE("Fragment Shader Build Failed");
         IsReady = false;
@@ -86,7 +86,7 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
     {
         gs_used = true;
         FileBuffer *geom = new FileBuffer(std::string(".\\shaders\\")+gprog);
-        gs = LoadShader ( (const char *)geom->buffer, GL_GEOMETRY_SHADER, gprog  );
+        gs = LoadShader ( (const char *)geom->buffer(), GL_GEOMETRY_SHADER, gprog  );
         if (vs == EFAIL) {
             LOGE("Geometry Shader Build Failed");
             IsReady = false;

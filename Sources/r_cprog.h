@@ -50,7 +50,7 @@ SCProg::SCProg(AbstractBuffer* src)
     d_ready  = false;
     d_program = glCreateProgram();
     d_shader  = glCreateShader (GL_COMPUTE_SHADER);
-    const char * source = (const char *) src->buffer;
+    const char * source = (const char *) src->buffer();
     int len = strlen(source);
 
     glShaderSource (d_shader,1 , &source, &len);
