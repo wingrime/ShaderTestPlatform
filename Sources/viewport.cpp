@@ -23,14 +23,14 @@ void Viewport::initDepthRenderBuffer(){
     glBindRenderbuffer(GL_RENDERBUFFER,0);
 }
 
-Viewport::Viewport(int _w, int _h,RTType _type,
+Viewport::Viewport(int _w, int _h,SRBOTexture::RTType _type,
         std::shared_ptr<SRBOTexture> _texIMG,
         std::shared_ptr<SRBOTexture> _texIMG1,
         std::shared_ptr<SRBOTexture> _texIMG2,
         std::shared_ptr<SRBOTexture> _texDEPTH)
 :w(_w),h(_h), type(_type) ,texIMG(_texIMG),texIMG1(_texIMG1),texIMG2(_texIMG2),texDEPTH(_texDEPTH)
  {
-    if (type == RT_SCREEN) {
+    if (type == SRBOTexture::RT_SCREEN) {
         IsReady = true;
         return;
     }
@@ -41,13 +41,13 @@ Viewport::Viewport(int _w, int _h,RTType _type,
 
 
     if (texIMG == nullptr) {
-        if (type == RT_TEXTURE_FLOAT)
-            texIMG.reset(new SRBOTexture(w,h,RT_TEXTURE_FLOAT));
+        if (type == SRBOTexture::RT_TEXTURE_FLOAT)
+            texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_FLOAT));
         else /* RT_TEXTURE_RGBA */
-            texIMG.reset(new SRBOTexture(w,h,RT_TEXTURE_RGBA));
+            texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_RGBA));
     }
     if (texDEPTH == nullptr) {
-        texDEPTH.reset(new SRBOTexture(w,h, RT_TEXTURE_DEPTH));
+        texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH));
     } else {
     //	if (texDEPTH->type != RT_TEXTURE_DEPTH || ) {
     //		EMSGS("Viewport: try attatch non depth texture to depth!");

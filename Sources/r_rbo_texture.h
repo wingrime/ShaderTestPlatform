@@ -13,22 +13,27 @@
 #include <cereal/archives/binary.hpp>
 #include <fstream>
 
-enum RTType  {
-    RT_NONE, /* empty slot*/
-    RT_SCREEN, /* render to screen*/
-    RT_TEXTURE_FLOAT,
-    RT_TEXTURE_RGBA,
-    RT_TEXTURE_RED,
-    RT_TEXTURE_DEPTH,
-    RT_TEXTURE_MSAA, /*float always ??*/
-    RT_TEXTURE_DEPTH_MSAA,
-    RT_TEXTURE_CUBEMAP,
-    RT_TEXTURE_DEPTH_CUBEMAP
-};
+
 
 
 class SRBOTexture {
 public:
+    enum RTType  {
+        RT_NONE, /* empty slot*/
+        RT_SCREEN, /* render to screen*/
+        RT_TEXTURE_FLOAT,
+        RT_TEXTURE_RGBA,
+        RT_TEXTURE_RED,
+        RT_TEXTURE_DEPTH,
+        RT_TEXTURE_MSAA, /*float always ??*/
+        RT_TEXTURE_DEPTH_MSAA,
+        RT_TEXTURE_CUBEMAP,
+        RT_TEXTURE_DEPTH_CUBEMAP
+    };
+    enum BorderType {
+        TEX_CLAMP = 0,
+        TEX_REPEAT
+    };
     /* simple empty texture */
     SRBOTexture(int _x, int _y)
     :SRBOTexture(_x,_y,RT_TEXTURE_FLOAT)

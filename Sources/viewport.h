@@ -14,12 +14,12 @@ public:
     //TODO: texIMG1 and texIMG2 not creates by default 
 
 	/*base constructor*/
-    Viewport(int w, int h,RTType type, std::shared_ptr<SRBOTexture> texIMG,std::shared_ptr<SRBOTexture> texIMG1,std::shared_ptr<SRBOTexture> texIMG2, std::shared_ptr<SRBOTexture> texDEPTH);
-    Viewport(int w, int h,RTType type, std::shared_ptr<SRBOTexture> texIMG, std::shared_ptr<SRBOTexture> texDEPTH)
+    Viewport(int w, int h,SRBOTexture::RTType type, std::shared_ptr<SRBOTexture> texIMG,std::shared_ptr<SRBOTexture> texIMG1,std::shared_ptr<SRBOTexture> texIMG2, std::shared_ptr<SRBOTexture> texDEPTH);
+    Viewport(int w, int h,SRBOTexture::RTType type, std::shared_ptr<SRBOTexture> texIMG, std::shared_ptr<SRBOTexture> texDEPTH)
 		:Viewport(w, h , type , texIMG,nullptr,nullptr, texDEPTH ){};
-    Viewport(int w, int h,RTType type, std::shared_ptr<SRBOTexture> texIMG ) :Viewport(w, h , type , texIMG, nullptr ){};
-	Viewport(int w, int h, RTType type) :Viewport(w,h, type , nullptr , nullptr ){};
-    Viewport(int w, int h) :Viewport(w,h,RT_SCREEN) {};
+    Viewport(int w, int h,SRBOTexture::RTType type, std::shared_ptr<SRBOTexture> texIMG ) :Viewport(w, h , type , texIMG, nullptr ){};
+    Viewport(int w, int h, SRBOTexture::RTType type) :Viewport(w,h, type , nullptr , nullptr ){};
+    Viewport(int w, int h) :Viewport(w,h,SRBOTexture::RT_SCREEN) {};
     ~Viewport();
 
     Viewport(const Viewport&) = delete;
@@ -29,7 +29,7 @@ public:
     int Bind(bool clear) const;
     int Bind() const {return Bind(true);}
 
-    RTType type;
+    SRBOTexture::RTType type;
 
     std::shared_ptr<SRBOTexture> texIMG; /*color attachment 0*/
     std::shared_ptr<SRBOTexture> texIMG1; /*color attachment 1*/

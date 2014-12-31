@@ -22,22 +22,23 @@
 
 #include "ImageBuffer.h"
 #include "e_base.h"
-enum TextureType {
-    TEX_RGBA = 0,
-    TEX_LDR,
-    TEX_DEPTH,
-    TEX_CUBIEMAP
-};
-enum BorderType {
-    TEX_CLAMP = 0,
-    TEX_REPEAT
-};
+
+
 
 
 class STexture {
 public:
     /* from image sRGB is default*/
-    
+    enum TextureType {
+        TEX_RGBA = 0,
+        TEX_LDR,
+        TEX_DEPTH,
+        TEX_CUBIEMAP
+    };
+    enum BorderType {
+        TEX_CLAMP = 0,
+        TEX_REPEAT
+    };
     STexture(const std::string& fname, bool sRGB);
     STexture(const std::string& fname)
     : STexture( fname, true) {}
