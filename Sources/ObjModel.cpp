@@ -427,12 +427,12 @@ SObjModel::SObjModel(const std::string&  fname)
         if (parser.d_mtllibs.empty())
         {
             MTLParser mtl_p("default.mtl");
-            d_materials = mtl_p.d_materials; //OMG copy!! FIX ME
+            d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
         }
         else
         {
              MTLParser mtl_p(parser.d_mtllibs[0]);
-            d_materials = mtl_p.d_materials; //OMG copy!! FIX ME
+            d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
         }
     }
 

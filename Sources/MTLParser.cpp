@@ -58,6 +58,11 @@ MTLParser::MTLParser(const std::string& fname) {
 
 
 }
+
+std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > &MTLParser::GetMaterials()
+{
+    return d_materials;
+}
 std::string MTLParser::ParseNEWMTL(const std::string& str) {
     char buf[90];
     sscanf(str.c_str(),"newmtl %80s",buf);

@@ -53,10 +53,10 @@ struct CMTLMaterial {
 class MTLParser {
 public:
      MTLParser(const std::string& fname);
-     std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
+     std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > &GetMaterials();
 
 private:
-
+    std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
     float Parsed(const std::string &v_desc);
      std::string ParseNEWMTL(const std::string &str);
      float ParseNs(const std::string &v_desc);
