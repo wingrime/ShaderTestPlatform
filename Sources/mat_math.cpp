@@ -76,11 +76,12 @@ return (SVec4(vec.x + v.vec.x,
               vec.z + v.vec.z,
               vec.w + v.vec.w));
 }
-SVec4 SVec4::operator-(const SVec4& v) const {
-return (SVec4(vec.x - v.vec.x,
-              vec.y - v.vec.y,
-              vec.z - v.vec.z,
-              vec.w - v.vec.w));
+
+SVec4 operator-(const SVec4& v1,const SVec4& v2){
+return (SVec4(v1.vec.x - v2.vec.x,
+              v1.vec.y - v2.vec.y,
+              v1.vec.z - v2.vec.z,
+              v1.vec.w - v2.vec.w));
 }
 
 
@@ -196,24 +197,31 @@ SMat4x4::SMat4x4( const SMat4x4& i){
     mat.a31 = i.mat.a31; mat.a32 = i.mat.a32; mat.a33 = i.mat.a33; mat.a34 = i.mat.a34;
     mat.a41 = i.mat.a41; mat.a42 = i.mat.a42; mat.a43 = i.mat.a43; mat.a44 = i.mat.a44;
 }
+// TODO make delta standart
 bool SMat4x4::Eq(const SMat4x4& a,const SMat4x4& b){
-    return (!memcmp(a.mat.raw,b.mat.raw,sizeof(float)*16));
+    for ( int i = 0 ; i < 16 ; i++ ) {
+        if ( abs(a.mat.raw[i] - b.mat.raw[i]) > 0.00001 )
+            return false;
+    }
+    return true;
 }
+/*not much optimal*/
 SMat4x4 SMat4x4::Move(float x,float y,float z) const{
-    SMat4x4 a =  SMat4x4();
+    SMat4x4 a =  SMat4x4(0.0);
     a.mat.a14 = x;
     a.mat.a24 = y;
     a.mat.a34 = z;
-    return (a)*(* this); 
+    return (* this)+a;
 }
-
+/*optimize*/
 SMat4x4 SMat4x4::Translate(const SVec4& vec) const{
-    SMat4x4 a =  SMat4x4();
+    SMat4x4 a =  SMat4x4(0.0);
     a.mat.a14 = vec.vec.x;
     a.mat.a24 = vec.vec.y;
     a.mat.a34 = vec.vec.z;
     a.mat.a44 = vec.vec.w;
-    return (a)*(* this); 
+
+    return (* this)+(a);
 }
 
 SMat4x4 SMat4x4::Scale(float x,float y,float z) const {
@@ -221,7 +229,7 @@ SMat4x4 SMat4x4::Scale(float x,float y,float z) const {
     a.mat.a11 = x;
     a.mat.a22 = y;
     a.mat.a33 = z;
-    return (a)*(* this); 
+    return (a)*(* this);
 }
 
 

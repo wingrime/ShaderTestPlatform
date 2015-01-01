@@ -11,18 +11,24 @@
 #include <cereal/archives/binary.hpp>
 
 #include "MAssert.h"
+#include <type_traits>
 //TODO
 // && operator
 // == operator
 //vector cross product can become unstable, such situations should be traced
 template <typename T>
 T inline toRad(T deg){
+
+    static_assert(std::is_floating_point<T>::value , "It's Error using non floating point here");
     return (M_PI/180.0f) * deg;
 }
+
 template <typename T>
 T inline toDeg(T rad){
+    static_assert(std::is_floating_point<T>::value , "It's Error using non floating point here");
     return (180.0f/M_PI) * rad;
 }
+
 
 class SVec4 {
 public:
@@ -46,7 +52,6 @@ public:
     //SVec4 operator*(const SVec4& v) const;
     // not corrent, in R4 it will require 3 vector for cross product
     SVec4 operator+(const SVec4& v) const;
-    SVec4 operator -(const SVec4 &v) const;
     SVec4 Normalize() const;
     static SVec4 Normalize(const SVec4& a);
 
@@ -65,7 +70,8 @@ public:
     static SVec4 Cross3(const SVec4 &a, const SVec4 &b);
     float Length() const;
 };
-
+/*free from operator*/
+SVec4 operator-(const SVec4& v1,const SVec4& v2);
 
 class SMat4x4 {
 public:
@@ -107,9 +113,8 @@ public:
 
     //operators
     SMat4x4 operator+(const SMat4x4& i) const;
-    SMat4x4 operator-(const SMat4x4& i) const;
     SMat4x4 operator*(const SMat4x4& i) const;
-
+    SMat4x4 operator-(const SMat4x4& i) const;
     // Move/Scale
     SMat4x4 Move(const float x,const float y,const float z) const;
     SMat4x4 Translate(const SVec4& vec) const;
@@ -142,7 +147,6 @@ public:
     }
 
 };
-
 class UnitQuaterion {
 public:
     UnitQuaterion();

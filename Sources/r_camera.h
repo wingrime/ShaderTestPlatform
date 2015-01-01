@@ -35,7 +35,7 @@ public:
     ,yRot(y)
     ,zRot(z)
      { buildViewMatrix();};
-          SCamera(SMat4x4 view, SMat4x4 proj)
+          SCamera(const SMat4x4& view,const SMat4x4& proj)
     :proj(proj)
     ,view(view)
      {};
@@ -47,18 +47,18 @@ public:
     SMat4x4 buildViewMatrix();
 
 
-    const SMat4x4& getViewMatrix() const;
-    const SMat4x4& getProjMatrix() const;
+    SMat4x4 getViewMatrix();
+    SMat4x4 getProjMatrix();
     SVec4 getPosition() const;
 
 
     int goForward(float s);
-    int setEulerX(float x);
-    int setEulerY(float y);
-    int setEulerZ(float z);
+    int rotEulerX(float x);
+    int rotEulerY(float y);
+    int rotEulerZ(float z);
     int goPosition(float x, float y ,float z);
     int goPosition(const SVec4& v);
-    int setEuler(const SVec4& v);
+    int rotEuler(const SVec4& v);
     int LookAt(const SVec4 &at, const SVec4 &eye, const SVec4 &up);
 
     int SyncFromCamera(const SCamera& s);

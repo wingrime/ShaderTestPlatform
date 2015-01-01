@@ -21,7 +21,7 @@ int SCamera::goPosition(const SVec4 &v)
     return 0;
 }
 
-int SCamera::setEuler(const SVec4& v)
+int SCamera::rotEuler(const SVec4& v)
 {
     xRot = v.vec.x;
     yRot = v.vec.y;
@@ -32,17 +32,14 @@ int SCamera::setEuler(const SVec4& v)
 
 int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
 {
-    SVec4 zaxis = (at - eye).Normalize();
-    zaxis.Reflect();
-    SVec4 xaxis = (SVec4::Cross3(up,zaxis)).Normalize();
-    xaxis.Reflect();
-    SVec4 yaxis(SVec4::Cross3(zaxis,xaxis));// SVec4::Cross(zaxis,yaxis);
-    yaxis.Reflect();
+    SVec4 zaxis = ( eye -at).Normalize(); /*direction to view point*/
+    SVec4 xaxis = (SVec4::Cross3(up,zaxis)).Normalize(); /* left vector*/
+    SVec4 yaxis(SVec4::Cross3(zaxis,xaxis)); /* new up vector */
     SVec4 v1 (xaxis.vec.x , yaxis.vec.x , zaxis.vec.x,0.0);
     SVec4 v2 (xaxis.vec.y , yaxis.vec.y , zaxis.vec.y,0.0);
     SVec4 v3 (xaxis.vec.z , yaxis.vec.z , zaxis.vec.z,0.0);
-    SVec4 v4(SVec4(-SVec4::Dot(xaxis,eye), -SVec4::Dot(yaxis,eye),-SVec4::Dot(zaxis,eye),1.0));
-
+    SVec4 v4(-SVec4::Dot(xaxis,eye),-SVec4::Dot(yaxis,eye),-SVec4::Dot(zaxis,eye),1.0);
+    //SVec4 v4(eye.vec.x,eye.vec.y,eye.vec.z,1.0);
     /*clean */
     xPos = 0.0;
     yPos = 0.0;
@@ -51,6 +48,7 @@ int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
     yRot = 0.0;
     zRot = 0.0;
     view = SMat4x4(v1,v2,v3,v4);
+    view.Reflect();
     return 0;
 }
 
@@ -69,31 +67,30 @@ int SCamera::SyncFromCamera(const SCamera &s)
     return 0;
 }
 
-int SCamera::setEulerX(float x) {
+int SCamera::rotEulerX(float x) {
     xRot = x;
     buildViewMatrix();
     return 0;
 }
 
-int SCamera::setEulerY(float y) {
+int SCamera::rotEulerY(float y) {
     yRot = y;
     buildViewMatrix();
     return 0;
 }
 
-int SCamera::setEulerZ(float z) {
+int SCamera::rotEulerZ(float z) {
     zRot = z;
     buildViewMatrix();
     return 0;
 }
 int SCamera::goForward(float s) {
 
-    // that makes camera info outdated
-    //buildViewMatrix();
-
-    xPos += view.mat.a31*s;
-    yPos += view.mat.a32*s;
-    zPos += view.mat.a33*s;
+    /*Move from current to new offset*/
+    float s2 = 1.0+s;
+    xPos += view.mat.a31*s2;
+    yPos += view.mat.a32*s2;
+    zPos += view.mat.a33*s2;
     buildViewMatrix();
 
    
@@ -103,20 +100,19 @@ int SCamera::goForward(float s) {
 
 SMat4x4 SCamera::buildViewMatrix(){
     SMat4x4 a;
-
     a = a.Move(xPos,yPos,zPos);
-
+    /*gimbal lock ! */
     a = a.RotY(yRot);
     a = a.RotX(xRot);
     a = a.RotZ(zRot);
     view = a;
     return a;
 }
-const SMat4x4& SCamera::getViewMatrix() const{
+SMat4x4 SCamera::getViewMatrix(){
     return view;
 }
 
-const SMat4x4& SCamera::getProjMatrix() const{
+SMat4x4 SCamera::getProjMatrix(){
     return proj;
 }
 SVec4 SCamera::getPosition() const {
