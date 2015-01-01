@@ -38,8 +38,8 @@ public:
     GLuint ibo;
 
 
-    const float local_att = toRad(10);
-    const float local_long = toRad(10);
+    const float local_att = toRad(10.0);
+    const float local_long = toRad(10.0);
     const float local_GMT_delta = -5;
     const float local_day_of_year = 10;
 
@@ -101,10 +101,10 @@ SolAng SProcedureSky::SolarAngleModel(float LT,float delta_GMT,float d, float lo
     pos.Elev = asin( sin(declination) *sin(attitude)+ cos(declination)*cos(attitude)*cos(HRA));
     //pos.Elev = toDeg(90)-pos.Elev;
     pos.Ath = acos((sin(declination)*cos(attitude)- cos(declination)*sin(attitude)*cos(HRA))/cos(pos.Elev));
-    pos.Elev = toRad(90)-pos.Elev;
+    pos.Elev = toRad(90.0)-pos.Elev;
 
     if (LST > 12 || HRA > 0)
-        pos.Ath = toRad(360)-pos.Ath;
+        pos.Ath = toRad(360.0)-pos.Ath;
     
     //pos.Ath = acos((sin(declination)*cos(attitude) - cos(HRA)*cos(declination)*sin(attitude))/ cos(toDeg(90)-pos.Elev));
     return pos;
