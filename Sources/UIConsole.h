@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "Command.h"
-#include "ErrorCodes.h"
+
 class UIConsole {
 public:
     UIConsole(RBO *v, std::shared_ptr<AbstractCommandHandler> cmd_h);
