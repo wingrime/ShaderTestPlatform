@@ -39,15 +39,22 @@ Viewport::Viewport(int _w, int _h,SRBOTexture::RTType _type,
     glGenFramebuffers(1, &d_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, d_fbo);
 
-
     if (texIMG == nullptr) {
         if (type == SRBOTexture::RT_TEXTURE_FLOAT)
             texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_FLOAT));
+        else  if (type == SRBOTexture::RT_TEXTURE_CUBEMAP) {
+            printf("init cubemap tex!\n");
+            texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_CUBEMAP));
+        }
         else /* RT_TEXTURE_RGBA */
             texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_RGBA));
+
     }
     if (texDEPTH == nullptr) {
-        texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH));
+         if (type == SRBOTexture::RT_TEXTURE_CUBEMAP)
+                texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP));
+            else
+                texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH));
     } else {
     //	if (texDEPTH->type != RT_TEXTURE_DEPTH || ) {
     //		EMSGS("Viewport: try attatch non depth texture to depth!");
@@ -57,14 +64,18 @@ Viewport::Viewport(int _w, int _h,SRBOTexture::RTType _type,
     }
     d_isMSAA = texIMG->IsMSAA() ;
     /* attach */
-    glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_DEPTH_ATTACHMENT,  (texDEPTH->IsMSAA()) ?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texDEPTH->getGLId(), 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0,  (texIMG->IsMSAA()) ?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texIMG->getGLId(), 0);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_DEPTH_ATTACHMENT,  (texDEPTH->IsMSAA()) ?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texDEPTH->getGLId(), 0);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0,  (texIMG->IsMSAA()) ?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texIMG->getGLId(), 0);
+    glFramebufferTexture(GL_FRAMEBUFFER,    GL_DEPTH_ATTACHMENT,   texDEPTH->getGLId(), 0);
+    glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0,  texIMG->getGLId(), 0);
 
     if (texIMG1 != nullptr) {
-            glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT1, (texIMG1->IsMSAA())?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texIMG1->getGLId(), 0);
+            //glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT1, (texIMG1->IsMSAA())?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texIMG1->getGLId(), 0);
+        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT1,   texIMG1->getGLId(), 0);
     }
     if (texIMG2 != nullptr) {
-            glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,  (texIMG2->IsMSAA())?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texIMG2->getGLId(), 0);
+           // glFramebufferTexture2D(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,  (texIMG2->IsMSAA())?GL_TEXTURE_2D_MULTISAMPLE:GL_TEXTURE_2D,  texIMG2->getGLId(), 0);
+        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,    texIMG2->getGLId(), 0);
     }
 
     GLenum  buffers [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
@@ -100,6 +111,7 @@ int Viewport::ResolveMSAA(const Viewport &dst)
       glReadBuffer(GL_COLOR_ATTACHMENT0);
       glDrawBuffers ( 1, buffers1 );
       glBlitFramebuffer(0, 0, w, h, 0, 0, dst.w, dst.h, GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+      //TODO
       glReadBuffer(GL_COLOR_ATTACHMENT1);
       glDrawBuffers ( 1, buffers2 );
       glBlitFramebuffer(0, 0, w, h, 0, 0, dst.w, dst.h, GL_COLOR_BUFFER_BIT , GL_NEAREST);

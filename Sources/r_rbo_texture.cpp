@@ -7,7 +7,7 @@
 
 #include "r_texture.h"
 #include "string_format.h"
-
+#include "MAssert.h"
 unsigned int SRBOTexture::getGLId() const {
     return tex;
 }
@@ -23,7 +23,10 @@ int SRBOTexture::Bind(unsigned int sampler) const {
         if (d_isMSAA) {
             glBindTexture( GL_TEXTURE_2D_MULTISAMPLE,tex);
         } else {
-            glBindTexture( GL_TEXTURE_2D,tex);
+            if (type ==  RT_TEXTURE_CUBEMAP )
+                    glBindTexture( GL_TEXTURE_CUBE_MAP,tex);
+                else
+                    glBindTexture( GL_TEXTURE_2D,tex);
         }
         return ESUCCESS;
 	}
@@ -121,7 +124,19 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
                 x, y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         }
 
+    }else if (t == RT_TEXTURE_ARRAY ) {
+        glBindTexture(GL_TEXTURE_2D_ARRAY , tex);
+        /*configure */
+        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, GL_RGBA8, x, y, 6);
+
     }
+
+
     IsReady = true;
 }
 SRBOTexture::~SRBOTexture() {

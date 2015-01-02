@@ -28,7 +28,8 @@ public:
         RT_TEXTURE_MSAA, /*float always ??*/
         RT_TEXTURE_DEPTH_MSAA,
         RT_TEXTURE_CUBEMAP,
-        RT_TEXTURE_DEPTH_CUBEMAP
+        RT_TEXTURE_DEPTH_CUBEMAP,
+        RT_TEXTURE_ARRAY
     };
     enum BorderType {
         TEX_CLAMP = 0,
