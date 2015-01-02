@@ -173,6 +173,13 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type)
         IsReady = true;
         return;
     }
+
+    if (type == RBO_CUBEMAP){
+
+        MASSERT(w != h);/*cubemap are should be cube*/
+        MASSERT( w % 2 != 0); /*should be power of two*/
+    }
+
     d_texIMG.reset(new SRBOTexture(w,h,RBO::getRelatedRBOTextueTypeFromRBOType(type) ));
     d_texDEPTH.reset(new SRBOTexture(w,h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type)));
     d_isMSAA = d_texIMG->IsMSAA() ; /* ??? */
