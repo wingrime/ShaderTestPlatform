@@ -46,6 +46,9 @@ void RBO::initDepthRenderBuffer(){
 
 int RBO::attachRBOTextures()
 {
+
+
+    int buffers = 1;
     /*Create FBO*/
     glGenFramebuffers(1, &d_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, d_fbo);
@@ -53,19 +56,31 @@ int RBO::attachRBOTextures()
     glFramebufferTexture(GL_FRAMEBUFFER,    GL_DEPTH_ATTACHMENT,   d_texDEPTH->getGLId(), 0);
     glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0,  d_texIMG->getGLId(), 0);
 
-
     if (d_texIMG1 != nullptr) {
         glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT1,   d_texIMG1->getGLId(), 0);
+        buffers++;
     }
 
     if (d_texIMG2 != nullptr) {
         glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,    d_texIMG2->getGLId(), 0);
+        buffers++;
     }
+    GLenum  buffers1 [] = { GL_COLOR_ATTACHMENT0 };
+    GLenum  buffers2 [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1 };
+    GLenum  buffers3 [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
+    switch (buffers)
+    {
 
-    //TODO
-    GLenum  buffers [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
-
-    glDrawBuffers ( 3, buffers );
+    case 1:
+            glDrawBuffers (1, buffers1 );
+        break;
+    case 2:
+            glDrawBuffers (1, buffers2 );
+        break;
+    case 3:
+            glDrawBuffers (3, buffers3 );
+        break;
+    }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     int rcode = glCheckFramebufferStatus(GL_FRAMEBUFFER) ;
