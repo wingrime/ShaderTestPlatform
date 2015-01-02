@@ -12,26 +12,33 @@
 class RBO {
 
 public:
-
+    enum RBOType {
+    RBO_SCREEN = 0,
+    RBO_CUBEMAP,
+    RBO_FLOAT,
+    RBO_RGBA,
+    RBO_RED
+    /*RBO_DEPTH ??*/
+    };
 
 	/*base constructor*/
-    RBO(int w, int h,SRBOTexture::RTType type, std::shared_ptr<SRBOTexture> texIMG, \
+    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
                                                std::shared_ptr<SRBOTexture> texIMG1,\
                                                std::shared_ptr<SRBOTexture> texIMG2,\
                                                std::shared_ptr<SRBOTexture> texDEPTH);
 
-    RBO(int w, int h,SRBOTexture::RTType type, std::shared_ptr<SRBOTexture> texIMG, \
+    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
                                                std::shared_ptr<SRBOTexture> texDEPTH)
 		:RBO(w, h , type , texIMG,nullptr,nullptr, texDEPTH ){};
-    RBO(int w, int h,SRBOTexture::RTType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(w, h , type , texIMG, nullptr ){};
-    RBO(int w, int h, SRBOTexture::RTType type) :RBO(w,h, type , nullptr , nullptr ){};
-    RBO(int w, int h) :RBO(w,h,SRBOTexture::RT_SCREEN) {};
+    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(w, h , type , texIMG, nullptr ){};
+    RBO(int w, int h,RBOType type) :RBO(w,h, type , nullptr , nullptr ){};
+    RBO(int w, int h) :RBO(w,h,RBO_SCREEN) {};
     ~RBO();
 
     /*new interface*/
-    RBO(int def_w, int def_h, SRBOTexture::RTType t0_type, int t0_s, \
-                              SRBOTexture::RTType t1_type, int t1_s, \
-                              SRBOTexture::RTType t2_type, int t2_s );
+    RBO(int def_w, int def_h,RBOType type, SRBOTexture::RTType t0_type, int t0_s, \
+                                           SRBOTexture::RTType t1_type, int t1_s, \
+                                           SRBOTexture::RTType t2_type, int t2_s );
 
     RBO(const RBO&) = delete;
 
@@ -40,7 +47,7 @@ public:
     int Bind(bool clear) const;
     int Bind() const {return Bind(true);}
 
-    SRBOTexture::RTType type;
+    RBOType type;
 
     std::shared_ptr<SRBOTexture> texIMG(); /*color attachment 0*/
     std::shared_ptr<SRBOTexture> texIMG1(); /*color attachment 1*/

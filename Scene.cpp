@@ -13,31 +13,31 @@ SScene::SScene(RBO *v)
     ,fps_label(new UILabel(v))
     ,cfg_label(new UILabel(v,0.0, 0.7))
     ,v_sel_label(new UILabel(v,0.0, 0.55))
-    ,rtShadowMap(new RBO((v->w),(v->h),SRBOTexture::RT_TEXTURE_RGBA,
+    ,rtShadowMap(new RBO((v->w),(v->h),RBO::RBO_RGBA,
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w*2,v->h*2,SRBOTexture::RT_TEXTURE_RGBA)), /*color */
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_RGBA)), /*rsm*/
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_RGBA)), /*rsm */
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_DEPTH) ))) /*shadow map render from light*/
-    ,rtHDRScene_MSAA(new RBO((v->w),(v->h),SRBOTexture::RT_TEXTURE_FLOAT,
+    ,rtHDRScene_MSAA(new RBO((v->w),(v->h),RBO::RBO_RGBA,
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_MSAA)), /*IMG0 color*/
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_MSAA)), /*IMG1 normal in world space */
             nullptr,    /*IMG2*/
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_DEPTH_MSAA) ))) /*depth for Volumetric*/
-    ,rtHDRScene(new RBO((v->w),(v->h),SRBOTexture::RT_TEXTURE_FLOAT,
+    ,rtHDRScene(new RBO((v->w),(v->h),RBO::RBO_RGBA,
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_FLOAT)), /*IMG0 color*/
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_FLOAT)), /*IMG1 normal in world space */
             nullptr,    /*IMG2*/
             std::shared_ptr<SRBOTexture>(new SRBOTexture(v->w,v->h,SRBOTexture::RT_TEXTURE_DEPTH) ))) /*depth for Volumetric*/
-    ,rtHDRBloomResult( new RBO((v->w)/2, (v->h)/2, SRBOTexture::RT_TEXTURE_RGBA)) /* bloom clamp*/
-    ,rtHDRHorBlurResult(new RBO((v->w)/4, (v->h)/4, SRBOTexture::RT_TEXTURE_RGBA))
-    ,rtHDRVertBlurResult(new RBO((v->w)/4, (v->h)/4, SRBOTexture::RT_TEXTURE_RGBA))
+    ,rtHDRBloomResult( new RBO((v->w)/2, (v->h)/2, RBO::RBO_RGBA)) /* bloom clamp*/
+    ,rtHDRHorBlurResult(new RBO((v->w)/4, (v->h)/4, RBO::RBO_RGBA))
+    ,rtHDRVertBlurResult(new RBO((v->w)/4, (v->h)/4, RBO::RBO_RGBA))
 
-    ,rtSSAOResult( new RBO((v->w), (v->h), SRBOTexture::RT_TEXTURE_RED)) /*fix me some time*/
-    ,rtSSAOBLUR2(new RBO((v->w), (v->h), SRBOTexture::RT_TEXTURE_RED))
-    ,rtVolumetric(new RBO((v->w), (v->h), SRBOTexture::RT_TEXTURE_RGBA))
+    ,rtSSAOResult( new RBO((v->w), (v->h), RBO::RBO_RED)) /*fix me some time*/
+    ,rtSSAOBLUR2(new RBO((v->w), (v->h), RBO::RBO_RED))
+    ,rtVolumetric(new RBO((v->w), (v->h), RBO::RBO_RGBA))
     ,sky_dome_model(new SObjModel("sky_dome.obj"))
     ,model(new SObjModel("sponza.obj"))
-    ,rtCubemap(new RBO(1024, 1024, SRBOTexture::RT_TEXTURE_CUBEMAP))
+    ,rtCubemap(new RBO(1024, 1024, RBO::RBO_CUBEMAP))
    
     
 {

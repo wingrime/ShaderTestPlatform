@@ -43,14 +43,14 @@ void RBO::initDepthRenderBuffer(){
     glBindRenderbuffer(GL_RENDERBUFFER,0);
 }
 /* Constructor from ptr's*/
-RBO::RBO(int _w, int _h,SRBOTexture::RTType _type,
+RBO::RBO(int _w, int _h,RBOType _type,
         std::shared_ptr<SRBOTexture> _texIMG,
         std::shared_ptr<SRBOTexture> _texIMG1,
         std::shared_ptr<SRBOTexture> _texIMG2,
         std::shared_ptr<SRBOTexture> _texDEPTH)
 :w(_w),h(_h), type(_type) ,d_texIMG(_texIMG),d_texIMG1(_texIMG1),d_texIMG2(_texIMG2),d_texDEPTH(_texDEPTH)
  {
-    if (type == SRBOTexture::RT_SCREEN) {
+    if (type == RBO_SCREEN) {
         IsReady = true;
         return;
     }
@@ -60,9 +60,9 @@ RBO::RBO(int _w, int _h,SRBOTexture::RTType _type,
     glBindFramebuffer(GL_FRAMEBUFFER, d_fbo);
 
     if (d_texIMG == nullptr) {
-        if (type == SRBOTexture::RT_TEXTURE_FLOAT)
+        if (type == RBO_FLOAT)
             d_texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_FLOAT));
-        else  if (type == SRBOTexture::RT_TEXTURE_CUBEMAP) {
+        else  if (type == RBO_CUBEMAP) {
             printf("init cubemap tex!\n");
             d_texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_CUBEMAP));
         }
@@ -71,7 +71,7 @@ RBO::RBO(int _w, int _h,SRBOTexture::RTType _type,
 
     }
     if (d_texDEPTH == nullptr) {
-         if (type == SRBOTexture::RT_TEXTURE_CUBEMAP)
+         if (type == RBO_CUBEMAP)
                 d_texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP));
             else
                 d_texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH));
