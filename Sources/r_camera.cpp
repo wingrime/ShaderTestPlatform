@@ -54,15 +54,16 @@ int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
 
 int SCamera::SyncFromCamera(const SCamera &s)
 {
-    xRot = s.xRot;
-    yRot = s.yRot;
-    zRot = s.zRot;
+    //xRot = s.xRot;
+    //yRot = s.yRot;
+    //zRot = s.zRot;
 
 
-    xPos = s.xPos;
-    yPos = s.yPos;
-    zPos = s.zPos;
-    buildViewMatrix();
+    //xPos = s.xPos;
+    //yPos = s.yPos;
+    //zPos = s.zPos;
+    view = s.view;
+    //buildViewMatrix();
 
     return 0;
 }
