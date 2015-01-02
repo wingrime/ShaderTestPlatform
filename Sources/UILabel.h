@@ -1,6 +1,6 @@
 #pragma once
 
-#include "viewport.h"
+#include "RBO.h"
 #include <string>
 #include <vector>
 #include "UIFont.h"
@@ -8,15 +8,15 @@
 
 class UILabel {
 public:
-    UILabel(Viewport *v) :UILabel(v, 0.0, 0.5) {};
-    UILabel(Viewport *v, float x, float y) ;
+    UILabel(RBO *v) :UILabel(v, 0.0, 0.5) {};
+    UILabel(RBO *v, float x, float y) ;
     /*Draw console*/
     void Draw();
     /*Add simple message*/
     void setText(const std::string& msg);
 private:
     UIFontFactory ft;
-    Viewport *v_port;
+    RBO *v_port;
 
     UIFont * fnt;
     std::string con;

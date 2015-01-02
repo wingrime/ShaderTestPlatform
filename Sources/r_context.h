@@ -2,8 +2,9 @@
 
 #include "r_sprog.h"
 #include "mat_math.h"
-#include "viewport.h"
+#include "RBO.h"
 #include "r_texture.h"
+#include "r_rbo_texture.h"
 
 #include "r_projmat.h"
 #include "r_camera.h"
@@ -17,20 +18,20 @@ Current Object Matrix ???
 */
 class RenderContext {
     public:
-        RenderContext(const Viewport* v,SShader* s, SCamera *c)
+        RenderContext(const RBO* v,SShader* s, SCamera *c)
         	:shader(s),
          	viewport(v),
          	camera(c),
          	sm_map(false)
          {}
-        RenderContext(const Viewport* v,SShader* s, SCamera *c, std::shared_ptr<SRBOTexture> sm_tex)
+        RenderContext(const RBO* v,SShader* s, SCamera *c, std::shared_ptr<SRBOTexture> sm_tex)
         	:sm_texture(sm_tex),
         	shader(s),
          	viewport(v),
          	camera(c),
          	sm_map(true)
         {}
-        RenderContext(const Viewport* v,SShader* s, SCamera *c, 
+        RenderContext(const RBO* v,SShader* s, SCamera *c, 
                     std::shared_ptr<SRBOTexture> sm_tex,
                     std::shared_ptr<SRBOTexture> rsm_normal_tex,
                     std::shared_ptr<SRBOTexture> rsm_vector_tex,
@@ -46,7 +47,7 @@ class RenderContext {
         {}
         RenderContext(const RenderContext&) = delete;
     	SShader *shader;
-    	const Viewport *viewport;
+    	const RBO *viewport;
     	SCamera *camera;
         std::shared_ptr<SRBOTexture> sm_texture;
         std::shared_ptr<SRBOTexture> rsm_normal_texture;

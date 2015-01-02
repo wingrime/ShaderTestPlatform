@@ -1,6 +1,6 @@
 #include "UILabel.h"
 
-UILabel::UILabel(Viewport *v,float x ,float y) {
+UILabel::UILabel(RBO *v,float x ,float y) {
 
     fnt = ft.Construct(16);
     v_port = v;

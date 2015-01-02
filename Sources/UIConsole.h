@@ -1,6 +1,6 @@
 #pragma once
 
-#include "viewport.h"
+#include "RBO.h"
 #include <string>
 #include <vector>
 #include "UIFont.h"
@@ -12,7 +12,7 @@ public:
 
 class UIConsole {
 public:
-    UIConsole(Viewport *v, std::shared_ptr<AbstractCommandHandler> cmd_h);
+    UIConsole(RBO *v, std::shared_ptr<AbstractCommandHandler> cmd_h);
     ~UIConsole();
     /*Draw console*/
     void Draw();
@@ -32,7 +32,7 @@ private:
 
     const unsigned int d_con_sz =  20; /*max messages in console log*/
     UIFontFactory ft;
-    Viewport *v_port;
+    RBO *v_port;
     UIFont * fnt ;
     std::vector<std::string> con;
     std::vector<std::string> console_history;

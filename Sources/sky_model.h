@@ -11,7 +11,7 @@
 
 #include "mat_math.h"
 
-#include "viewport.h"
+#include "RBO.h"
 struct SolAng {
     float Elev;
     float Ath;
@@ -19,7 +19,7 @@ struct SolAng {
 
 class SProcedureSky {
 public:
-    SProcedureSky (Viewport *vp);
+    SProcedureSky (RBO *vp);
     void Draw();
     SolAng SolarAngleModel(float LT,float delta_GMT,float d, float longtitude, float attitude);
     void SetTime(float time);
@@ -32,7 +32,7 @@ public:
 
     SMat4x4 model;
 
-    Viewport *v;
+    RBO *v;
     GLuint vbo;
     GLuint vao;
     GLuint ibo;
@@ -110,7 +110,7 @@ SolAng SProcedureSky::SolarAngleModel(float LT,float delta_GMT,float d, float lo
     return pos;
 
 }
-SProcedureSky::SProcedureSky(Viewport *vp) {
+SProcedureSky::SProcedureSky(RBO *vp) {
     sky_prog = new  SShader("f_shader.v","f_shader.f");
   
     GLfloat vertices[] = { -1, -1, 0, //bottom left corner

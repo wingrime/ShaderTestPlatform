@@ -11,7 +11,7 @@
 
 #include "mat_math.h"
 
-#include "viewport.h"
+#include "RBO.h"
 
 #include "r_texture.h"
 

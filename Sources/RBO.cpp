@@ -1,6 +1,6 @@
-#include "viewport.h"
+#include "RBO.h"
 #include "ErrorCodes.h"
-int Viewport::Bind(bool clear) const {
+int RBO::Bind(bool clear) const {
     if (!IsReady)
         return EFAIL;
         /* in case when viewport is not texture target just use 0*/
@@ -16,14 +16,14 @@ int Viewport::Bind(bool clear) const {
     return ESUCCESS;
 }
 
-void Viewport::initDepthRenderBuffer(){
+void RBO::initDepthRenderBuffer(){
     glGenRenderbuffers(1, &depthrenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
     glBindRenderbuffer(GL_RENDERBUFFER,0);
 }
 
-Viewport::Viewport(int _w, int _h,SRBOTexture::RTType _type,
+RBO::RBO(int _w, int _h,SRBOTexture::RTType _type,
         std::shared_ptr<SRBOTexture> _texIMG,
         std::shared_ptr<SRBOTexture> _texIMG1,
         std::shared_ptr<SRBOTexture> _texIMG2,
@@ -57,7 +57,7 @@ Viewport::Viewport(int _w, int _h,SRBOTexture::RTType _type,
                 texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH));
     } else {
     //	if (texDEPTH->type != RT_TEXTURE_DEPTH || ) {
-    //		EMSGS("Viewport: try attatch non depth texture to depth!");
+    //		EMSGS("RBO: try attatch non depth texture to depth!");
     //		return;
     //	} FIX WITH MSAA
 
@@ -94,12 +94,12 @@ Viewport::Viewport(int _w, int _h,SRBOTexture::RTType _type,
 
 }
 
-Viewport::~Viewport()
+RBO::~RBO()
 {
     glDeleteFramebuffers(1,&d_fbo);
 }
 
-int Viewport::ResolveMSAA(const Viewport &dst)
+int RBO::ResolveMSAA(const RBO &dst)
 {
       //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst.d_fbo);   // Make sure no FBO is set as the draw framebuffer

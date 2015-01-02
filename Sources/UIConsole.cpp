@@ -4,7 +4,7 @@ int UIConsole::HandleExitConsole() {
     RebuildOut();
     return 0;
 }
-UIConsole::UIConsole(Viewport *v, std::shared_ptr<AbstractCommandHandler> cmd_h)
+UIConsole::UIConsole(RBO *v, std::shared_ptr<AbstractCommandHandler> cmd_h)
     :d_cmd_handler(cmd_h)
 {
 
