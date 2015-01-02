@@ -139,7 +139,7 @@ RBO::RBO(int _w, int _h,RBOType _type,
 
     }
     if (d_texDEPTH == nullptr) {
-            d_texIMG.reset(new SRBOTexture(w,h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type) ));
+            d_texDEPTH.reset(new SRBOTexture(w,h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type) ));
     }
 
     d_isMSAA = d_texIMG->IsMSAA() ;
@@ -190,12 +190,16 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, i
 
     if (t1_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t1_s <= 0);
-        d_texIMG.reset(new SRBOTexture(w/t1_s,h/t1_s,t1_type));
+        d_texIMG1.reset(new SRBOTexture(w/t1_s,h/t1_s,t1_type));
     }
     if (t2_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t2_s <= 0);
-        d_texIMG.reset(new SRBOTexture(w/t2_s,h/t2_s,t2_type));
+        d_texIMG2.reset(new SRBOTexture(w/t2_s,h/t2_s,t2_type));
     }
+    d_isMSAA = d_texIMG->IsMSAA() ;
+
+    if (attachRBOTextures() == ESUCCESS)
+        IsReady = true;
 
 }
 
