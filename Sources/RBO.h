@@ -42,10 +42,10 @@ public:
 
     SRBOTexture::RTType type;
 
-    std::shared_ptr<SRBOTexture> texIMG; /*color attachment 0*/
-    std::shared_ptr<SRBOTexture> texIMG1; /*color attachment 1*/
-    std::shared_ptr<SRBOTexture> texIMG2; /*color attachment 2*/
-    std::shared_ptr<SRBOTexture> texDEPTH;
+    std::shared_ptr<SRBOTexture> texIMG(); /*color attachment 0*/
+    std::shared_ptr<SRBOTexture> texIMG1(); /*color attachment 1*/
+    std::shared_ptr<SRBOTexture> texIMG2(); /*color attachment 2*/
+    std::shared_ptr<SRBOTexture> texDEPTH();
 
     /*required sizes*/
     int w;
@@ -56,6 +56,11 @@ private:
     GLuint d_fbo = 0;
 
     bool d_isMSAA = false;
+
+    std::shared_ptr<SRBOTexture> d_texIMG; /*color attachment 0*/
+    std::shared_ptr<SRBOTexture> d_texIMG1; /*color attachment 1*/
+    std::shared_ptr<SRBOTexture> d_texIMG2; /*color attachment 2*/
+    std::shared_ptr<SRBOTexture> d_texDEPTH;
 
     void initDepthRenderBuffer() ;
 

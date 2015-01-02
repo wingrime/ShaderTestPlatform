@@ -57,31 +57,31 @@ SScene::SScene(RBO *v)
 
     pp_prog_hdr_blur_kawase = new SShader("pp_quad.v","pp_blur_kawase.f");
 
-    pp_stage_ssao =  new SPostProcess(pp_prog_ssao,w,h,rtHDRScene->texIMG1,rtHDRScene->texDEPTH);
+    pp_stage_ssao =  new SPostProcess(pp_prog_ssao,w,h,rtHDRScene->texIMG1(),rtHDRScene->texDEPTH());
 
-    pp_stage_ssao_blur_hor=  new SPostProcess(pp_prog_ssao_blur_hor,w,h,rtSSAOResult->texIMG,rtSSAOResult->texIMG);
-    pp_stage_ssao_blur_vert =  new SPostProcess(pp_prog_ssao_blur_vert,w,h,rtSSAOBLUR2->texIMG,rtHDRScene->texIMG);
+    pp_stage_ssao_blur_hor=  new SPostProcess(pp_prog_ssao_blur_hor,w,h,rtSSAOResult->texIMG(),rtSSAOResult->texIMG());
+    pp_stage_ssao_blur_vert =  new SPostProcess(pp_prog_ssao_blur_vert,w,h,rtSSAOBLUR2->texIMG(),rtHDRScene->texIMG());
 
 
    
 
 
 
-    pp_stage_hdr_bloom =  new SPostProcess(pp_prog_hdr_bloom,w/2,h/2,rtHDRScene->texIMG);
-    pp_stage_hdr_blur_hor =   new SPostProcess(pp_prog_hdr_blur_kawase, w/4.0,h/4.0 ,rtHDRBloomResult->texIMG);
-    pp_stage_hdr_blur_vert =  new SPostProcess(pp_prog_hdr_blur_kawase,w/4.0,h/4.0 ,rtHDRHorBlurResult->texIMG);
+    pp_stage_hdr_bloom =  new SPostProcess(pp_prog_hdr_bloom,w/2,h/2,rtHDRScene->texIMG());
+    pp_stage_hdr_blur_hor =   new SPostProcess(pp_prog_hdr_blur_kawase, w/4.0,h/4.0 ,rtHDRBloomResult->texIMG());
+    pp_stage_hdr_blur_vert =  new SPostProcess(pp_prog_hdr_blur_kawase,w/4.0,h/4.0 ,rtHDRHorBlurResult->texIMG());
     /*ping pong*/
-    pp_stage_hdr_blur_hor2 =   new SPostProcess(pp_prog_hdr_blur_kawase, w/4.0,h/4.0 ,rtHDRVertBlurResult->texIMG);
-    pp_stage_hdr_blur_vert2 =  new SPostProcess(pp_prog_hdr_blur_kawase,w/4.0,h/4.0 ,rtHDRHorBlurResult->texIMG);
+    pp_stage_hdr_blur_hor2 =   new SPostProcess(pp_prog_hdr_blur_kawase, w/4.0,h/4.0 ,rtHDRVertBlurResult->texIMG());
+    pp_stage_hdr_blur_vert2 =  new SPostProcess(pp_prog_hdr_blur_kawase,w/4.0,h/4.0 ,rtHDRHorBlurResult->texIMG());
 
 
-    pp_stage_hdr_tonemap =  new SPostProcess(pp_prog_hdr_tonemap,w,h,rtHDRVertBlurResult->texIMG,rtHDRScene->texIMG,rtSSAOResult->texIMG);
+    pp_stage_hdr_tonemap =  new SPostProcess(pp_prog_hdr_tonemap,w,h,rtHDRVertBlurResult->texIMG(),rtHDRScene->texIMG(),rtSSAOResult->texIMG());
 
 
     /*volumetric */
     pp_prog_volumetric = new SShader("pp_quad.v","pp_volumetric.f");
     /* img depth | shadow depth | shadow world pos*/
-    pp_stage_volumetric =  new SPostProcess(pp_prog_volumetric,w,h,rtHDRScene->texDEPTH,rtShadowMap->texDEPTH,rtShadowMap->texIMG2);
+    pp_stage_volumetric =  new SPostProcess(pp_prog_volumetric,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG2());
 
     /*main prog*/
     r_prog = new SShader("shader.v","shader.f");
@@ -413,10 +413,10 @@ int inline SScene::RenderDirect(const RBO& v) {
     else
     {
 
-        RenderContext r_ctx(&v, r_prog ,&cam,rtShadowMap->texDEPTH,rtShadowMap->texIMG1, rtCubemap->texIMG, rtShadowMap->texIMG);
+        RenderContext r_ctx(&v, r_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtCubemap->texIMG(), rtShadowMap->texIMG());
         model->Render(r_ctx);
 
-        RenderContext r_ctx2(&v, sky_dome_prog ,&cam,rtShadowMap->texDEPTH,rtShadowMap->texIMG1 ,rtCubemap->texIMG, rtShadowMap->texIMG);
+        RenderContext r_ctx2(&v, sky_dome_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
         //RenderContext r_ctx2(&v, r_prog ,&cam,rtShadowMap->texDEPTH,rtShadowMap->texIMG1, rtShadowMap->texIMG2, rtShadowMap->texIMG); 
         sky_dome_model->Render(r_ctx2);
     }
@@ -579,7 +579,7 @@ uniform mat4 cam_view_matrix;
         glDepthFunc  ( GL_LEQUAL );
         //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         //glCullFace(GL_FRONT);
-        RenderContext r_ctx(rtSCREEN.get(), cubemap_prog_generator ,&cam,rtShadowMap->texDEPTH,rtShadowMap->texIMG1, rtShadowMap->texIMG2, rtShadowMap->texIMG);
+        RenderContext r_ctx(rtSCREEN.get(), cubemap_prog_generator ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtShadowMap->texIMG2(), rtShadowMap->texIMG());
         model->Render(r_ctx);
     }
 
