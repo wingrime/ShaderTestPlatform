@@ -32,11 +32,16 @@ public:
 
     /*working shader */
     SShader * p_prog;
-    const std::shared_ptr<SRBOTexture> texSRC1;
-    const std::shared_ptr<SRBOTexture> texSRC2;
-    const std::shared_ptr<SRBOTexture> texSRC3;
+
+    const std::shared_ptr<SRBOTexture> texSRC1();
+    const std::shared_ptr<SRBOTexture> texSRC2();
+    const std::shared_ptr<SRBOTexture> texSRC3();
 private:
     GLuint vbo;
     GLuint vao;
     GLuint ibo;
+
+    const std::shared_ptr<SRBOTexture> d_texSRC1;
+    const std::shared_ptr<SRBOTexture> d_texSRC2;
+    const std::shared_ptr<SRBOTexture> d_texSRC3;
 };

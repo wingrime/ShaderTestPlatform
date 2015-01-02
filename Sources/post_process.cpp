@@ -1,7 +1,7 @@
 #include "post_process.h"
 SPostProcess::SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRBOTexture> &texSRC1, const std::shared_ptr<SRBOTexture> &texSRC2, const std::shared_ptr<SRBOTexture> &texSRC3)
 
-    :p_prog(prog), texSRC1(texSRC1), texSRC2(texSRC2),texSRC3(texSRC3) {
+    :p_prog(prog), d_texSRC1(texSRC1), d_texSRC2(texSRC2),d_texSRC3(texSRC3) {
   
     GLfloat vertices[] = { -1, -1, 0, //bottom left corner
                            -1,  1, 0, //top left corner
@@ -33,15 +33,15 @@ SPostProcess::SPostProcess(SShader *prog,int w, int h, const std::shared_ptr<SRB
     /*configure windows size*/
     p_prog->SetUniform("vp",SVec4(w,h,0,0));
 
-    if (texSRC1)
+    if (d_texSRC1)
         p_prog->SetUniform("texSRC1",0);
 
 
-    if (texSRC2)
+    if (d_texSRC2)
         p_prog->SetUniform("texSRC2",1);
 
 
-    if (texSRC3)
+    if (d_texSRC3)
         p_prog->SetUniform("texSRC3",2);
 
 
@@ -54,17 +54,35 @@ void SPostProcess::Draw() {
     {
         glBindVertexArray ( vao );
         p_prog-> Bind();
-        if (texSRC1)
-            texSRC1->Bind(0);
-        if (texSRC2)
-            texSRC2->Bind(1);
-        if (texSRC3)
-            texSRC3->Bind(2);
+        if (d_texSRC1)
+            d_texSRC1->Bind(0);
+        if (d_texSRC2)
+            d_texSRC2->Bind(1);
+        if (d_texSRC3)
+            d_texSRC3->Bind(2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid *)0);
         glBindVertexArray ( 0 );
     }
 
 
     
+
+}
+
+const std::shared_ptr<SRBOTexture> SPostProcess::texSRC1()
+{
+    return d_texSRC1;
+
+}
+
+const std::shared_ptr<SRBOTexture> SPostProcess::texSRC2()
+{
+    return d_texSRC2;
+
+}
+
+const std::shared_ptr<SRBOTexture> SPostProcess::texSRC3()
+{
+    return d_texSRC3;
 
 }
