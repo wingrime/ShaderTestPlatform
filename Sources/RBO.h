@@ -17,7 +17,8 @@ public:
     RBO_CUBEMAP,
     RBO_FLOAT,
     RBO_RGBA,
-    RBO_RED
+    RBO_RED,
+    RBO_MIXED, /* by texture type*/
     /*RBO_DEPTH ??*/
     };
 
@@ -47,7 +48,7 @@ public:
     int Bind(bool clear) const;
     int Bind() const {return Bind(true);}
 
-    RBOType type;
+
 
     std::shared_ptr<SRBOTexture> texIMG(); /*color attachment 0*/
     std::shared_ptr<SRBOTexture> texIMG1(); /*color attachment 1*/
@@ -69,6 +70,10 @@ private:
     std::shared_ptr<SRBOTexture> d_texIMG2; /*color attachment 2*/
     std::shared_ptr<SRBOTexture> d_texDEPTH;
 
+    RBOType d_type;
+
     void initDepthRenderBuffer() ;
+
+    int attachRBOTextures();
 
 };

@@ -21,6 +21,7 @@ public:
     enum RTType  {
         RT_NONE, /* empty slot*/
         RT_SCREEN, /* render to screen*/
+        RT_SCREEN_DEPTH,
         RT_TEXTURE_FLOAT,
         RT_TEXTURE_RGBA,
         RT_TEXTURE_RED,
@@ -56,6 +57,12 @@ public:
         ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(IsReady),CEREAL_NVP(type));
     }
     bool IsMSAA();
+
+    static RTType getRelatedDepthType(RTType t );
+    static bool isDepthType(RTType t);
+    /*NOT IMPL*/
+    static RTType getRelatedTextureType(RTType t );
+
 private:
     unsigned int tex;
     int ConfigureTexture(const BorderType t) const;

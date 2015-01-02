@@ -16,6 +16,34 @@ bool SRBOTexture::IsMSAA()
 {
     return d_isMSAA;
 }
+
+SRBOTexture::RTType SRBOTexture::getRelatedDepthType(SRBOTexture::RTType t)
+{
+    switch (t) {
+        case SRBOTexture::RT_SCREEN:
+            return RT_SCREEN_DEPTH;
+        case SRBOTexture::RT_SCREEN_DEPTH:
+            return RT_SCREEN_DEPTH;
+        case SRBOTexture::RT_TEXTURE_ARRAY:
+            MASSERT(true); /*NOT IMPL*/
+            return RT_NONE;
+        case SRBOTexture::RT_TEXTURE_CUBEMAP:
+            return RT_TEXTURE_DEPTH_CUBEMAP;
+        case SRBOTexture::RT_TEXTURE_MSAA:
+            return RT_TEXTURE_DEPTH_MSAA;
+    }
+    return RT_NONE;
+}
+
+bool SRBOTexture::isDepthType(SRBOTexture::RTType t)
+{
+    if ( t == SRBOTexture::RT_TEXTURE_DEPTH || \
+         t == SRBOTexture::RT_SCREEN_DEPTH ||  \
+         t == SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP  || \
+         t == SRBOTexture::RT_TEXTURE_DEPTH_MSAA )
+        return true;
+    return false;
+}
 int SRBOTexture::Bind(unsigned int sampler) const {
     if (IsReady) {
 
