@@ -22,8 +22,6 @@ SRBOTexture::RTType SRBOTexture::getRelatedDepthType(SRBOTexture::RTType t)
     switch (t) {
         case SRBOTexture::RT_SCREEN:
             return RT_SCREEN_DEPTH;
-        case SRBOTexture::RT_SCREEN_DEPTH:
-            return RT_SCREEN_DEPTH;
         case SRBOTexture::RT_TEXTURE_ARRAY:
             MASSERT(true); /*NOT IMPL*/
             return RT_NONE;
@@ -31,7 +29,14 @@ SRBOTexture::RTType SRBOTexture::getRelatedDepthType(SRBOTexture::RTType t)
             return RT_TEXTURE_DEPTH_CUBEMAP;
         case SRBOTexture::RT_TEXTURE_MSAA:
             return RT_TEXTURE_DEPTH_MSAA;
+        case SRBOTexture::RT_TEXTURE_RED:
+            return RT_TEXTURE_DEPTH;
+        case SRBOTexture::RT_TEXTURE_FLOAT:
+            return RT_TEXTURE_DEPTH;
+        case SRBOTexture::RT_TEXTURE_RGBA:
+            return RT_TEXTURE_DEPTH;
     }
+    MASSERT (true) /* Unknown types should halt*/
     return RT_NONE;
 }
 

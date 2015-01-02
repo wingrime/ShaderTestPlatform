@@ -77,6 +77,50 @@ int RBO::attachRBOTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return ESUCCESS;
 }
+
+SRBOTexture::RTType RBO::getRelatedRBOTextueTypeFromRBOType(RBO::RBOType t)
+{
+    switch (t) {
+    case RBOType::RBO_CUBEMAP:
+        return SRBOTexture::RTType::RT_TEXTURE_CUBEMAP;
+    case RBOType::RBO_FLOAT:
+        return SRBOTexture::RTType::RT_TEXTURE_FLOAT;
+    case RBOType::RBO_MIXED:
+        return SRBOTexture::RTType::RT_NONE;
+    case RBOType::RBO_RED:
+        return SRBOTexture::RTType::RT_TEXTURE_RED;
+    case RBOType::RBO_RGBA:
+        return SRBOTexture::RTType::RT_TEXTURE_RGBA;
+    case RBOType::RBO_SCREEN:
+        return SRBOTexture::RTType::RT_NONE;
+    case RBOType::RBO_MSAA:
+        return SRBOTexture::RTType::RT_TEXTURE_MSAA;
+    }
+    MASSERT(true); /*Unknown types should halt*/
+    return SRBOTexture::RTType::RT_NONE;
+}
+
+SRBOTexture::RTType RBO::getRelatedDepthRBOTextueTypeFromRBOType(RBO::RBOType t)
+{
+    switch (t) {
+    case RBOType::RBO_CUBEMAP:
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH_CUBEMAP;
+    case RBOType::RBO_FLOAT:
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH;
+    case RBOType::RBO_MIXED:
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH;/*default ?*/
+    case RBOType::RBO_RED:
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH;
+    case RBOType::RBO_RGBA:
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH;
+    case RBOType::RBO_SCREEN:
+        return SRBOTexture::RTType::RT_SCREEN_DEPTH;
+    case RBOType::RBO_MSAA:
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH_MSAA;
+    }
+    MASSERT(true); /*Unknown types should halt*/
+    return SRBOTexture::RTType::RT_NONE;
+}
 /* Constructor from ptr's*/
 RBO::RBO(int _w, int _h,RBOType _type,
         std::shared_ptr<SRBOTexture> _texIMG,
@@ -91,26 +135,32 @@ RBO::RBO(int _w, int _h,RBOType _type,
     }
 
     if (d_texIMG == nullptr) {
-        if (d_type == RBO_FLOAT)
-            d_texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_FLOAT));
-        else  if (d_type == RBO_CUBEMAP) {
-            printf("init cubemap tex!\n");
-            d_texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_CUBEMAP));
-        }
-        else /* RT_TEXTURE_RGBA */
-            d_texIMG.reset(new SRBOTexture(w,h,SRBOTexture::RT_TEXTURE_RGBA));
+            d_texIMG.reset(new SRBOTexture(w,h,RBO::getRelatedRBOTextueTypeFromRBOType(d_type) ));
 
     }
     if (d_texDEPTH == nullptr) {
-         if (d_type == RBO_CUBEMAP)
-                d_texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP));
-            else
-                d_texDEPTH.reset(new SRBOTexture(w,h, SRBOTexture::RT_TEXTURE_DEPTH));
+            d_texIMG.reset(new SRBOTexture(w,h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type) ));
     }
 
     d_isMSAA = d_texIMG->IsMSAA() ;
 
 
+    if (attachRBOTextures() == ESUCCESS)
+        IsReady = true;
+}
+/*single buffer*/
+RBO::RBO(int def_w, int def_h, RBO::RBOType type)
+{
+    w = def_w;
+    h = def_h;
+    d_type = type;
+    if (type == RBO_SCREEN) {
+        IsReady = true;
+        return;
+    }
+    d_texIMG.reset(new SRBOTexture(w,h,RBO::getRelatedRBOTextueTypeFromRBOType(type) ));
+    d_texDEPTH.reset(new SRBOTexture(w,h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type)));
+    d_isMSAA = d_texIMG->IsMSAA() ; /* ??? */
     if (attachRBOTextures() == ESUCCESS)
         IsReady = true;
 }

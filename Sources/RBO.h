@@ -19,6 +19,7 @@ public:
     RBO_RGBA,
     RBO_RED,
     RBO_MIXED, /* by texture type*/
+    RBO_MSAA,
     /*RBO_DEPTH ??*/
     };
 
@@ -32,7 +33,9 @@ public:
                                                std::shared_ptr<SRBOTexture> texDEPTH)
 		:RBO(w, h , type , texIMG,nullptr,nullptr, texDEPTH ){};
     RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(w, h , type , texIMG, nullptr ){};
-    RBO(int w, int h,RBOType type) :RBO(w,h, type , nullptr , nullptr ){};
+
+    RBO(int def_w, int def_h,RBOType type);
+
     RBO(int w, int h) :RBO(w,h,RBO_SCREEN) {};
     ~RBO();
 
@@ -76,4 +79,6 @@ private:
 
     int attachRBOTextures();
 
+    static SRBOTexture::RTType  getRelatedRBOTextueTypeFromRBOType( RBOType t);
+    static SRBOTexture::RTType  getRelatedDepthRBOTextueTypeFromRBOType( RBOType t);
 };
