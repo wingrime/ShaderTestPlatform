@@ -22,7 +22,7 @@ void RBO::initDepthRenderBuffer(){
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
     glBindRenderbuffer(GL_RENDERBUFFER,0);
 }
-
+/* Constructor from ptr's*/
 RBO::RBO(int _w, int _h,SRBOTexture::RTType _type,
         std::shared_ptr<SRBOTexture> _texIMG,
         std::shared_ptr<SRBOTexture> _texIMG1,
