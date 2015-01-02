@@ -1,8 +1,5 @@
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <GL/gl.h>
-#include <GL/wglew.h>
-/*OpenGL performant monitor*/
+#pragma once
+/*OpenGL performance monitor*/
 class SPerfMan {
 public: 
 	SPerfMan();
@@ -15,35 +12,9 @@ public:
 	unsigned int getMaxTime();
 	unsigned int getAvgTime();
 private:
-	GLuint res; /* nanoseconds*/
-	GLuint mtime = 0;
-	GLuint avgtime = 0 ;
-	GLuint q;
+	unsigned int res; /* nanoseconds*/
+	unsigned int mtime = 0;
+	unsigned int avgtime = 0 ;
+	unsigned int q;
 };
-SPerfMan::SPerfMan() {
-	glGenQueries(1,&q);
-}
-SPerfMan::~SPerfMan() {
-	glDeleteQueries(1,&q);
-}
-int SPerfMan::Begin(){
-	glBeginQuery(GL_TIME_ELAPSED, q);
-	return ESUCCESS;
-}
-int SPerfMan::End(){
-	glEndQuery(GL_TIME_ELAPSED );
-	glGetQueryObjectuiv(q, GL_QUERY_RESULT, &res);
-	if ( res > mtime)
-		mtime = res;
-	avgtime = (avgtime + res )/ 2.0; /*Moving average*/
-	return ESUCCESS;
-}
-unsigned int SPerfMan::getTime(){
-	return res;
-}
-unsigned int SPerfMan::getMaxTime(){
-	return mtime;
-}
-unsigned int SPerfMan::getAvgTime(){
-	return avgtime;
-}
+

@@ -5,11 +5,9 @@
 #include <vector>
 #include "UIFont.h"
 #include <memory>
-class AbstractCommandHandler {
-public:
-    virtual int HandleCommand(const std::string& cmd){return EFAIL;};
-};
 
+#include "Command.h"
+#include "ErrorCodes.h"
 class UIConsole {
 public:
     UIConsole(RBO *v, std::shared_ptr<AbstractCommandHandler> cmd_h);
