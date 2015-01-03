@@ -52,6 +52,9 @@ public:
     SVec4 getPosition() const;
 
 
+    int setViewMatrix( const SMat4x4& m);
+    int setProjMatrix( const SMat4x4& m);
+
     int goForward(float s);
     int rotEulerX(float x);
     int rotEulerY(float y);

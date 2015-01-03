@@ -48,7 +48,6 @@ int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
     yRot = 0.0;
     zRot = 0.0;
     view = SMat4x4(v1,v2,v3,v4);
-    view.Reflect();
     return 0;
 }
 
@@ -118,4 +117,16 @@ SMat4x4 SCamera::getProjMatrix(){
 }
 SVec4 SCamera::getPosition() const {
     return SVec4(xPos,zPos,yPos,1.0);
+}
+
+int SCamera::setViewMatrix(const SMat4x4 &m)
+{
+    view = SMat4x4(m);
+    return 0;
+}
+
+int SCamera::setProjMatrix(const SMat4x4 &m)
+{
+    proj = SMat4x4(m);
+    return 0;
 }
