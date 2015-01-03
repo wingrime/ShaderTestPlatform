@@ -44,14 +44,20 @@ class SObjModel {
         bool IsReady = false;
         void SetModelMat(const SMat4x4& m);
     private:
-        SMat4x4 model;
+        /*Utils*/
+        void BindTextures(const std::shared_ptr<CObjSubmesh> &submesh);
+        void LoadTextures();
+        void BindVAOs ();
 
+
+
+        SMat4x4 model;
         // default textures for fail prove
         std::shared_ptr<STexture> texDiffuse;
         std::shared_ptr<STexture> texNormal;
 
-        void BindTextures(const std::shared_ptr<CObjSubmesh> &submesh);
-        
+
+
         std::vector<std::shared_ptr<CObjSubmesh> > d_sm;
 
 
