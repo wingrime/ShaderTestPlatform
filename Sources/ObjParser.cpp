@@ -247,8 +247,6 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
             } else if (!line.find("o")) {
                     /*begin new submesh*/
                     std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
-                    s->flag_normals = true;
-                    d_normals = true; /* thats crap*/
                     s->name = ParseO(line);
                     s->id  = sm_id++;
                     d_sm.push_back(s);
@@ -261,7 +259,6 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                 if (!subm->m_name.empty()) {
                     /*begin new submesh*/
                     std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
-                    s->flag_normals = d_normals;
                     s->name = subm->name + std::string("_mat_") + mtl;
                     s->m_name = mtl;
                     s->id  = sm_id++;
@@ -288,7 +285,6 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                 d_glv.push_back(ParseV(line));
             } else if (!line.find("g")) {
                 std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
-                s->flag_normals = d_normals;
                 s->id  = sm_id++;
                 s->name = ParseG(line);
                 d_sm.push_back(s);

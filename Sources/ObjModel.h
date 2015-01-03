@@ -40,19 +40,16 @@ class SObjModel {
 
         ~SObjModel();
 
-        //matrices
+        // ready flag
+        bool IsReady = false;
+        void SetModelMat(const SMat4x4& m);
+    private:
         SMat4x4 model;
-
 
         // default textures for fail prove
         std::shared_ptr<STexture> texDiffuse;
         std::shared_ptr<STexture> texNormal;
 
-        // ready flag
-        bool IsReady = false;
-        void SetModelMat(const SMat4x4& m);
-    private:
-        
         void BindTextures(const std::shared_ptr<CObjSubmesh> &submesh);
         
         std::vector<std::shared_ptr<CObjSubmesh> > d_sm;
@@ -65,7 +62,6 @@ class SObjModel {
         std::unordered_map<std::string, std::unique_ptr<STexture> > d_textures;
         std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
 
-        bool flag_normals = false;
         
         friend class cereal::access;
         /*serialize support */

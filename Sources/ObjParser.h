@@ -107,7 +107,6 @@ struct CObjVertexN {
 struct CObjSubmesh {
     std::string name; /* submesh name*/
     std::string m_name; /* material name*/
-    bool flag_normals; /* is normals used */
     std::vector<CObjVertexN> vn; /* vertex list with normals*/
     std::vector<unsigned int> indexes; /*indexed mesh*/
     unsigned int id;/* number of submesh in obj*/
@@ -116,7 +115,7 @@ struct CObjSubmesh {
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar(CEREAL_NVP(name),CEREAL_NVP(m_name),CEREAL_NVP(flag_normals),CEREAL_NVP(vn),CEREAL_NVP(indexes));
+        ar(CEREAL_NVP(name),CEREAL_NVP(m_name),CEREAL_NVP(vn),CEREAL_NVP(indexes));
     }
 };
 

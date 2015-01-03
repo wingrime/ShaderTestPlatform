@@ -33,7 +33,6 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
     CObjSubmesh *mesh = new CObjSubmesh ;
 
     mesh->m_name = d_inmesh->m_name;
-    mesh->flag_normals = d_inmesh->flag_normals;
     mesh->name = d_inmesh->name;
     mesh->id = d_inmesh->id;
     unsigned int current_index = 0;
@@ -54,8 +53,6 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
             mesh->indexes.push_back(vn_map[*it]);
         }
 
-
-
     }
     return  std::shared_ptr<CObjSubmesh>(mesh);
 
@@ -74,7 +71,6 @@ int SObjModel::ConfigureProgram(SShader& sprog){
             sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
             sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
 
-
         BindTextures(submesh);
         glBindVertexArray(0);
     }
@@ -89,23 +85,23 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     sprog.SetUniform("rsm_albedo_sampler",8);
     return 0;
 }
+
 SObjModel::SObjModel(const std::string&  fname) 
 {
     CObjMeshParser parser(fname);
     if (!parser.IsReady)
         {
             LOGE(std::string("Unable open model :") + fname);
-            std::cout <<   std::string("Unable open model :") << fname << std::endl;
-        return;
+            return;
         }
-    printf("Indexing mesh\n");
+    LOGV("Indexing mesh\n");
 
     for (auto it = parser.d_sm.begin(); it != parser.d_sm.end();++it) {
         MeshIndexer idx(*it);
         d_sm.push_back(std::shared_ptr<CObjSubmesh>(idx.Do()));
         (*it).reset();
     }
-    printf("Load materials\n");
+    LOGV("Load materials");
 
     /* load descriptor*/
     unsigned int temp_vao;
@@ -136,13 +132,9 @@ SObjModel::SObjModel(const std::string&  fname)
         return;
     }
 
-    /*configure mesh prop*/
-    printf("loaded shader\n");
-
     for (auto it = d_sm.begin(); it != d_sm.end();++it) {
 
         auto &submesh =  (*it);
-        flag_normals = submesh->flag_normals;
         if (d_materials.find(submesh->m_name) == d_materials.end()) {
            LOGE(std::string("no material found - ") + submesh->m_name);
         } else {
@@ -210,8 +202,7 @@ SObjModel::SObjModel(const std::string&  fname)
 
         glBindVertexArray(0);
     }
-printf("model configured\n");
-
+    LOGV("Model configured");
     IsReady = true;
 
 }
@@ -267,7 +258,6 @@ void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
 }
 void SObjModel::Render(RenderContext& r) {
     /*activate shader and load model matrix*/
-    //glDepthMask(GL_TRUE); // no need disable or enable depth buffer
     if (r.shader->IsReady) {
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
@@ -288,18 +278,11 @@ void SObjModel::Render(RenderContext& r) {
             if (r.rsm_albedo_texture) {
                r.rsm_albedo_texture->Bind(8);
             }
-            //texDiffuse->Bind(0);
-            //texNormal->Bind(1);
+
             r.shader->SetUniform("model",model);
             r.shader->SetUniform("view",r.camera->getViewMatrix());
             r.shader->SetUniform("cam_proj",r.camera->getProjMatrix());
             r.shader->Bind();
-
-           // if (submesh->flag_normals)
-             //  glDrawArrays(GL_TRIANGLES,0,submesh->vn.size());
-
-           // else
-           //    glDrawArrays(GL_TRIANGLES,0,submesh->v.size());
 
 
             int idx_c = submesh->indexes.size();
