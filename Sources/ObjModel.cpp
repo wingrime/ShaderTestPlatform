@@ -95,8 +95,8 @@ SObjModel::SObjModel(const std::string&  fname)
             return;
         }
     LOGV("Indexing mesh\n");
-
-    for (auto it = parser.d_sm.begin(); it != parser.d_sm.end();++it) {
+    auto submesh_set = parser.getSM();
+    for (auto it = submesh_set.begin(); it != submesh_set.end();++it) {
         MeshIndexer idx(*it);
         d_sm.push_back(std::shared_ptr<CObjSubmesh>(idx.Do()));
         (*it).reset();
@@ -108,14 +108,15 @@ SObjModel::SObjModel(const std::string&  fname)
     unsigned int temp_vbo;
     unsigned int temp_ibo;
     {
-        if (parser.d_mtllibs.empty())
+        auto mtlrefs = parser.getMTLs();
+        if (mtlrefs.empty())
         {
             MTLParser mtl_p("default.mtl");
             d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
         }
         else
         {
-             MTLParser mtl_p(parser.d_mtllibs[0]);
+             MTLParser mtl_p(mtlrefs[0]);
             d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
         }
     }

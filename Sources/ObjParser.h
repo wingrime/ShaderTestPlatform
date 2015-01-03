@@ -124,13 +124,17 @@ public:
     CObjMeshParser(const std::string &fname);
     void Reflect();
 
-    std::vector<std::shared_ptr<CObjSubmesh> > d_sm; /*set of submeshes*/
-    std::vector<std::string> d_mtllibs; /* set of reference MTL files */
+    inline std::vector<std::shared_ptr<CObjSubmesh> > getSM() {return d_sm;}
+    inline std::vector<std::string> getMTLs() {return d_mtllibs;}
+
     bool IsReady = false;
 
     long int getVertexCount() const {return d_vertex_count;};
 
 private:
+    std::vector<std::shared_ptr<CObjSubmesh> > d_sm; /*set of submeshes*/
+    std::vector<std::string> d_mtllibs; /* set of reference MTL files */
+
     std::vector<CObjVertexN> BuildVerts(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt , const CObjFaceI& face);
     std::vector<CObjVertexN> BuildVertsN(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt, const std::vector<CObjV3> &gln , const CObjFaceI& face);
     CObjVertexN BuildVertN(const CObjV3 &p, const CObjV2 &tc, const CObjV3 &n);
