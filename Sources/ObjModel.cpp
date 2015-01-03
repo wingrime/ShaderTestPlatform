@@ -74,19 +74,19 @@ int SObjModel::ConfigureProgram(SShader& sprog){
             sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
             sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
 
-        sprog.SetUniform("texIMG",0);
-        sprog.SetUniform("texBUMP",1);
-        sprog.SetUniform("texture_alpha_sampler",2);
-        sprog.SetUniform("model",model);
 
-        sprog.SetUniform("sm_depth_sampler",5);
-        sprog.SetUniform("rsm_normal_sampler",6);
-        sprog.SetUniform("rsm_vector_sampler",7);
-        sprog.SetUniform("rsm_albedo_sampler",8);
         BindTextures(submesh);
         glBindVertexArray(0);
     }
-    
+    sprog.SetUniform("texIMG",0);
+    sprog.SetUniform("texBUMP",1);
+    sprog.SetUniform("texture_alpha_sampler",2);
+    sprog.SetUniform("model",model);
+
+    sprog.SetUniform("sm_depth_sampler",5);
+    sprog.SetUniform("rsm_normal_sampler",6);
+    sprog.SetUniform("rsm_vector_sampler",7);
+    sprog.SetUniform("rsm_albedo_sampler",8);
     return 0;
 }
 SObjModel::SObjModel(const std::string&  fname) 
