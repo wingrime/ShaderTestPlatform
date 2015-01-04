@@ -1,8 +1,21 @@
 #include "r_texture.h"
 #include "ErrorCodes.h"
 #include "Log.h"
+#include "MAssert.h"
 unsigned int STexture::getGLId() const {
     return tex;
+}
+
+unsigned int STexture::resolveGLType(STexture::TextureType t, bool sRGB)
+{
+    switch (t) {
+        case STexture::TEX_RGB:
+            return sRGB?GL_SRGB8:GL_RGB8;
+        //case STextur::TEX_RGBA:
+        //    return sRGB?GL_SRGB8:GL_RGB8;
+
+    }
+    MASSERT (true) /* Unknown types should halt*/
 }
 
 int STexture::Bind(unsigned int sampler) const {
@@ -17,6 +30,11 @@ int STexture::Bind(unsigned int sampler) const {
         return EFAIL;
         }
 
+}
+
+int STexture::BindImage(unsigned int unit)
+{
+    glBindImageTexture(unit, tex, 0,GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
 }
 int STexture::ConfigureTexture(const BorderType t) const {
         if (t == TEX_REPEAT) {
@@ -35,10 +53,8 @@ int STexture::ConfigureTexture(const BorderType t) const {
 int STexture::CreateTexture(GLsizei num_mipmaps,GLenum internalformat) {
     glGenTextures(1, &tex);
 
-        glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, num_mipmaps, internalformat, x, y); /*GL_RGBA8 for LDR*/
-
-
+    glBindTexture(GL_TEXTURE_2D,tex);
+    glTexStorage2D(GL_TEXTURE_2D, num_mipmaps, internalformat, x, y);
     ConfigureTexture(TEX_CLAMP);
 
     glBindTexture(GL_TEXTURE_2D,0);
@@ -46,15 +62,13 @@ int STexture::CreateTexture(GLsizei num_mipmaps,GLenum internalformat) {
 }
 STexture::STexture(int _x, int _y, TextureType t)
     :type(t) , x(_x) ,y (_y)
- {  if (type == TEX_LDR)
-        CreateTexture(1,GL_RGBA8);
-    else
-        CreateTexture(1,GL_RGBA16F);
+ {
+    CreateTexture(1,STexture::resolveGLType(type,false));
     IsReady = true;
 }
 STexture::STexture(const std::string& fname, bool sRGB) 
 :d_fname(fname), d_issRGB(sRGB) {
-
+    type = TEX_RGB;
     ImageBuffer img(fname);
 
     if (!img.IsReady)
@@ -69,7 +83,7 @@ STexture::STexture(const std::string& fname, bool sRGB)
 
 
     /*gl 4.2 required */
-    glTexStorage2D(GL_TEXTURE_2D, num_mipmaps, sRGB?GL_SRGB8:GL_RGB8,(GLsizei)  x, (GLsizei)y);
+    glTexStorage2D(GL_TEXTURE_2D, num_mipmaps, STexture::resolveGLType(type,sRGB) ,(GLsizei)  x, (GLsizei)y);
     glTexSubImage2D(GL_TEXTURE_2D,0, 0, 0,x,y, GL_RGB, GL_UNSIGNED_BYTE, img.buffer());
     ConfigureTexture(TEX_REPEAT);
     glGenerateMipmap(GL_TEXTURE_2D);

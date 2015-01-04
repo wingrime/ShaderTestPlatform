@@ -31,9 +31,8 @@ public:
     /* from image sRGB is default*/
     enum TextureType {
         TEX_RGBA = 0,
-        TEX_LDR,
-        TEX_DEPTH,
-        TEX_CUBIEMAP
+        TEX_RGB,
+        TEX_R,
     };
     enum BorderType {
         TEX_CLAMP = 0,
@@ -44,12 +43,14 @@ public:
     : STexture( fname, true) {}
     /* simple empty texture */
     STexture(int _x, int _y) 
-    :STexture(_x,_y,TEX_RGBA)
+    :STexture(_x,_y,TEX_RGB)
     {};
     STexture(int _x, int _y, TextureType t);
     STexture(const STexture&) = delete;
      ~STexture();
     int Bind(unsigned int sampler) const;
+
+    int BindImage(unsigned int unit);
     unsigned int getGLId() const;
     int x,y;
 
@@ -64,6 +65,8 @@ public:
     {
         ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(IsReady),CEREAL_NVP(d_fname),CEREAL_NVP(type));
     }
+
+    unsigned int static resolveGLType(TextureType t,bool sRGB);
 private:
     unsigned int tex;
     int CreateTexture(GLsizei num_mipmaps, GLenum internalformat);
