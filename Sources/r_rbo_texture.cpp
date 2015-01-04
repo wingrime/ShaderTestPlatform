@@ -49,6 +49,33 @@ bool SRBOTexture::isDepthType(SRBOTexture::RTType t)
         return true;
     return false;
 }
+/*thats come form settings (runtime ?)*/
+unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
+{
+    switch (t) {
+        case SRBOTexture::RT_SCREEN:
+            return GL_RGBA8;
+        case SRBOTexture::RT_TEXTURE_ARRAY:
+            return GL_RGBA8;
+        case SRBOTexture::RT_TEXTURE_CUBEMAP:
+            return GL_RGBA;
+        case SRBOTexture::RT_TEXTURE_MSAA:
+            return GL_RGBA16F;
+        case SRBOTexture::RT_TEXTURE_RED:
+            return GL_R8;
+        case SRBOTexture::RT_TEXTURE_FLOAT:
+            return GL_RGBA16F;
+        case SRBOTexture::RT_TEXTURE_RGBA:
+            return GL_RGBA8;
+        case SRBOTexture::RT_TEXTURE_DEPTH:
+            return GL_DEPTH_COMPONENT32;
+        case SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP:
+            return GL_DEPTH_COMPONENT32;
+        case SRBOTexture::RT_TEXTURE_DEPTH_MSAA:
+            return GL_DEPTH_COMPONENT32;
+    }
+    MASSERT (true) /* Unknown types should halt*/
+}
 int SRBOTexture::Bind(unsigned int sampler) const {
     if (IsReady) {
 
@@ -67,6 +94,12 @@ int SRBOTexture::Bind(unsigned int sampler) const {
         printf("unable bind non-exists texture\n");
         return EFAIL;
         }
+
+}
+
+int SRBOTexture::BindImage(unsigned int unit)
+{
+    glBindImageTexture(unit, tex, 0,GL_TRUE, 0, GL_READ_WRITE, SRBOTexture::getRelatedGLType(type));
 
 }
 int SRBOTexture::ConfigureTexture(const BorderType t) const {
@@ -88,49 +121,21 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
  {
     glGenTextures(1, &tex);
 
-    if (t  ==  RT_TEXTURE_DEPTH) {
+    if (t  ==  RT_TEXTURE_DEPTH ||
+        t == RT_TEXTURE_FLOAT ||
+        t == RT_TEXTURE_RGBA ||
+        t == RT_TEXTURE_RED   ) {
 
         glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, 4, GL_DEPTH_COMPONENT32, x, y);
-        ConfigureTexture(TEX_CLAMP); // ???
-        glBindTexture(GL_TEXTURE_2D,0);
-        d_isMSAA  = false;
-
-    } else if (t == RT_TEXTURE_FLOAT) {
-        glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, 4, GL_RGBA16F, x, y);
+        glTexStorage2D(GL_TEXTURE_2D, 4, SRBOTexture::getRelatedGLType(t), x, y);
         ConfigureTexture(TEX_CLAMP);
         glBindTexture(GL_TEXTURE_2D,0);
         d_isMSAA  = false;
-
-    } else if (t == RT_TEXTURE_RGBA) {
-        glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, 4, GL_RGBA8, x, y);
-        ConfigureTexture(TEX_CLAMP);
-        glBindTexture(GL_TEXTURE_2D,0);
-
-        d_isMSAA  = false;
-    }else if (t == RT_TEXTURE_RED) {
-        glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, 4, GL_R8, x, y);
-        ConfigureTexture(TEX_CLAMP);
-        glBindTexture(GL_TEXTURE_2D,0);
-
-        d_isMSAA  = false;
-
-    } else if (t == RT_TEXTURE_MSAA) {
+    } else if (t == RT_TEXTURE_MSAA || t  ==  RT_TEXTURE_DEPTH_MSAA) {
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,tex);
-        glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, GL_RGBA16F, x, y,true);
+        glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, SRBOTexture::getRelatedGLType(t), x, y,true);
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
         d_isMSAA  = true;
-
-    }else if  (t  ==  RT_TEXTURE_DEPTH_MSAA) {
-
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,tex);
-        glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, GL_DEPTH_COMPONENT32, x, y,true);
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
-        d_isMSAA  = true;
-
     }else if (t == RT_TEXTURE_CUBEMAP ) {
         glBindTexture(GL_TEXTURE_CUBE_MAP , tex);
         /*configure */
@@ -140,7 +145,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         for (unsigned int face = 0; face < 6; face++) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, SRBOTexture::getRelatedGLType(t),
                 x, y, 0, GL_RGBA, GL_FLOAT, NULL);
         }
 
@@ -153,7 +158,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         for (unsigned int face = 0; face < 6; face++) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_DEPTH_COMPONENT32,
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, SRBOTexture::getRelatedGLType(t),
                 x, y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         }
 
@@ -165,7 +170,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, GL_RGBA8, x, y, 6);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, SRBOTexture::getRelatedGLType(t), x, y, 6);
 
     }
 

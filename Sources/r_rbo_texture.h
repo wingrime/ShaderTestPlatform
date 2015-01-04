@@ -43,7 +43,8 @@ public:
     SRBOTexture(int _x, int _y, RTType t);
     SRBOTexture(const SRBOTexture&) = delete;
      ~SRBOTexture();
-    int Bind(unsigned int sampler) const;
+    int Bind(unsigned int sampler) const; /*bind as texture to sampler*/
+    int BindImage(unsigned int unit);
     unsigned int getGLId() const;
     int x,y;
 
@@ -60,6 +61,7 @@ public:
 
     static RTType getRelatedDepthType(RTType t );
     static bool isDepthType(RTType t);
+    static unsigned int getRelatedGLType (RTType t) ;
     /*NOT IMPL*/
     static RTType getRelatedTextureType(RTType t );
 
