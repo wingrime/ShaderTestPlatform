@@ -24,7 +24,8 @@ public:
         RT_SCREEN_DEPTH,
         RT_TEXTURE_FLOAT,
         RT_TEXTURE_RGBA,
-        RT_TEXTURE_RED,
+        RT_TEXTURE_RED, /* r only 8 bit*/
+        RT_TEXTURE_FLOAT_RED, /* 32 bit signle float*/
         RT_TEXTURE_DEPTH,
         RT_TEXTURE_MSAA, /*float always ??*/
         RT_TEXTURE_DEPTH_MSAA,

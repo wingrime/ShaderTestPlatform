@@ -67,6 +67,8 @@ unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
             return GL_RGBA16F;
         case SRBOTexture::RT_TEXTURE_RGBA:
             return GL_RGBA8;
+        case SRBOTexture::RT_TEXTURE_FLOAT_RED:
+            return GL_R32F;
         case SRBOTexture::RT_TEXTURE_DEPTH:
             return GL_DEPTH_COMPONENT32;
         case SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP:
@@ -124,7 +126,8 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
     if (t  ==  RT_TEXTURE_DEPTH ||
         t == RT_TEXTURE_FLOAT ||
         t == RT_TEXTURE_RGBA ||
-        t == RT_TEXTURE_RED   ) {
+        t == RT_TEXTURE_RED  ||
+        t == RT_TEXTURE_FLOAT_RED) {
 
         glBindTexture(GL_TEXTURE_2D,tex);
         glTexStorage2D(GL_TEXTURE_2D, 4, SRBOTexture::getRelatedGLType(t), x, y);
@@ -172,7 +175,8 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, SRBOTexture::getRelatedGLType(t), x, y, 6);
 
-    }
+    } else
+        MASSERT(true); /* You should forget define new type there*/
 
 
     IsReady = true;
