@@ -75,7 +75,7 @@ int RBO::attachRBOTextures()
             glDrawBuffers (1, buffers1 );
         break;
     case 2:
-            glDrawBuffers (1, buffers2 );
+            glDrawBuffers (2, buffers2 );
         break;
     case 3:
             glDrawBuffers (3, buffers3 );
@@ -110,6 +110,8 @@ SRBOTexture::RTType RBO::getRelatedRBOTextueTypeFromRBOType(RBO::RBOType t)
         return SRBOTexture::RTType::RT_NONE;
     case RBOType::RBO_MSAA:
         return SRBOTexture::RTType::RT_TEXTURE_MSAA;
+    case RBOType::RBO_FLOAT_RED:
+        return SRBOTexture::RTType::RT_TEXTURE_FLOAT_RED;
     }
     MASSERT(true); /*Unknown types should halt*/
     return SRBOTexture::RTType::RT_NONE;
@@ -132,6 +134,8 @@ SRBOTexture::RTType RBO::getRelatedDepthRBOTextueTypeFromRBOType(RBO::RBOType t)
         return SRBOTexture::RTType::RT_SCREEN_DEPTH;
     case RBOType::RBO_MSAA:
         return SRBOTexture::RTType::RT_TEXTURE_DEPTH_MSAA;
+    case RBOType::RBO_FLOAT_RED:
+        return SRBOTexture::RTType::RT_SCREEN_DEPTH;
     }
     MASSERT(true); /*Unknown types should halt*/
     return SRBOTexture::RTType::RT_NONE;

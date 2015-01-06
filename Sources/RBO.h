@@ -20,6 +20,7 @@ public:
     RBO_RED,
     RBO_MIXED, /* by texture type*/
     RBO_MSAA,
+    RBO_FLOAT_RED, /*single 32 bit float */
     /*RBO_DEPTH ??*/
     };
 
