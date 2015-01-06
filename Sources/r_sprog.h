@@ -33,8 +33,7 @@ public:
     ~SShader();
     int Bind();
 
-    /* Link to low level interface*/
-    SProg * prog;
+
     /*Shader variables defered change*/
     int SetUniform(const std::string& var,float i );
     int SetUniform(const std::string& var,int i );
@@ -54,6 +53,9 @@ public:
 
     bool IsReady = false;
 private:
+    /* Link to low level interface*/
+    SProg * prog;
+
     std::vector< std::pair<int, SMat4x4> > d_matrix_update_list;
     std::vector< std::pair<int, int> >     d_int_update_list;
     std::vector< std::pair<int, float > >  d_float_update_list;
