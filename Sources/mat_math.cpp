@@ -387,3 +387,27 @@ UnitQuaterion UnitQuaterion::Conjugate() const{
 UnitQuaterion UnitQuaterion::Inverse() const{
     return UnitQuaterion(-q.x ,-q.y,-q.z , q.w);
 }
+
+/*SVec2 impl*/
+SVec2::SVec2(const SVec2& v){
+    x = v.x;
+    y = v.y;
+}
+SVec2::SVec2(float _x, float _y){
+    x = _x;
+    y = _y;
+}
+SVec2::SVec2(){
+    x = 0;
+    y = 0;
+}
+SVec2 operator-(const SVec2& v1,const SVec2& v2){
+return (SVec2(v1.x - v2.x,
+              v1.y - v2.y));
+}
+SVec2 operator+(const SVec2& v1,const SVec2& v2){
+return (SVec2(v1.x + v2.x,
+              v1.y + v2.y));
+}
+
+

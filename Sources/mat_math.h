@@ -191,3 +191,30 @@ public:
     constexpr static float CheckDelta = 1e-6;
 };
 
+
+class SVec2 {
+public:
+    SVec2(float x,float y);
+    SVec2(const SVec2& v);
+    SVec2();
+    union  {
+        struct {
+            float x;float y;
+        };
+        struct {
+            float r;float g;
+        };
+        struct {
+            float raw[2];
+        };
+    };
+    /*serialize support */
+    template <class Archive>
+    void serialize( Archive & ar )
+    {
+        ar( x,y);
+    }
+};
+/*free from operators*/
+SVec2 operator-(const SVec2& v1,const SVec2& v2);
+SVec2 operator+(const SVec2& v1,const SVec2& v2);
