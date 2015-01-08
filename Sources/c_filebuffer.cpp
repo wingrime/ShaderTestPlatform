@@ -9,7 +9,9 @@
 #include "c_filebuffer.h"
 #include "Log.h"
 
-FileBuffer::FileBuffer(const std::string& srcfile) {
+FileBuffer::FileBuffer(const std::string& srcfile)
+    :d_path(srcfile)
+{
     FILE *f_file;
     f_file = fopen(srcfile.c_str(),"rb");
     if (f_file == NULL)
@@ -27,5 +29,10 @@ FileBuffer::FileBuffer(const std::string& srcfile) {
 }
 FileBuffer::~FileBuffer() {
     free((void *)d_buffer);
+}
+
+std::string FileBuffer::getPath()
+{
+    return d_path;
 }
 

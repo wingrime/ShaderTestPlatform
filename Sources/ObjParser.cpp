@@ -239,7 +239,6 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
             //std::cout << "Parsing line "<< line << std::endl;
             auto &subm =  (d_sm.back());
             if (!line.find("vt") ){
-                //(d_sm.back())->flag_normals = true;
                 d_gltc.push_back(ParseVt(line));
             } else if (!line.find("vn")) {
                 d_normals = true;

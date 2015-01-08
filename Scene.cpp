@@ -1,99 +1,103 @@
 #include "Scene.h"
-
+#include "r_cprog.h"
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
     ,d_console_cmd_handler(new ConsoleCommandHandler())
-    ,d_shadowmap_cam(-1344.012,-1744.6,-43.26,0.4625, -1.57,0.0,SPerspectiveProjectionMatrix(100.0f, 5000.0f,1.0f,toRad(26.0)))
+    ,d_shadowmap_cam(-1344.012,-1744.6,-43.26,0.4625, -1.57,0.0,SPerspectiveProjectionMatrix(10.0f, 10000.0f,1.0f,toRad(26.0)))
     ,cam(0,0,0,0,0,0,SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,sky_cam(0,0,0,0,0,0,SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,step(0.0f)
     
     ,err_con(new UIConsoleErrorHandler(con))
-    ,fps_label(new UILabel(v))
-    ,cfg_label(new UILabel(v,0.0, 0.7))
-    ,v_sel_label(new UILabel(v,0.0, 0.55))
+    ,fps_label(new UILabel(v,0.85,0.1))
+    ,cfg_label(new UILabel(v,0.0, 0.6))
+    ,v_sel_label(new UILabel(v,0.0, 0.4))
 
-    ,rtShadowMap(new RBO(v->w, v->h ,RBO::RBO_RGBA,SRBOTexture::RT_TEXTURE_RGBA,1,
+    ,rtShadowMap(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_RGBA,SRBOTexture::RT_TEXTURE_RGBA,1,
                                                     SRBOTexture::RT_TEXTURE_RGBA,1,
                                                     SRBOTexture::RT_TEXTURE_RGBA,1 ))
-    ,rtHDRScene_MSAA(new RBO(v->w, v->h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
+    ,rtHDRScene_MSAA(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_NONE, 1 ))
-    ,rtHDRScene(new RBO(v->w, v->h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
+    ,rtHDRScene(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_NONE, 1 ))
 
-    ,rtHDRBloomResult( new RBO((v->w)/2, (v->h)/2, RBO::RBO_RGBA)) /* bloom clamp*/
-    ,rtHDRHorBlurResult(new RBO((v->w)/4, (v->h)/4, RBO::RBO_RGBA))
-    ,rtHDRVertBlurResult(new RBO((v->w)/4, (v->h)/4, RBO::RBO_RGBA))
+    ,rtHDRBloomResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RGBA)) /* bloom clamp*/
+    ,rtHDRHorBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_RGBA))
+    ,rtHDRVertBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_RGBA))
 
-    ,rtSSAOResult( new RBO((v->w), (v->h), RBO::RBO_RGBA))
-    ,rtSSAOBLUR2(new RBO((v->w), (v->h), RBO::RBO_RGBA))
-    ,rtVolumetric(new RBO((v->w), (v->h), RBO::RBO_RGBA))
+    ,rtSSAOVertBlurResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
+    ,rtSSAOHorBlurResult(new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
+    ,rtVolumetric(new RBO(v->getSize().w,v->getSize().h, RBO::RBO_RGBA))
     ,sky_dome_model(new SObjModel("sky_dome.obj"))
     ,model(new SObjModel("sponza.obj"))
-    ,rtCubemap(new RBO(1024, 1024, RBO::RBO_CUBEMAP))
-   
+    ,test_sphere_model(new SObjModel("sky_dome.obj"))
+    ,rtCubemap(new RBO(128, 128, RBO::RBO_CUBEMAP))
+   ,rtConvoledCubemap(new SRBOTexture(10,4,SRBOTexture::RT_TEXTURE_FLOAT_RED))
+    ,rtHDRLogLum(new RBO(16,16,RBO::RBO_FLOAT)) /*Downsampled source for lumeneace*/
+    ,rtHDRLumKey(new RBO(1,1,RBO::RBO_FLOAT)) /*Lum key out*/
     
 {
     /*Setup error handler*/
     MainLog::GetInstance()->SetCallback([=](Log::Verbosity v, const std::string &s)-> void { con->Msg(s); });
-    int w = rtHDRScene->w;
-    int h = rtHDRScene->h;
-    /*ssao shaders*/
-    pp_prog_ssao = new SShader("pp_quad.v","pp_shader.f");
-    pp_prog_ssao_blur_hor = new SShader("pp_quad.v","pp_gauss_hor.f");
-    pp_prog_ssao_blur_vert = new SShader("pp_quad.v","pp_gauss_vert.f");
+    int w = rtHDRScene->getSize().w;
+    int h = rtHDRScene->getSize().h;
     /*bloom shaders */
-    pp_prog_hdr_bloom = new SShader("pp_quad.v", "pp_bloom.f");
-    pp_prog_hdr_blur_hor = new SShader("pp_quad.v","pp_gauss_hor.f");
-    pp_prog_hdr_blur_vert = new SShader("pp_quad.v","pp_gauss_vert.f");
-    pp_prog_hdr_tonemap = new SShader("pp_quad.v","pp_hdr_tonemap.f");
+    pp_prog_hdr_tonemap = new SShader("PostProcessing/PostProccessQuard.vert",\
+                                      "PostProcessing/Tonemap/Filmic.frag");
 
-    pp_prog_hdr_blur_kawase = new SShader("pp_quad.v","pp_blur_kawase.f");
+    pp_prog_hdr_blur_kawase = new SShader("PostProcessing/PostProccessQuard.vert",\
+                                          "PostProcessing/Bloor/Kawase.frag");
 
-    pp_stage_ssao =  new SPostProcess(pp_prog_ssao,w,h,rtHDRScene->texIMG1(),rtHDRScene->texDEPTH());
+    pp_stage_ssao =  new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
+                                                  "PostProcessing/SSAO/SimpleSSAO.frag") \
+                                      ,w/2,h/2,rtHDRScene->texIMG1(),rtHDRScene->texDEPTH());
 
-    pp_stage_ssao_blur_hor=  new SPostProcess(pp_prog_ssao_blur_hor,w,h,rtSSAOResult->texIMG(),rtSSAOResult->texIMG());
-    pp_stage_ssao_blur_vert =  new SPostProcess(pp_prog_ssao_blur_vert,w,h,rtSSAOBLUR2->texIMG(),rtHDRScene->texIMG());
+    pp_stage_ssao_blur_hor=  new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
+                                                          "PostProcessing/Bloor/GaussHorizontal.frag"),\
+                                              rtSSAOHorBlurResult,rtSSAOVertBlurResult);
+    pp_stage_ssao_blur_vert =  new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", \
+                                                            "PostProcessing/Bloor/GaussVertical.frag"),\
+                                                rtSSAOVertBlurResult,rtSSAOHorBlurResult);
 
-
-   
-
-
-
-    pp_stage_hdr_bloom =  new SPostProcess(pp_prog_hdr_bloom,w/2,h/2,rtHDRScene->texIMG());
-    pp_stage_hdr_blur_hor =   new SPostProcess(pp_prog_hdr_blur_kawase, w/4.0,h/4.0 ,rtHDRBloomResult->texIMG());
-    pp_stage_hdr_blur_vert =  new SPostProcess(pp_prog_hdr_blur_kawase,w/4.0,h/4.0 ,rtHDRHorBlurResult->texIMG());
+    pp_stage_hdr_bloom =  new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
+                                                       "PostProcessing/Bloom/Clamp.frag" ),\
+                                                rtHDRBloomResult,rtHDRScene,rtHDRLumKey);
+    pp_stage_hdr_blur_hor =   new SPostProcess(pp_prog_hdr_blur_kawase, rtHDRHorBlurResult ,rtHDRBloomResult);
+    pp_stage_hdr_blur_vert =  new SPostProcess(pp_prog_hdr_blur_kawase, rtHDRVertBlurResult ,rtHDRHorBlurResult);
     /*ping pong*/
-    pp_stage_hdr_blur_hor2 =   new SPostProcess(pp_prog_hdr_blur_kawase, w/4.0,h/4.0 ,rtHDRVertBlurResult->texIMG());
-    pp_stage_hdr_blur_vert2 =  new SPostProcess(pp_prog_hdr_blur_kawase,w/4.0,h/4.0 ,rtHDRHorBlurResult->texIMG());
+    pp_stage_hdr_blur_hor2 =   new SPostProcess(pp_prog_hdr_blur_kawase,rtHDRHorBlurResult ,rtHDRVertBlurResult);
+    pp_stage_hdr_blur_vert2 =  new SPostProcess(pp_prog_hdr_blur_kawase,rtHDRVertBlurResult,rtHDRHorBlurResult);
+
+    pp_stage_hdr_lum_log = new SPostProcess(new SShader ("PostProcessing/PostProccessQuard.vert",\
+                                                         "PostProcessing/Tonemap/LumLog.frag")
+                                            ,rtHDRLogLum,rtHDRScene);
+
+    pp_stage_hdr_lum_key = new SPostProcess(new SShader ("PostProcessing/PostProccessQuard.vert",\
+                                                        "PostProcessing/Tonemap/LumKey.frag")
+                                          ,rtHDRLumKey,rtHDRLogLum,rtHDRLumKey);
 
 
-    pp_stage_hdr_tonemap =  new SPostProcess(pp_prog_hdr_tonemap,w,h,rtHDRVertBlurResult->texIMG(),rtHDRScene->texIMG(),rtSSAOResult->texIMG());
+    /*final tonemap*/
+    pp_stage_hdr_tonemap =  new SPostProcess(pp_prog_hdr_tonemap,rtSCREEN,rtHDRVertBlurResult,rtHDRScene,rtHDRLumKey,rtSSAOVertBlurResult);
 
-
-    /*volumetric */
-    pp_prog_volumetric = new SShader("pp_quad.v","pp_volumetric.f");
     /* img depth | shadow depth | shadow world pos*/
-    pp_stage_volumetric =  new SPostProcess(pp_prog_volumetric,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG2());
+    pp_stage_volumetric =  new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", \
+                                                        "PostProcessing/Volumetric/Test.frag") \
+                                            ,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG2());
 
     /*main prog*/
-    r_prog = new SShader("shader.v","shader.f");
-    /*camera_side prog*/
-    cam_prog = new SShader("sm_shader.v","sm_shader.f");
+    r_prog = new SShader("Main/Main.vert","Main/Main.frag");
+
+    cam_prog = new SShader("Shadow/Direct.vert","Shadow/Direct.frag");
 
     /*sky dome prog*/
-    sky_dome_prog = new SShader("shader.v","shader_sky.f");
+    sky_dome_prog = new SShader("Sky/PerezSky.vert","Sky/PerezSky.frag");
 
-    cubemap_prog_generator = new SShader("cubemap_gen.v","cubemap_gen.f","cubemap_gen.g");
+    cubemap_prog_generator = new SShader("Cubemap/cubemap_gen.vert","Cubemap/cubemap_gen.frag","Cubemap/cubemap_gen.geom");
 
-
-
-
-
-   // model.reset(new SObjModel("sponza.obj"));
 
     model->ConfigureProgram( *r_prog);
    
@@ -101,151 +105,21 @@ SScene::SScene(RBO *v)
 
     model->ConfigureProgram( *cubemap_prog_generator);
 
+    test_sphere_model->ConfigureProgram( *r_prog);
     //model->ConfigureProgram( *sky_dome_prog);
 
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
-    //SShader shader("shader_config.json");
-    //shader.ReflectUniforms();
-    //shader.Bind(); 
+    test_sphere_model->SetModelMat(SMat4x4().Scale(4.0,4.0,4.0).Move(0.0,400.0,0.0));
 
-    con->Msg("Model View\nShestacov Alexsey 2014 (c)\n"); 
+    con->Msg("Model View\nShestacov Alexsey 2014-2015 (c)\n");
     UpdateCfgLabel();
     UpdateViewSelLabel();
-
- //   std::ostringstream os;// ("out2_model.json");
- //   {
-        /*use raii */
-    //cereal::PortableBinaryOutputArchive archive( os);
-  //      cereal::JSONOutputArchive archive( os);
-
-//        archive( CEREAL_NVP( model));
-   // }//
-
-    //std::ofstream o("sky_dome_test.json");{
-    //    cereal::JSONOutputArchive archive( o);
-    //    archive( CEREAL_NVP( sky_dome_model));
-    //}
-
-    /*
-    state.Load("config.lua");
-    std::string s = os.str();
-    state["engine_view_json"] = s;
-    state["main"]();
-    */
-    d_console_cmd_handler->AddCommand("cls", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        con->Cls();
-    }));
-
-    d_console_cmd_handler->AddCommand("r_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        float val_f = std::stof(args[2]);
-        r_prog->SetUniform(args[1],val_f);
-
-    }));
-    d_console_cmd_handler->AddCommand("r_set_i", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        int val_f = std::stoi(args[2]);
-        r_prog->SetUniform(args[1],val_f);
-
-    }));
-       d_console_cmd_handler->AddCommand("sky_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        float val_f = std::stof(args[2]);
-        sky_dome_prog->SetUniform(args[1],val_f);
-
-    }));
-
-    d_console_cmd_handler->AddCommand("sm_cam_set", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        d_shadowmap_cam = cam;
-
-    }));
-    d_console_cmd_handler->AddCommand("dump_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-
-         std::ostringstream os;
-        {
-            /*use raii */
-            cereal::JSONOutputArchive archive( os);
-            archive( CEREAL_NVP( cam));
-        }
-        con->Msg(os.str());
-
-    }));
-
-        d_console_cmd_handler->AddCommand("sm_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        float val_f = std::stof(args[1]);
-        d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,val_f,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
-
-    }));
-        d_console_cmd_handler->AddCommand("dump_smcam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-
-         std::ostringstream os;
-        {
-            /*use raii */
-            cereal::JSONOutputArchive archive( os);
-            archive( CEREAL_NVP( d_shadowmap_cam));
-        }
-        con->Msg(os.str());
-
-
-    }));
-
-    d_console_cmd_handler->AddCommand("toggle_fps", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        d_toggle_fps_view = !d_toggle_fps_view;
-
-    }));
-    d_console_cmd_handler->AddCommand("toggle_cfg", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        d_toggle_cfg_view = !d_toggle_cfg_view;
-
-    }));
-        d_console_cmd_handler->AddCommand("toggle_msaa", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        d_toggle_MSAA= !d_toggle_MSAA;
-
-    }));
-
-    d_console_cmd_handler->AddCommand("goto", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        SVec4 vect(args[1]);
-        cam.goPosition(vect);
-        cam.rotEuler(SVec4(0,0,0,0));
-    }));
-
-    d_console_cmd_handler->AddCommand("rot_x", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        float val_f = std::stof(args[1]);
-        cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
-        cam.rotEulerX(toRad(val_f));
-    }));
-    d_console_cmd_handler->AddCommand("rot_y", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        float val_f = std::stof(args[1]);
-        cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
-        cam.rotEulerY(toRad(val_f));
-    }));
-    d_console_cmd_handler->AddCommand("rot_z", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        float val_f = std::stof(args[1]);
-        cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
-        cam.rotEulerZ(toRad(val_f));
-    }));
-
-    d_console_cmd_handler->AddCommand("li", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        const std::vector < std::string >& args = *arg_list;
-        SVec4 vect(args[1]);
-        r_prog->SetUniform("main_light_dir", vect);
-    }));
-
-d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,1000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
-
-RenderCubemap();
+    InitDebugCommands();
+    d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,6000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
+    d_first_render = false;
 
 }
-
-
 
 int SScene::upCfgItem() {
     if (d_cfg_current > 0)
@@ -331,22 +205,21 @@ int SScene::UpdateCfgLabel() {
              C_I(14) + string_format("%f - Base Light Interisty\n",d_cfg[14]) 
             );
 
-    pp_prog_ssao_blur_hor->SetUniform("blurSize",d_cfg[0]);
-    pp_prog_ssao_blur_vert->SetUniform("blurSize",d_cfg[0]);
+    pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",d_cfg[0]);
+    pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",d_cfg[0]);
     /*dbg*/
     pp_prog_hdr_tonemap->SetUniform("aoStrength",d_cfg[0]);
     
+    SShader * s = pp_stage_ssao->getShader();
+    s->SetUniform("ssaoSize",d_cfg[1]);
+    s->SetUniform("ssaoLevelClamp",d_cfg[2]);
+    s->SetUniform("ssaoDepthClamp",d_cfg[3]);
+    pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomClamp",d_cfg[4]);
+    pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",d_cfg[5]);
 
-    pp_prog_ssao->SetUniform("ssaoSize",d_cfg[1]);
-    pp_prog_ssao->SetUniform("ssaoLevelClamp",d_cfg[2]);
-    pp_prog_ssao->SetUniform("ssaoDepthClamp",d_cfg[3]);
 
-    pp_prog_hdr_bloom->SetUniform("hdrBloomClamp",d_cfg[4]);
-    pp_prog_hdr_bloom->SetUniform("hdrBloomMul",d_cfg[5]);
-
-
-    pp_prog_hdr_blur_hor->SetUniform("blurSize",d_cfg[6]);
-    pp_prog_hdr_blur_vert->SetUniform("blurSize",d_cfg[6]);
+    //pp_prog_hdr_blur_hor->SetUniform("blurSize",d_cfg[6]);
+    //pp_prog_hdr_blur_vert->SetUniform("blurSize",d_cfg[6]);
 
 
     pp_prog_hdr_tonemap->SetUniform("A",d_cfg[7]);
@@ -355,15 +228,15 @@ int SScene::UpdateCfgLabel() {
     pp_prog_hdr_tonemap->SetUniform("D",d_cfg[10]);
     pp_prog_hdr_tonemap->SetUniform("E",d_cfg[11]);
     pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
-    pp_prog_hdr_tonemap->SetUniform("LW",d_cfg[13]);
+    pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])*10.0));
 
     r_prog->SetUniform("lightIntensity",d_cfg[14]);
 
     return ESUCCESS;
 }
 int SScene::Reshape(int w, int h) {
-        rtSCREEN->w = w;
-        rtSCREEN->h = h;
+
+        rtSCREEN->Resize(SVec2(w,h));
         /*ToDo remake*/
         glViewport ( 0, 0, (GLsizei)w, (GLsizei)h );
 
@@ -373,71 +246,141 @@ int SScene::UpdateScene() {
    sky_cam.SyncFromCamera(cam);
     r_prog->Bind();
     r_prog->SetUniform("sm_projection_mat",d_shadowmap_cam.getProjMatrix());
-
     r_prog->SetUniform("sm_view_mat",d_shadowmap_cam.getViewMatrix());
-
     return 0;
+
+}
+
+int SScene::InitDebugCommands()
+{
+    d_console_cmd_handler->AddCommand("cls", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        con->Cls();
+    }));
+
+    d_console_cmd_handler->AddCommand("r_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        float val_f = std::stof(args[2]);
+        r_prog->SetUniform(args[1],val_f);
+
+    }));
+    d_console_cmd_handler->AddCommand("r_set_i", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        int val_f = std::stoi(args[2]);
+        r_prog->SetUniform(args[1],val_f);
+
+    }));
+       d_console_cmd_handler->AddCommand("sky_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        float val_f = std::stof(args[2]);
+        sky_dome_prog->SetUniform(args[1],val_f);
+
+    }));
+
+    d_console_cmd_handler->AddCommand("sm_cam_set", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        d_shadowmap_cam = cam;
+
+    }));
+    d_console_cmd_handler->AddCommand("dump_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+
+         std::ostringstream os;
+        {
+            /*use raii */
+            cereal::JSONOutputArchive archive( os);
+            archive( CEREAL_NVP( cam));
+        }
+        con->Msg(os.str());
+
+    }));
+
+        d_console_cmd_handler->AddCommand("sm_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,4000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
+
+    }));
+        d_console_cmd_handler->AddCommand("dump_smcam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+
+         std::ostringstream os;
+        {
+            /*use raii */
+            cereal::JSONOutputArchive archive( os);
+            archive( CEREAL_NVP( d_shadowmap_cam));
+        }
+        con->Msg(os.str());
+    }));
+
+    d_console_cmd_handler->AddCommand("toggle_ui", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        d_toggle_fps_view = !d_toggle_fps_view;
+        d_toggle_cfg_view = !d_toggle_cfg_view;
+
+    }));
+    d_console_cmd_handler->AddCommand("toggle_msaa", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        d_toggle_MSAA= !d_toggle_MSAA;
+
+    }));
+
+    d_console_cmd_handler->AddCommand("goto", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        SVec4 vect(args[1]);
+        cam.goPosition(vect);
+        cam.rotEuler(SVec4(0,0,0,0));
+    }));
+
+    d_console_cmd_handler->AddCommand("rot_x", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        float val_f = std::stof(args[1]);
+        cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
+        cam.rotEulerX(toRad(val_f));
+    }));
+    d_console_cmd_handler->AddCommand("rot_y", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        float val_f = std::stof(args[1]);
+        cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
+        cam.rotEulerY(toRad(val_f));
+    }));
+    d_console_cmd_handler->AddCommand("rot_z", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        float val_f = std::stof(args[1]);
+        cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
+        cam.rotEulerZ(toRad(val_f));
+    }));
+
+    d_console_cmd_handler->AddCommand("li", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        SVec4 vect(args[1]);
+        r_prog->SetUniform("main_light_dir", vect);
+        d_debugDrawMgr.AddCross({vect.vec.x,vect.vec.y,vect.vec.z},20);
+
+    }));
+
+
+    d_console_cmd_handler->AddCommand("rec", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        d_first_render = false;
+    }));
+
+    d_console_cmd_handler->AddCommand("updc", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        SMat4x4 m = cam.getViewMatrix();
+        d_debugDrawMgr.AddCross({m.mat.a14,m.mat.a24,m.mat.a34},1000);
+        d_debugDrawMgr.Update();
+    }));
+
 
 }
 int inline SScene::RenderShadowMap(const RBO& v) {
     v.Bind(true);
     RenderContext r_ctx(&v, cam_prog ,&d_shadowmap_cam);
     model->Render(r_ctx);
+    test_sphere_model->Render(r_ctx);
     return ESUCCESS;
 }
 
 int SScene::RenderCubemap()
 {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc  ( GL_LEQUAL );
-    rtCubemap->Bind();
-
-    RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator ,&cam);
-    model->Render(r_ctx);
-
-}
-int inline SScene::RenderDirect(const RBO& v) {
-    v.Bind(true);    
-    /*connect shadowmap to model sampler*/
-    
-    if (rWireframe)
-    {
-        RenderContext r_ctx(&v, cam_prog ,&d_shadowmap_cam);
-        model->Render(r_ctx);
-
-    }
-    else
-    {
-
-        RenderContext r_ctx(&v, r_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtCubemap->texIMG(), rtShadowMap->texIMG());
-        model->Render(r_ctx);
-
-        RenderContext r_ctx2(&v, sky_dome_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
-        //RenderContext r_ctx2(&v, r_prog ,&cam,rtShadowMap->texDEPTH,rtShadowMap->texIMG1, rtShadowMap->texIMG2, rtShadowMap->texIMG); 
-        sky_dome_model->Render(r_ctx2);
-    }
-
-   // if (rWireframe) 
-      //  glPolygonMode( GL_FRONT_AND_BACK, GL_LINE  );
-    //else
-    //    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    
-   
-    if (model->IsReady) 
-    {
-        //model->SetCamera(cam.getMatrix());
-        //model->Render(r_ctx);
-    }
-
-   // glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-    return 0;
-}
-int SScene::Render() {
-    
-    step  += 0.002f;
- 
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
 
     glDepthFunc  ( GL_LEQUAL );
@@ -447,22 +390,86 @@ int SScene::Render() {
         glDisable( GL_MULTISAMPLE );
     UpdateScene();
 
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    glCullFace(GL_FRONT);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc  ( GL_LEQUAL );
+    static int step = 0;
+    step ++;
+    rtCubemap->Bind();
+    SMat4x4 pos = SMat4x4().Move(0.0+step*100,-200.0,0.0);
+    d_debugDrawMgr.AddCross({0.0-step*100,200,1.0},50);
+    d_debugDrawMgr.Update();
+    SCamera cubemap_cam(pos,SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0)));
+    RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator ,&cubemap_cam);
+    RenderContext r_ctx2(rtCubemap.get() , r_prog ,&cubemap_cam);
+
+    sky_dome_model->Render(r_ctx);
+    model->Render(r_ctx);
+    // Convolve it !!
+    SCProg cs("Cubemap/cubemap_convolve.comp");
+    cs.Barrier();
+    cs.Use();
+    rtCubemap->texIMG()->Bind(1);
+    cs.SetUniform("srcCube",1);
+    cs.Use();
+    rtConvoledCubemap->BindImage(2);
+    cs.SetUniform("dstSHBands",2);
+
+    cs.SetUniform("dstSamplesTotal",100*100);
+    cs.SetUniform("dstSHBandY",1);
+
+    cs.Dispatch(100,1 ,1);
+    cs.Barrier();
+
+}
+int inline SScene::RenderDirect(const RBO& v) {
+    v.Bind(true);    
+    if (rWireframe)
+    {
+        RenderContext r_ctx(&v, cam_prog ,&d_shadowmap_cam);
+        model->Render(r_ctx);
+    }
+    else
+    {
+        RenderContext r_ctx(&v, r_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtCubemap->texIMG(), rtShadowMap->texIMG());
+        r_ctx.sh_bands = rtConvoledCubemap;
+        model->Render(r_ctx);
+        test_sphere_model->Render(r_ctx);
+        RenderContext r_ctx2(&v, sky_dome_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
+        sky_dome_model->Render(r_ctx2);
+
+    }
+
+    d_debugDrawMgr.Render(cam.getProjMatrix()*cam.getViewMatrix());
+
+    return 0;
+}
+int SScene::Render() {
+    step  += 0.002f;
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+    glDepthFunc  ( GL_LEQUAL );
+    if (d_toggle_MSAA)
+       glEnable( GL_MULTISAMPLE );
+    else
+        glDisable( GL_MULTISAMPLE );
+    UpdateScene();
     glEnable(GL_DEPTH_TEST);
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     glCullFace(GL_FRONT);
-    
+    if (!d_first_render ) {
+        d_first_render = true;
+        RenderCubemap();
+    }
     rtime.Begin();
-    RenderCubemap();
     if (d_v_sel_current == V_DIRECT) {
         //RenderShadowMap( *rtSCREEN);
         
         RenderDirect( *rtSCREEN);
 
-    }
-       
-    else {
-
-
+    } else {
         RenderShadowMap( *rtShadowMap);
         if (d_toggle_MSAA) {
             RenderDirect( *rtHDRScene_MSAA);
@@ -477,48 +484,39 @@ int SScene::Render() {
     glDisable(GL_DEPTH_TEST);
     glDepthFunc(GL_NEVER);  
     
-
     /*Bloom + SSAO + RenderShadowMap*/
     if (d_v_sel_current == V_NORMAL) {
-    
 
 
-        rtHDRBloomResult->Bind(false);
-        pp_stage_hdr_bloom->Draw(); 
 
-        rtHDRHorBlurResult->Bind(true);
+        pp_stage_hdr_bloom->DrawRBO();
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)0.0);
-        pp_stage_hdr_blur_hor->Draw();
-        rtHDRVertBlurResult->Bind(false);
+        pp_stage_hdr_blur_hor->DrawRBO();
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*1.0));
-        pp_stage_hdr_blur_vert->Draw();
+        pp_stage_hdr_blur_vert->DrawRBO();
+        /*LumKEY*/
 
+        pp_stage_hdr_lum_log->DrawRBO();
+        pp_stage_hdr_lum_key->DrawRBO();
         /*ping pong 1*/
-        rtHDRHorBlurResult->Bind(false);
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*2.0));
-        pp_stage_hdr_blur_hor2->Draw();
-        rtHDRVertBlurResult->Bind(false);
+        pp_stage_hdr_blur_hor2->DrawRBO();
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*2.0));
-        pp_stage_hdr_blur_vert2->Draw();
+        pp_stage_hdr_blur_vert2->DrawRBO();
         /*ping pong 2*/
-        rtHDRHorBlurResult->Bind(false);
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*3.0));
-        pp_stage_hdr_blur_hor2->Draw();
+        pp_stage_hdr_blur_hor2->DrawRBO();
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*3.0));
-        rtHDRVertBlurResult->Bind(false);
-        pp_stage_hdr_blur_vert2->Draw();
+        pp_stage_hdr_blur_vert2->DrawRBO();
         /*SSAO*/
-
-        rtSSAOResult->Bind(true);
+        rtSSAOVertBlurResult->Bind(true);
         pp_stage_ssao->Draw();
-        rtSSAOBLUR2->Bind(true);
-        pp_stage_ssao_blur_hor->Draw();
-        rtSSAOResult->Bind(true);
-        pp_stage_ssao_blur_vert->Draw();
+        pp_stage_ssao_blur_hor->DrawRBO();
+        pp_stage_ssao_blur_vert->DrawRBO();
 
 
-        rtSCREEN->Bind(false);
-        pp_stage_hdr_tonemap->Draw(); 
+        pp_stage_hdr_tonemap->DrawRBO();
+
     } else if (d_v_sel_current == V_BLOOM) {
         rtSCREEN->Bind(true); 
         pp_stage_hdr_bloom->Draw();
@@ -531,7 +529,6 @@ int SScene::Render() {
         pp_stage_hdr_blur_hor->Draw();
         rtHDRVertBlurResult->Bind(false);
         pp_stage_hdr_blur_vert->Draw();
-
         /*ping pong 1*/
         rtHDRHorBlurResult->Bind(false);
         pp_stage_hdr_blur_hor2->Draw();
@@ -543,9 +540,9 @@ int SScene::Render() {
         rtSCREEN->Bind(true);
         pp_stage_hdr_blur_vert2->Draw();
     } else if (d_v_sel_current == V_SSAO) {
-        rtSSAOResult->Bind(true);
+        rtSSAOVertBlurResult->Bind(true);
         pp_stage_ssao->Draw();
-        rtSSAOBLUR2->Bind(true);
+        rtSSAOHorBlurResult->Bind(true);
         pp_stage_ssao_blur_hor->Draw();
         rtSCREEN->Bind(true);
         pp_stage_ssao_blur_vert->Draw();
@@ -553,30 +550,24 @@ int SScene::Render() {
         rtSCREEN->Bind(true); 
         RenderShadowMap( *rtSCREEN);
     } else if (d_v_sel_current == V_VOLUMETRIC) {
-
-/*
-uniform mat4 sm_proj_matrix;
-uniform mat4 sm_view_matrix;
-uniform mat4 cam_proj_matrix;
-uniform mat4 cam_view_matrix;
-*/
         rtSCREEN->Bind(true); 
-        pp_prog_volumetric->SetUniform("sm_proj_matrix",d_shadowmap_cam.getProjMatrix());
-        pp_prog_volumetric->SetUniform("sm_view_matrix",d_shadowmap_cam.getViewMatrix());
-        pp_prog_volumetric->SetUniform("cam_proj_matrix",cam.getProjMatrix());
-        pp_prog_volumetric->SetUniform("cam_view_matrix",cam.getViewMatrix());
+
+        pp_stage_volumetric->getShader()->SetUniform("sm_proj_matrix",d_shadowmap_cam.getProjMatrix());
+        pp_stage_volumetric->getShader()->SetUniform("sm_view_matrix",d_shadowmap_cam.getViewMatrix());
+        pp_stage_volumetric->getShader()->SetUniform("cam_proj_matrix",cam.getProjMatrix());
+        pp_stage_volumetric->getShader()->SetUniform("cam_view_matrix",cam.getViewMatrix());
         pp_stage_volumetric->Draw();
     }
     else if (d_v_sel_current == V_CUBEMAPTEST ) {
 
-
+        //glEnable(GL_DEPTH_TEST);
+        //glDepthFunc  ( GL_LEQUAL );
+        //RenderContext r_ctx(rtSCREEN.get(), cubemap_prog_generator ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtShadowMap->texIMG2(), rtShadowMap->texIMG());
+        //model->Render(r_ctx);
         rtSCREEN->Bind(true);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc  ( GL_LEQUAL );
-        //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        //glCullFace(GL_FRONT);
-        RenderContext r_ctx(rtSCREEN.get(), cubemap_prog_generator ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtShadowMap->texIMG2(), rtShadowMap->texIMG());
-        model->Render(r_ctx);
+        pp_stage_hdr_lum_log->Draw();
+
+        //pp_stage_hdr_lum_key->Draw();
     }
 
     glFlush();

@@ -19,7 +19,12 @@
 
 #include "ObjParser.h"
 
+struct Material {
+STexture * diffuse;
+STexture *bump;
+STexture * alpha;
 
+};
 
 class MeshIndexer {
 public:
@@ -66,6 +71,7 @@ class SObjModel {
         std::unordered_map<unsigned int , unsigned int > submesh_vao;
         std::unordered_map<unsigned int , unsigned int > submesh_ibo;
         std::unordered_map<std::string, std::unique_ptr<STexture> > d_textures;
+        std::unordered_map<std::string, Material> d_textures_loaded;
         std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
 
         

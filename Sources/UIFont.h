@@ -14,7 +14,7 @@ TODOs:
 #include "ft2build.h"
 #include FT_FREETYPE_H
 #define DEF_fontname "Anonymous Pro.ttf"
-#define DEF_fontsize 16
+#define DEF_fontsize 20
 #include "r_sprog.h"
 
 

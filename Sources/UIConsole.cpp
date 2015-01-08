@@ -8,7 +8,7 @@ UIConsole::UIConsole(RBO *v, std::shared_ptr<AbstractCommandHandler> cmd_h)
     :d_cmd_handler(cmd_h)
 {
 
-    fnt = ft.Construct(16);
+    fnt = ft.Construct(20);
     v_port = v;
 }
 
@@ -17,10 +17,8 @@ UIConsole::~UIConsole()
     ft.Release(fnt);
 }
 void UIConsole::Draw() {
-
-    float sx = (v_port->w);
-    float sy = (v_port->h);
-    fnt->RenderText(d_output_cache,0.0,0.1,    sx, sy);
+    SVec2 sz = v_port->getSize();
+    fnt->RenderText(d_output_cache,0.0,0.0,    sz.x, sz.y);
 }
 int UIConsole::HandlePrevHistoryCommand() {
     if ( !console_history.empty() ) 

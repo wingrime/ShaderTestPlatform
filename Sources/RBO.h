@@ -4,7 +4,7 @@
 #include <GL/wglew.h>
 #include "r_texture.h" // FIXME
 #include "r_rbo_texture.h"
-#include "RBO.h"
+#include "mat_math.h"
 
 /*RenderTarget Type*/
 
@@ -59,11 +59,16 @@ public:
     std::shared_ptr<SRBOTexture> texIMG2(); /*color attachment 2*/
     std::shared_ptr<SRBOTexture> texDEPTH();
 
-    /*required sizes*/
-    int w;
-    int h;
+    /*Request size*/
+    SVec2 getSize();
+    /*Do resize*/
+    int Resize(SVec2 new_sz);
     bool IsReady = false;
+    RBOType getType();
 private:
+
+    int d_w;
+    int d_h;
     GLuint depthrenderbuffer = 0;
     GLuint d_fbo = 0;
 

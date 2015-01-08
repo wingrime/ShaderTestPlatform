@@ -69,7 +69,17 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
     FileBuffer *frag = new FileBuffer(std::string(".\\shaders\\")+fprog);
     FileBuffer *vert = new FileBuffer(std::string(".\\shaders\\")+vprog);
 
+    if (!vert || !vert->IsReady) {
+        LOGE("Vertex Shader Open Failed");
+        IsReady = false;
+        return;
+    }
 
+    if (!frag || !frag->IsReady) {
+        LOGE("Fragment Shader Open Failed");
+        IsReady = false;
+        return;
+    }
     vs = LoadShader ( (const char *)vert->buffer(), GL_VERTEX_SHADER, vprog  );
     if (vs == EFAIL) {
         LOGE("Vertex Shader Build Failed");

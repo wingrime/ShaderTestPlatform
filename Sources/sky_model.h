@@ -58,7 +58,7 @@ void SProcedureSky::SetTime(float LT) {
     printf("sun: %f %f %f\n Elev %f, Ath %f\n", sun_x,sun_y,sun_z,toDeg(a.Elev),toDeg(a.Ath));
     
 
-    sky_prog->SetUniform("viewport",SVec4(v->w,v->h,0,0));
+    sky_prog->SetUniform("viewport",SVec4(v->getSize().w,v->getSize().h,0,0));
 
 }
 
@@ -81,7 +81,7 @@ void SProcedureSky::SetTurbidity(float t) {
  //   sky_prog->Use ();
     sky_prog->SetUniform("turbidity",t);
 
-    sky_prog->SetUniform("viewport",SVec4(v->w,v->h,0,0));
+    sky_prog->SetUniform("viewport",SVec4(v->getSize().w,v->getSize().h,0,0));
 }
 SolAng SProcedureSky::SolarAngleModel(float LT,float delta_GMT,float d, float longtitude, float attitude) {
     SolAng pos;
@@ -158,7 +158,7 @@ SProcedureSky::SProcedureSky(RBO *vp) {
     sky_prog->SetUniform("view",SMat4x4());
 
 
-    sky_prog->SetUniform("viewport",SVec4(v->w,v->h,0,0));
+    sky_prog->SetUniform("viewport",SVec4(v->getSize().w,v->getSize().h,0,0));
 
 // sky_prog->ReflectUniforms();
 

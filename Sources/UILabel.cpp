@@ -2,7 +2,7 @@
 
 UILabel::UILabel(RBO *v,float x ,float y) {
 
-    fnt = ft.Construct(16);
+    fnt = ft.Construct(20);
     v_port = v;
     d_x  = x;
     d_y  = y;
@@ -11,9 +11,8 @@ void UILabel::Draw() {
 
     if (!con.empty()) {
 
-        float sx = ((v_port->w));
-        float sy = ((v_port->h));
-        fnt->RenderText(con,d_x, d_y, sx, sy);    
+        SVec2 sz = v_port->getSize();
+        fnt->RenderText(con,d_x, d_y, sz.x, sz.y);
     }
 }
 void UILabel::setText(const std::string& label) {

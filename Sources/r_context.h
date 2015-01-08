@@ -53,5 +53,6 @@ class RenderContext {
         std::shared_ptr<SRBOTexture> rsm_normal_texture;
         std::shared_ptr<SRBOTexture> rsm_vector_texture;
         std::shared_ptr<SRBOTexture> rsm_albedo_texture;
+        std::shared_ptr<SRBOTexture> sh_bands;
     	bool sm_map;
 };

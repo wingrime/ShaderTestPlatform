@@ -205,6 +205,9 @@ public:
             float r;float g;
         };
         struct {
+            float w;float h;
+        };
+        struct {
             float raw[2];
         };
     };

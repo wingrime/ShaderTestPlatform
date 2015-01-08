@@ -10,7 +10,7 @@ int RBO::Bind(bool clear) const {
 
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport ( 0, 0, (GLsizei)w, (GLsizei)h );
+    glViewport ( 0, 0, (GLsizei)d_w, (GLsizei)d_h );
    // glDrawBuffer(GL_BACK);                       // Set the back buffer as the draw buffer
     // glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
@@ -37,10 +37,27 @@ std::shared_ptr<SRBOTexture> RBO::texDEPTH()
     return d_texDEPTH;
 }
 
+SVec2 RBO::getSize()
+{
+    return SVec2(d_w,d_h);
+}
+
+int RBO::Resize(SVec2 new_sz)
+{
+    //TODO: full impl
+    d_w = new_sz.w;
+    d_h = new_sz.h;
+}
+
+RBO::RBOType RBO::getType()
+{
+    return d_type;
+}
+
 void RBO::initDepthRenderBuffer(){
     glGenRenderbuffers(1, &depthrenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, d_w, d_h);
     glBindRenderbuffer(GL_RENDERBUFFER,0);
 }
 
@@ -135,7 +152,7 @@ SRBOTexture::RTType RBO::getRelatedDepthRBOTextueTypeFromRBOType(RBO::RBOType t)
     case RBOType::RBO_MSAA:
         return SRBOTexture::RTType::RT_TEXTURE_DEPTH_MSAA;
     case RBOType::RBO_FLOAT_RED:
-        return SRBOTexture::RTType::RT_SCREEN_DEPTH;
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH;
     }
     MASSERT(true); /*Unknown types should halt*/
     return SRBOTexture::RTType::RT_NONE;
@@ -146,7 +163,7 @@ RBO::RBO(int _w, int _h,RBOType _type,
         std::shared_ptr<SRBOTexture> _texIMG1,
         std::shared_ptr<SRBOTexture> _texIMG2,
         std::shared_ptr<SRBOTexture> _texDEPTH)
-:w(_w),h(_h), d_type(_type) ,d_texIMG(_texIMG),d_texIMG1(_texIMG1),d_texIMG2(_texIMG2),d_texDEPTH(_texDEPTH)
+:d_w(_w),d_h(_h), d_type(_type) ,d_texIMG(_texIMG),d_texIMG1(_texIMG1),d_texIMG2(_texIMG2),d_texDEPTH(_texDEPTH)
  {
     if (d_type == RBO_SCREEN) {
         IsReady = true;
@@ -154,11 +171,11 @@ RBO::RBO(int _w, int _h,RBOType _type,
     }
 
     if (d_texIMG == nullptr) {
-            d_texIMG.reset(new SRBOTexture(w,h,RBO::getRelatedRBOTextueTypeFromRBOType(d_type) ));
+            d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(d_type) ));
 
     }
     if (d_texDEPTH == nullptr) {
-            d_texDEPTH.reset(new SRBOTexture(w,h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type) ));
+            d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type) ));
     }
 
     d_isMSAA = d_texIMG->IsMSAA() ;
@@ -170,8 +187,8 @@ RBO::RBO(int _w, int _h,RBOType _type,
 /*single buffer*/
 RBO::RBO(int def_w, int def_h, RBO::RBOType type)
 {
-    w = def_w;
-    h = def_h;
+    d_w = def_w;
+    d_h = def_h;
     d_type = type;
     if (type == RBO_SCREEN) {
         IsReady = true;
@@ -180,12 +197,12 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type)
 
     if (type == RBO_CUBEMAP){
 
-        MASSERT(w != h);/*cubemap are should be cube*/
-        MASSERT( w % 2 != 0); /*should be power of two*/
+        MASSERT(d_w != d_h);/*cubemap are should be cube*/
+        MASSERT( d_w % 2 != 0); /*should be power of two*/
     }
 
-    d_texIMG.reset(new SRBOTexture(w,h,RBO::getRelatedRBOTextueTypeFromRBOType(type) ));
-    d_texDEPTH.reset(new SRBOTexture(w,h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type)));
+    d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(type) ));
+    d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type)));
     d_isMSAA = d_texIMG->IsMSAA() ; /* ??? */
     if (attachRBOTextures() == ESUCCESS)
         IsReady = true;
@@ -198,8 +215,8 @@ RBO::~RBO()
 /* new constructor*/
 RBO::RBO(int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, int t0_s, SRBOTexture::RTType t1_type, int t1_s, SRBOTexture::RTType t2_type, int t2_s)
 {
-    w = def_w;
-    h = def_h;
+    d_w = def_w;
+    d_h = def_h;
     d_type = type;
     //TODO: add type check
 
@@ -209,18 +226,18 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, i
     MASSERT(SRBOTexture::isDepthType(t2_type));
     MASSERT(t0_s <= 0);
 
-    d_texIMG.reset(new SRBOTexture(w/t0_s,h/t0_s,t0_type));
+    d_texIMG.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s,t0_type));
     /*depth*/
-    d_texDEPTH.reset(new SRBOTexture(w/t0_s,h/t0_s, SRBOTexture::getRelatedDepthType(t0_type) ));
+    d_texDEPTH.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s, SRBOTexture::getRelatedDepthType(t0_type) ));
 
 
     if (t1_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t1_s <= 0);
-        d_texIMG1.reset(new SRBOTexture(w/t1_s,h/t1_s,t1_type));
+        d_texIMG1.reset(new SRBOTexture(d_w/t1_s,d_h/t1_s,t1_type));
     }
     if (t2_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t2_s <= 0);
-        d_texIMG2.reset(new SRBOTexture(w/t2_s,h/t2_s,t2_type));
+        d_texIMG2.reset(new SRBOTexture(d_w/t2_s,d_h/t2_s,t2_type));
     }
     d_isMSAA = d_texIMG->IsMSAA() ;
 
@@ -240,14 +257,14 @@ int RBO::ResolveMSAA(const RBO &dst)
       GLenum  buffers3 [] = { GL_COLOR_ATTACHMENT2};
       glReadBuffer(GL_COLOR_ATTACHMENT0);
       glDrawBuffers ( 1, buffers1 );
-      glBlitFramebuffer(0, 0, w, h, 0, 0, dst.w, dst.h, GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+      glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
       //TODO
       glReadBuffer(GL_COLOR_ATTACHMENT1);
       glDrawBuffers ( 1, buffers2 );
-      glBlitFramebuffer(0, 0, w, h, 0, 0, dst.w, dst.h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
+      glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
       glReadBuffer(GL_COLOR_ATTACHMENT2);
       glDrawBuffers ( 1, buffers3 );
-      glBlitFramebuffer(0, 0, w, h, 0, 0, dst.w, dst.h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
+      glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
 
       //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
       //glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);

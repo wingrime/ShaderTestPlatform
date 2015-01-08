@@ -20,7 +20,7 @@ unsigned int STexture::resolveGLType(STexture::TextureType t, bool sRGB)
 
 int STexture::Bind(unsigned int sampler) const {
     if (IsReady) {
-
+        //TODO HANDLE OTHER types
         glActiveTexture(GL_TEXTURE0+sampler);
        glBindTexture( GL_TEXTURE_2D,tex);
         return ESUCCESS;

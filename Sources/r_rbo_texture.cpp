@@ -58,13 +58,13 @@ unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
         case SRBOTexture::RT_TEXTURE_ARRAY:
             return GL_RGBA8;
         case SRBOTexture::RT_TEXTURE_CUBEMAP:
-            return GL_RGBA;
+            return GL_RGBA16F;
         case SRBOTexture::RT_TEXTURE_MSAA:
             return GL_RGBA16F;
         case SRBOTexture::RT_TEXTURE_RED:
             return GL_R8;
         case SRBOTexture::RT_TEXTURE_FLOAT:
-            return GL_RGBA16F;
+            return GL_RGBA32F;
         case SRBOTexture::RT_TEXTURE_RGBA:
             return GL_RGBA8;
         case SRBOTexture::RT_TEXTURE_FLOAT_RED:
@@ -130,7 +130,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         t == RT_TEXTURE_FLOAT_RED) {
 
         glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, 4, SRBOTexture::getRelatedGLType(t), x, y);
+        glTexStorage2D(GL_TEXTURE_2D, 1, SRBOTexture::getRelatedGLType(t), x, y);
         ConfigureTexture(TEX_CLAMP);
         glBindTexture(GL_TEXTURE_2D,0);
         d_isMSAA  = false;
@@ -173,7 +173,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 4, SRBOTexture::getRelatedGLType(t), x, y, 6);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, SRBOTexture::getRelatedGLType(t), x, y, 6);
 
     } else
         MASSERT(true); /* You should forget define new type there*/

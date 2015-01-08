@@ -14,5 +14,9 @@ class FileBuffer :public AbstractBuffer{
         virtual ~FileBuffer();
         bool IsReady = false;
 
+        std::string getPath();
+   private:
+        std::string d_path;
+
 };
 

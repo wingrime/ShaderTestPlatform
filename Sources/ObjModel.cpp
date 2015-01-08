@@ -30,7 +30,8 @@
 std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 {
 
-    CObjSubmesh *mesh = new CObjSubmesh ;
+    std::shared_ptr<CObjSubmesh> mesh;
+    mesh.reset(new CObjSubmesh()) ;
 
     mesh->m_name = d_inmesh->m_name;
     mesh->name = d_inmesh->name;
@@ -54,7 +55,7 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
         }
 
     }
-    return  std::shared_ptr<CObjSubmesh>(mesh);
+    return  (mesh);
 
 }
 
@@ -83,6 +84,9 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     sprog.SetUniform("rsm_normal_sampler",6);
     sprog.SetUniform("rsm_vector_sampler",7);
     sprog.SetUniform("rsm_albedo_sampler",8);
+    sprog.SetUniform("sh_bands_sampler",9);
+
+
     return 0;
 }
 
@@ -126,12 +130,25 @@ SObjModel::SObjModel(const std::string&  fname)
 }
 void SObjModel::SetModelMat(const SMat4x4& m){
 	model = m;
-	/*update shader variable*/ 
-   // sprog->SetUniform("model",model);
 }
 void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
-    
-    /*texture diffuse*/
+
+
+    Material * m = &d_textures_loaded[submesh->m_name];
+    if (m->alpha && m->alpha->IsReady)
+        m->alpha->Bind(2);
+    else
+        texDiffuse->Bind(2);
+    if (m->diffuse && m->diffuse->IsReady)
+        m->diffuse->Bind(0);
+    else
+        texDiffuse->Bind(0);
+    if (m->bump && m->bump->IsReady)
+        m->bump->Bind(1);
+    else
+        texNormal->Bind(1);
+            /*
+    //texture diffuse
     if (d_materials.find(submesh->m_name) != d_materials.end()) {
         auto &material = d_materials[submesh->m_name];
         if (d_textures.find(material->map_Kd) != d_textures.end()) {
@@ -145,7 +162,7 @@ void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
     } else
     texDiffuse->Bind(0);
 
-    /*texture bump*/
+    //texture bump
     if (d_materials.find(submesh->m_name) != d_materials.end()) {
         auto &material = d_materials[submesh->m_name];
         if (d_textures.find(material->map_bump) != d_textures.end()) {
@@ -158,7 +175,7 @@ void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
             texNormal->Bind(1);   
     } else
     texNormal->Bind(1);
-        /*texture alpha*/
+    //texture alpha
     if (d_materials.find(submesh->m_name) != d_materials.end()) {
         auto &material = d_materials[submesh->m_name];
         if (d_textures.find(material->map_d) != d_textures.end()) {
@@ -171,8 +188,8 @@ void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
             texDiffuse->Bind(2);   
     } else
         texDiffuse->Bind(2);
-    
 
+*/
 }
 
 void SObjModel::LoadTextures() {
@@ -197,10 +214,13 @@ void SObjModel::LoadTextures() {
 
             auto &material = d_materials[submesh->m_name];
 
+
             std::string &diffuse = material->map_Kd;
             if (d_textures.find(diffuse) == d_textures.end()) {
                // printf("material %s Diffuse %s Bump %s Alpha %s \n",submesh->m_name.c_str(),  material->map_Kd.c_str(), material->map_bump.c_str(), material->map_d.c_str());
-                d_textures[diffuse] = std::unique_ptr<STexture>(new STexture(diffuse));
+
+                d_textures_loaded[submesh->m_name].diffuse =  new STexture(diffuse);
+                d_textures[diffuse].reset( d_textures_loaded[submesh->m_name].diffuse);
                 if (!d_textures[diffuse]->IsReady) {
                    LOGE(string_format("OBJ:Diffuse texture load failed %s",diffuse.c_str()));
                 }
@@ -208,16 +228,16 @@ void SObjModel::LoadTextures() {
 
             std::string &bump = material->map_bump;
             if (d_textures.find(bump) == d_textures.end()) {
-
-                d_textures[bump] = std::unique_ptr<STexture>(new STexture(bump,false));
+                d_textures_loaded[submesh->m_name].bump =  new STexture(bump,false);
+                d_textures[bump].reset(d_textures_loaded[submesh->m_name].bump);
                 if (!d_textures[bump]->IsReady) {
                   LOGE(string_format("OBJ:Bump texture load failed %s",bump.c_str()));
                 }
             }
             std::string &alpha = material->map_d;
             if (d_textures.find(alpha) == d_textures.end()) {
-
-                d_textures[alpha] = std::unique_ptr<STexture>(new STexture(alpha));
+                d_textures_loaded[submesh->m_name].alpha = new STexture(alpha);
+                d_textures[alpha].reset(d_textures_loaded[submesh->m_name].alpha);
                 if (!d_textures[alpha]->IsReady) {
                    LOGE(string_format("OBJ:Alpha mask texture load failed %s",alpha.c_str()));
                 }
@@ -226,6 +246,7 @@ void SObjModel::LoadTextures() {
 
 
         }
+
 
     }
 }
@@ -291,6 +312,9 @@ void SObjModel::Render(RenderContext& r) {
             }
             if (r.rsm_albedo_texture) {
                r.rsm_albedo_texture->Bind(8);
+            }
+            if (r.sh_bands) {
+               r.sh_bands->Bind(9);
             }
 
             r.shader->SetUniform("model",model);

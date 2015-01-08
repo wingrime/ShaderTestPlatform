@@ -14,11 +14,14 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
     printf("font not loaded");
  //FT_Select_Charmap( face, ft_encoding_unicode  );
 
-	FT_Set_Pixel_Sizes(face, sz, 0);
-
+    FT_Set_Pixel_Sizes(face, sz, 0);
+    float size = sz, scale = 100.0;
+    FT_Matrix matrix = { ( int)((1.0/scale) * 0x10000L), (int)((0.0)* 0x10000L),(int)((0.0) *0x10000L),( int)((1.0) * 0x10000L) };
+    FT_Set_Char_Size( face, (int)(size  *64), 0, 72 * scale, 72 );
+    FT_Set_Transform( face, &matrix, NULL );
 	/*init ui shaders*/
 
-	ui_prog = new  SProg("ui_shader.v","ui_shader.f");
+    ui_prog = new  SProg("UI/UIText.vert","UI/UIText.frag");
 
 
 
@@ -120,6 +123,8 @@ int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp
     {
       if(FT_Load_Char(face, *p, FT_LOAD_RENDER))
         continue;
+
+
       g = face->glyph;
       if (*p == '\n') {
 

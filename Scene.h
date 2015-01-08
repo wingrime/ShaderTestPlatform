@@ -11,6 +11,7 @@
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/archives/json.hpp>
 #include <memory>
+#include "DebugDraw.h"
 
 class SScene {
 public:
@@ -35,7 +36,7 @@ public:
     
     std::shared_ptr<SObjModel> model;
     std::shared_ptr<SObjModel> sky_dome_model;
-
+    std::shared_ptr<SObjModel> test_sphere_model;
 
     SCamera cam;
     SCamera sky_cam;
@@ -54,21 +55,31 @@ public:
 
     SPostProcess *pp_stage_hdr_tonemap;
 
+    /*lumenance key*/
+    SPostProcess *pp_stage_hdr_lum_key;
+    SPostProcess *pp_stage_hdr_lum_log;
+
+
     SPostProcess *pp_stage_volumetric;
     std::shared_ptr<RBO> rtSCREEN;
     std::shared_ptr<RBO> rtHDRScene;
     std::shared_ptr<RBO> rtHDRScene_MSAA;
-    std::shared_ptr<RBO> rtSSAOResult;
+    std::shared_ptr<RBO> rtSSAOHorBlurResult;
     std::shared_ptr<RBO> rtShadowMap;
-    std::shared_ptr<RBO> rtSSAOBLUR2;
+    std::shared_ptr<RBO> rtSSAOVertBlurResult;
     std::shared_ptr<RBO> rtHDRBloomResult;
     std::shared_ptr<RBO> rtHDRHorBlurResult;
     std::shared_ptr<RBO> rtHDRVertBlurResult;
+
+    std::shared_ptr<RBO> rtHDRLogLum; /*Downsample input for total lum calculation*/
+    std::shared_ptr<RBO> rtHDRLumKey; /* Out 1x1 texture with lum*/
 
     std::shared_ptr<RBO> rtVolumetric;
 
 
     std::shared_ptr<RBO> rtCubemap;
+
+    std::shared_ptr<SRBOTexture> rtConvoledCubemap;
 
     SPerfMan rtime;
 
@@ -83,7 +94,7 @@ public:
     //sel::State state{true};
 private:
     float step;
-    
+    bool d_first_render;
     std::shared_ptr<UILabel> fps_label;
     std::shared_ptr<UILabel> cfg_label;
     std::shared_ptr<UILabel> v_sel_label;
@@ -91,7 +102,7 @@ private:
     int d_cfg_current = 0;
     int d_cfg_max = 14;
     /*default parameter set*/
-    float  d_cfg [15] = {0.012, 0.006,0.720,0.26,1.5,0.75,0.030,0.22,0.30,0.10,0.20,0.01,0.30,11.2,1.6};
+    float  d_cfg [15] = {0.012, 0.006,0.720,0.26,2.0,0.75,0.015,0.22,0.30,0.10,0.20,0.01,0.30,1.12,1.6};
     float d_cfg_step = 0.001;
 
 
@@ -99,27 +110,16 @@ private:
     SShader *r_prog;
     /*shadow prog*/
     SShader *cam_prog;
-
-
     /*Sky*/
-     SShader *sky_dome_prog;
-
-    /*SSAO*/
-    SShader *pp_prog_ssao_blur_hor;
-    SShader *pp_prog_ssao_blur_vert;
-    SShader *pp_prog_ssao;
+    SShader *sky_dome_prog;
 
     SShader *pp_prog_hdr_blur_kawase;
 
-    /*HDR stages */
-    SShader *pp_prog_hdr_bloom; /*clamp step*/
-    SShader *pp_prog_hdr_blur_hor; /* blur pass horizontal*/
-    SShader *pp_prog_hdr_blur_vert; /* blur pass vertical */
-
     SShader *pp_prog_hdr_tonemap; /* final tonemap*/
-    SShader *pp_prog_volumetric; /* final tonemap*/
 
     SShader *cubemap_prog_generator;
+
+
     enum {
     	V_NORMAL,
     	V_BLOOM,
@@ -161,4 +161,10 @@ private:
    bool d_toggle_MSAA = true;
 public:
     int UpdateScene();
+
+private:
+    int InitDebugCommands();
+
+    DebugDraw d_debugDrawMgr;
+
 };
