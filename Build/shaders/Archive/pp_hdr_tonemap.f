@@ -48,7 +48,7 @@ void main ()
   vec2 c = gl_FragCoord.xy/vp.xy;
   vec3 img_color = ( texture(texHDR,c)).rgb;
   vec3 img_bloom =  ( texture(texBLUM,c)).rgb;
-  vec3 img_ssao =  ( texture(texSSAO,c)).rgb;
+  vec3 img_ssao =  vec3( texture(texSSAO,c).r);//use single color
 	
   /*bloom + img with gamma correction*/
   color = vec4(img_ssao*gamma_v3((img_bloom +img_color)  ),1.0);

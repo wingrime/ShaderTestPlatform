@@ -29,19 +29,38 @@ uniform float bump_amount = 50.0;
 uniform sampler2D texIMG;
 uniform sampler2D texBUMP;
 uniform sampler2D texture_alpha_sampler;
+uniform sampler2D sh_bands_sampler;
 /* Shadow map depth buffer*/
 uniform sampler2D sm_depth_sampler;
 
 uniform sampler2D rsm_normal_sampler;
-uniform sampler2D rsm_vector_sampler;
+uniform samplerCube rsm_vector_sampler;
 uniform sampler2D rsm_albedo_sampler;
 
 uniform float lightIntensity = 1.0;
 uniform float shadowPenumbra = 200.0;
 uniform float ambientIntensity = 0.1;
+uniform float sh_int = 10.2;
+#define DBG_OUT_FULL 0
+#define DBG_OUT_NORMAL  1
+#define DBG_OUT_ALBEDO  2
+#define DBG_OUT_NORMAL_ORIGINAL  3
+#define DBG_OUT_DIFFUSE  4
+#define DBG_OUT_ALPHA  5
+#define DBG_OUT_ATTEN 6
+#define DBG_OUT_FRESSNEL 7
+#define DBG_OUT_NORMAL_MAPED 8 
+#define DBG_OUT_SHADOW 9 
+#define DBG_OUT_GAMMA 10
+#define DBG_OUT_REFLECT 11
+#define DBG_OUT_SH 12
+uniform int dbg_out = 0;
+
+
+
 vec3 F_schlick(vec3 l, vec3 n,vec3 c_spec) {
 
-	return clamp(c_spec+ (vec3(1.0f)-c_spec)*pow(1.0- max(dot(l,n),0.0),0.05),0.0,1.0); 
+	return clamp(c_spec+ (vec3(1.0f)-c_spec)*pow(1.0- max(dot(l,n),0.000),5),0.0,1.00); 
 }
 /*lambertian cosine law with normalization factor*/
 float lambert(vec3 n , vec3 l)  {
@@ -102,13 +121,7 @@ vec3 rgbToLinSpace(vec3 c) {
 
 return vec3(pow(c.x,2.2) , pow(c.y,2.2) , pow(c.z,2.2) );
 }
-vec3 restore_pos_from_depth(float z,vec2 uv,mat4 proj, mat4 view) {
-	mat4 inv_p = inverse(proj*view);
-	vec4 s_pos = vec4(uv*2.0-1.0 ,z,1.0 );
-	s_pos = inv_p * s_pos;
-	return (s_pos.xyz/ s_pos.w);
 
-}
 float c_d(float a, float b) {
 	if (a > b) 
 		return 1.0;
@@ -134,9 +147,29 @@ mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
     float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
     return mat3( T * invmax, B * invmax, N );
 }
+
 float shadow_test(vec2 uv , float z) {
  return step(texture(sm_depth_sampler,uv).r,z - 0.000005);
 
+}
+
+/*
+vec3 appplySHamonics(vec3 L[9],vec3 n) {
+	const vec3 c1 = vec3(0.429043);
+	const vec3 c2 = vec3(0.511664);
+	const vec3 c3 = vec3(0.743125);
+	const vec3 c4 = vec3(0.886227);
+	const vec3 c5 = vec3(0.247708);
+	return c1*L[8]*(n.x*n.x - n.y*n.y ) + c3*L[6]*n.z*n.z +c4*L[0] - c5*L[6] +
+		2*c1 *( L[4]*n.x*n.y  + L[7]*n.x*n.z + L[5]*n.y*n.z ) +
+		2*c2 *( L[3]*n.x+ L[1]*n.y + L[2]*n.z );
+}*/
+vec3 appplySHamonics(vec3 L[9],vec3 n) {
+	return vec3(0.282094791)*L[0] +  vec3(0.48860251)*(n.y*L[1]+n.z*L[2] + n.x*L[3] ) + 
+		 vec3(1.092548430)*(n.x*n.y*L[4] +n.y*n.z*L[5]) + 
+		 vec3(0.315391565)*(3.0*n.z*n.z-1.0)*L[6] +
+		 vec3(0.772744)*n.z*n.x*L[7] +
+		 vec3(0.386372)*(n.x*n.x-n.y*n.y)*L[8];
 }
 void main() 
 {
@@ -206,6 +239,16 @@ poissonDisk[60] = vec2(-0.620106, -0.328104);
 poissonDisk[61] = vec2(0.789239, -0.419965);
 poissonDisk[62] = vec2(-0.545396, 0.538133);
 poissonDisk[63] = vec2(-0.178564, -0.596057);
+
+	/*SH bands load*/
+	vec3  SH[9];
+	for (int c = 0 ; c < 9; c++) {
+		SH[c].r = texelFetch(sh_bands_sampler, ivec2(c,1u),0);
+		SH[c].g = texelFetch(sh_bands_sampler, ivec2(c,2u),0);
+		SH[c].b = texelFetch(sh_bands_sampler, ivec2(c,3u),0);
+	}
+	vec3 ambient_spectral_harmonics = appplySHamonics(SH,normalize(o_normal.xyz));
+
 	float texture_alpha = texture(texture_alpha_sampler,uv).r;
 	//fix me (get viewport sizes)
 	vec4 sm_pos = sm_mat*vec4(o_pos_v ,1.0);
@@ -225,34 +268,8 @@ poissonDisk[63] = vec2(-0.178564, -0.596057);
 	}
 	else
 		shadow = 1.0;
-	shadow -=ambientIntensity ;
-	const int rsm_samples = 3;
-	/*rsm*/
+	//shadow -=ambientIntensity ;
 
-	vec3 rsm_result = vec3(0.0);
-	if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w > 0.0) {
-	for (int i=0; i < rsm_samples;i++) {
-		for (int j=0; j < rsm_samples;j++) {
-		vec2 rsm_texcoord = vec2((float(i)/float(rsm_samples)),(float(j)/float(rsm_samples)));//poissonDisk[i]*0.5+0.5;
-		vec3 rsm_pos = texture(rsm_vector_sampler,rsm_texcoord).xyz;
-		vec3 rsm_normal =texture(rsm_normal_sampler,rsm_texcoord).xyz;
-		vec3 rsm_albedo = texture(rsm_albedo_sampler,rsm_texcoord).xyz;
-		float rsm_z = texture(rsm_normal_sampler,rsm_texcoord).w;
-
-		float dist = 1.0f -  (min(1.0,length(rsm_pos - o_pos_v)/200 ));
-		float flux2 = max(0.0 , dot(rsm_normal,normalize(rsm_pos-o_pos_v )))*max(0.0,dot(o_normal,normalize(o_pos_v -rsm_pos)));
-		//float dist_orig = pow(length(rsm_pos - o_pos_v),1)/2000;
-		//float est_orig = flux_orig/(dist_orig+0.00001);
-		float l2_a = max(0.0, min( 1.0, dot( normalize(o_normal), normalize(rsm_pos-o_pos_v) ))+ 0.4);
-      	float l2_b = max(0.0, dot(normalize(o_normal), normalize(rsm_normal)));
-      	float flux = min(1.0, l2_a*l2_b);
-
-		rsm_result += rsm_albedo*vec3(dist*flux2);
-		//rsm_result  += rsm_albedo*vec3(est_orig);
-	}
-	}
-	}
-	//;rsm_result = rsm_result / (rsm_samples) ;//*rsm_samples);
 
 	/* diffuse color texture*/
 	
@@ -265,9 +282,8 @@ poissonDisk[63] = vec2(-0.178564, -0.596057);
 
 	vec3 d_normal;
 
-	d_normal = t_normal; 
 	/* tangant basis matrix*/
-	mat3 TBN =  cotangent_frame(d_normal,normalize(vPos),uv);
+	mat3 TBN =  cotangent_frame(t_normal,normalize(vPos),uv);
 
 	//normal mapping
 	d_normal = TBN * texBump;
@@ -291,33 +307,54 @@ poissonDisk[63] = vec2(-0.178564, -0.596057);
 	float diff = lambert (n,l);
 	vec3 spec ;
 	vec3 fressnel ;
-	//spec = LightingFuncGGX_OPT2(n,v,l, 0.4,0.25);
+	//spec = LightingFuncGGX_OPT2(n,v,l, 0.4,0.25)*diffColor*diff*lightIntensity*10;
 	spec = binn_phong(n,h,l,2.0,diffColor,specColor)*lightIntensity*10;
 	//spec = 0;
-	fressnel =  F_schlick(l,h,spec*specColor);
+	fressnel =  F_schlick(l,n,diff*vec3(0.003,0.003,0.003));
 	if (dot(n,l)< 0.0) 
 		fressnel = vec3(0.0);
 	float dist = length(vPos - lightPos );
 	float att = 1.0 / (1.0 + 0.0001*dist + 0.0000001*dist*dist);
-	//fressnel = vec3(0,0,0);
-	//normal
-	//dstColor = vec4(d_normal*0.5+0.5,1.0);
-	//diff only 
-	//dstColor = vec4(vec3(diff),1.0);
-	//texture only 
-	//dstColor = vec4(texColor,1.0);
-	//spec only
-	//dstColor = vec4(vec3(t_normal),1.0);
-	//fresnell only
-	//dstColor = vec4(vec3(fressnel)+0.05*diff,1.0);
-	// spec+ diff+fressnel;
-	//list attenuation
-	//dstColor = vec4(vec3(att),1.0);
-	//vec4 linColor = vec4(rsm_result*diffColor,1.0);
-	//dstColor = vec4(pow(linColor.r,1/2.2),pow(linColor.g,1/2.2),pow(linColor.b,1/2.2),1.0);
-	vec4 linColor = vec4((1.0-shadow)*(spec*att+5.0*(rsm_result*rsm_result)),texture_alpha);
-	dstColor = linColor;
 
+
+
+
+
+	/*reflections */
+	vec3 cubemap_sample = vec3(texture(rsm_vector_sampler,(transpose(MV_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz);
+
+	vec3 reflection = fressnel*cubemap_sample;
+
+	if (dbg_out == DBG_OUT_FULL)
+		dstColor = vec4((1.0-shadow)*(spec*att)+(ambient_spectral_harmonics)*sh_int*diffColor,texture_alpha);
+	else if (dbg_out ==  DBG_OUT_ALBEDO)
+		dstColor = dstColor = vec4(vec3(diff),1.0);
+	else if (dbg_out ==  DBG_OUT_DIFFUSE)
+		dstColor =  vec4(diff*diffColor,1.0);
+	else if (dbg_out ==  DBG_OUT_ALPHA)
+		dstColor =  vec4(vec3(0.0,texture_alpha,0.0),1.0);
+	else if (dbg_out ==  DBG_OUT_DIFFUSE)
+		dstColor =  vec4(vec3(0.0,texture_alpha,0.0),1.0);	
+	else if (dbg_out ==  DBG_OUT_NORMAL)
+		dstColor = vec4(0.5*normalize(t_normal)+0.5,1.0);
+	else if (dbg_out ==  DBG_OUT_ATTEN)
+		dstColor =  vec4(vec3(0.0,att,0.0),1.0);	
+	else if (dbg_out ==  DBG_OUT_FRESSNEL)
+		dstColor =  vec4(fressnel,1.0);	
+	else if (dbg_out ==  DBG_OUT_NORMAL_MAPED)
+		dstColor = vec4(0.5*normalize(d_normal)+0.5,1.0);
+	else if (dbg_out ==  DBG_OUT_SHADOW)
+		dstColor = vec4(vec3(ambient_spectral_harmonics),1.0);
+	else if (dbg_out ==  DBG_OUT_REFLECT)
+		dstColor = vec4(vec3(texture(rsm_vector_sampler,(transpose(MV_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz),1.0);
+	else if (dbg_out ==  DBG_OUT_SH)
+		dstColor = vec4(vec3(ambient_spectral_harmonics),1.0);
+	else if (dbg_out ==  DBG_OUT_GAMMA) {
+			vec4 linColor = vec4((1.0-shadow)*(spec*att),texture_alpha);
+			dstColor = vec4(pow(linColor.r,1/2.2),pow(linColor.g,1/2.2),pow(linColor.b,1/2.2),1.0);
+		}
+	else 
+		dstColor = vec4(1.0);
 
 	worldNormal = vec4(0.5*normalize(t_normal)+0.5,texture_alpha);
 }

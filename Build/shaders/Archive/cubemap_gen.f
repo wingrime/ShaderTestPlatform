@@ -1,8 +1,7 @@
 /* Base Lighting Shader */
 #version 430 core
-//layout(location = 0) out vec4 dstColor;
-out vec4 color;
-//layout(location = 1) out vec4 worldNormal; /*SSAO*/ 
+layout(location = 0) out vec4 dstColor;
+
 const float pi = 3.14159;
 
 
@@ -30,7 +29,7 @@ void main()
 {
 
 
-	float texture_alpha = texture(texture_alpha_sampler,uv).r;	
+	//float texture_alpha = texture(texture_alpha_sampler,uv).r;	
 
 	vec3 n = normalize(t_normal);
 	vec3 v  = normalize(-vPos);
@@ -45,9 +44,7 @@ void main()
 
 	vec3 diff = lambert (n,l)*texColor;
 
-	//dstColor = vec4(vec3(float(gl_Layer)/6.0 ),1.0);
-	color = vec4(vec3(diff ),1.0);
-	//dstColor = vec4(vec3(n),1.0);
-	//dstColor = vec4(vec3(1.0),1.0);
+	dstColor = vec4(vec3(diff),1.0);
 
+	
 }

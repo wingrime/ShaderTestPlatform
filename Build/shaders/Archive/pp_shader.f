@@ -9,9 +9,37 @@ uniform sampler2D texSRC2;
 
 
 uniform float b_dist2 = 0;//0.005;
-float rand(vec2 co) {
-	return fract(sin(dot(co.xy,vec2(12.9898, 78.233))) * 43758.5453);
+
+
+
+uint hash (uint x) {
+x+= x<<10u;
+x^= x>>6u;
+x+= x<<3u;
+x^= x>>11u;
+x+= x<<15u;
+
+return x;
 }
+
+float floatConstruct(uint m) {
+    const uint ieeeMantissa = 0x007fffffu; // mantissa bitmask
+    const uint ieeeOne = 0x3f800000u; // 1.0 in uint
+
+m &= ieeeMantissa;
+m |= ieeeOne;
+
+float f = uintBitsToFloat(m);
+return f - 1.0;
+}
+uint seed;
+float rnd() {
+seed = hash(seed);
+return floatConstruct(seed);
+
+}
+
+
 float texSZ = 0.001;
 
 
@@ -36,32 +64,26 @@ uniform float ssaoSize  =0.01;
 const int Samples = 20;
 void main ()
 {
-  
+
+
 	vec2 c = gl_FragCoord.xy/vp.xy;
 	//vec3 n = normal_from_depth(c);
 	vec3 n =  normalize(texture(texFB,c).xyz*2.0-1.0);
+	seed = hash(hash(1u+hash(1u+ hash(1u+floatBitsToUint(n.x)))+hash(1u+hash(1u+floatBitsToUint(n.y+c.y))) +hash(1u+hash(1u+floatBitsToUint(n.z+c.x)) )));
 	float depth = texture(texDEPTH,c).r;
 	
 	float R = ssaoSize/depth;
 	
-	vec3 Rnd[Samples];
-	//gaussian dist
-	Rnd[0] = vec3((rand(c)),(rand(n.xy-c)),(rand(n.yx-c+vec2(0.2,0.2))));
-	
-	for (int i = 1; i < Samples; i++) {
-	
-	Rnd[i] = vec3((rand(Rnd[i-1].xy+vec2(0.6,0.1))-0.5)*2,(rand(Rnd[i-1].xy)-0.5)*2, (rand(Rnd[i-1].yx)-0.5)*2 );
-	}
 
 	float occ_depthf = 0;
 	for (int i = 0; i< Samples; i++) {
-
-		vec3 hemi = sign(dot(Rnd[i],n))*Rnd[i].xyz;	
-		if (dot (hemi, n) > 0.20) // clamp HI angles
+		vec3 v_rnd = vec3(rnd()*2.0-1.0,rnd()*2.0-1.0,rnd()*2.0-1.0);
+		vec3 hemi = sign(dot(v_rnd,n))*v_rnd;	
+		//if (dot (hemi, n) < 0.65 ) // clamp HI angles
 		{
 		float occ_depth = texture(texDEPTH,c+(R*hemi.xy)).r;
 		float diff = depth  - occ_depth;
-		if (diff > 0 && diff < 0.02 )
+		if (diff > 0.00001 && diff < 0.02 )
 			occ_depthf +=1;
 		}
 	}

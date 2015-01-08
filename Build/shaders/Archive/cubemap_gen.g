@@ -57,9 +57,9 @@ void main(void)
 {
 
 	mat4 rot[6];
-	
+	/*
 	// +X //
-	 rot[1] = (mat4 ( 	0 	,  0  	, -1.0 	, 0 , 
+	 rot[0] = (mat4 ( 	0 	,  0  	, -1.0 	, 0 , 
 	 			     	0 	,  1.0	, 0   	, 0 ,
 				    	1.0 ,  0  	, 0   	, 0 ,
 				     	0 	,  0  	, 0   	, 1.0 )) ;
@@ -69,17 +69,17 @@ void main(void)
 				    	-1.0 ,  0  	, 0   	, 0 ,
 				     	0 	,  0  	, 0   	, 1.0 )) ;
 	 //+Y/
-	 rot[2] = (mat4 ( 	1 	,  0  	, 0 	, 0 , 
-	 			     	0 	,  0	, 1.0 	, 0 ,
-				    	0 	,  -1.0	, 0   	, 0 ,
+	 rot[3] = (mat4 (  1 	,  0  	, 0 	, 0 , 
+	 			     	0 	,  0	, -1.0 	, 0 ,
+				    	0 	,  1.0	, 0   	, 0 ,
 				     	0 	,  0  	, 0   	, 1.0 )) ;
 	 //-Y/
-	rot[3] = (mat4 ( 	1 	,  0  	, 0 	, 0 , 
+	rot[0] = (mat4 ( 	-1.0 	,  0  	, 0 	, 0 , 
 	 			     	0 	,  0	, -1.0 	, 0 ,
 				    	0 	,  1.0	, 0   	, 0 ,
 				     	0 	,  0  	, 0   	, 1.0 )) ;
 	 //+z/
-	 rot[5] = (mat4 ( 	-1 	,  0  	, 0 	, 0 , 
+	 rot[5] = (mat4 ( 	1 	,  0  	, 0 	, 0 , 
 	 			     	0 	,  1	, 0 	, 0 ,
 				    	0 	,  0	, -1   	, 0 ,
 				     	0 	,  0  	, 0   	, 1.0 )) ;
@@ -89,50 +89,84 @@ void main(void)
 			    		0 	,  0	, 1   	, 0 ,
 			     		0 	,  0  	, 0   	, 1.0 )) ;
     
-	
-	/*
+	*/
+/*	
 	// +X
-	rot[0] = transpose(mat4 ( 	0 	,  0  	, -1.0 	, 0 , 
+	rot[0] = (mat4 ( 	0 	,  0  	, -1.0 	, 0 , 
 	 			     			0 	,  1.0	, 0   	, 0 ,
 				    			1.0 ,  0  	, 0   	, 0 ,
 				     			0 	,  0  	, 0   	, 1.0 )) ;
 	// -X /
-	 rot[1] = transpose(mat4 ( 	0 	,  0  	, 1.0 	, 0 , 
+	 rot[1] = (mat4 ( 	0 	,  0  	, 1.0 	, 0 , 
 	 			     			0 	,  1.0	, 0   	, 0 ,
 				    			-1.0 ,  0  	, 0   	, 0 ,
 				     			0 	,  0  	, 0   	, 1.0 )) ;
 	 //+Y/
-	 rot[2] = transpose(mat4 ( 	1 	,  0  	, 0 	, 0 , 
+	 rot[2] = (mat4 ( 	1 	,  0  	, 0 	, 0 , 
 	 			     			0 	,  0	, 1.0 	, 0 ,
 				    			0 	,  -1.0	, 0   	, 0 ,
 				     			0 	,  0  	, 0   	, 1.0 )) ;
 	 //-Y/
-	rot[3] =transpose(mat4 ( 	1 	,  0  	, 0 	, 0 , 
+	rot[3] =(mat4 ( 	1 	,  0  	, 0 	, 0 , 
 	 			     			0 	,  0	, -1.0 	, 0 ,
 				    			0 	,  1.0	, 0   	, 0 ,
 				     			0 	,  0  	, 0   	, 1.0 )) ;
 	 //+z/
-	 rot[4] = transpose(mat4 ( 	-1 	,  0  	, 0 	, 0 , 
+	 rot[4] = (mat4 ( 	-1 	,  0  	, 0 	, 0 , 
 	 			     			0 	,  1	, 0 	, 0 ,
 				    			0 	,  0	, -1   	, 0 ,
 				     			0 	,  0  	, 0   	, 1.0 )) ;
 	 //-z/
-	 rot[5] = transpose(mat4 ( 	1 	,  0  	, 0 	, 0 , 
+	 rot[5] = (mat4 ( 	1 	,  0  	, 0 	, 0 , 
 	 		     				0 	,  1	, 0 	, 0 ,
 			    				0 	,  0	, 1   	, 0 ,
 			     				0 	,  0  	, 0   	, 1.0 )) ;
-    */
+
+*/
+	// +X
+	 		rot[0] = transpose(mat4 ( 	0 	,  0  	, 1.0 	, 0 , 
+	 			     			0 	,  1.0	, 0   	, 0 ,
+				    			-1.0 ,  0  	, 0   	, 0 ,
+				     			0 	,  0  	, 0   	, 1.0 )) ;
+	// -X /
+	 		rot[1] = transpose(mat4 ( 	0 	,  0  	, -1.0 	, 0 , 
+	 			     			0 	,  1.0	, 0   	, 0 ,
+				    			1.0 ,  0  	, 0   	, 0 ,
+				     			0 	,  0  	, 0   	, 1.0 )) ;
+	 //+Y/
+	 		rot[3] = transpose(mat4 ( 	-1 	,  0  	, 0 	, 0 , 
+	 			     			0 	,  0	, -1.0 	, 0 ,
+				    			0 	,  -1.0	, 0   	, 0 ,
+				     			0 	,  0  	, 0   	, 1.0 )) ;
+	 //-Y/
+			rot[2] =transpose(mat4 ( 	-1 	,  0  	, 0 	, 0 , 
+	 			     			0 	,  0	, 1.0 	, 0 ,
+				    			0 	,  1.0	, 0   	, 0 ,
+				     			0 	,  0  	, 0   	, 1.0 )) ;
+	 //+z/
+	 		rot[4] = transpose(mat4 ( 	-1 	,  0  	, 0 	, 0 , 
+	 			     			0 	,  1	, 0 	, 0 ,
+				    			0 	,  0	, -1   	, 0 ,
+				     			0 	,  0  	, 0   	, 1.0 )) ;
+	 //-z/
+	 		rot[5] = transpose(mat4 ( 	1 	,  0  	, 0 	, 0 , 
+	 		     				0 	,  1	, 0 	, 0 ,
+			    				0 	,  0	, 1   	, 0 ,
+			     				0 	,  0  	, 0   	, 1.0 )) ;
+    
+    
     int i,layer;
 
 	for (layer = 0; layer < 6; layer++) {
 		
-		gl_Layer = layer;
+		
     	for (i = 0; i < 3; i++)
     	{	
     		// camera coordinate  system
-            //gl_Position = o_proj_gs[i]*rot[layer]*o_view_gs[i]*vec4(o_pos_v_gs[i],1.0);
+            gl_Position = o_proj_gs[i]*rot[layer]*o_view_gs[i]*vec4(o_pos_v_gs[i],1.0);
             // world
-          	gl_Position = o_proj_gs[i]*rot[layer]*vec4(o_pos_v_gs[i],1.0);
+            gl_Layer = layer;
+          	//gl_Position = o_proj_gs[i]*rot[layer]*vec4(o_pos_v_gs[i],1.0);
           	//gl_Position = o_proj_gs[i]*o_view_gs[i]*vec4(o_pos_v_gs[i],1.0);
             //TODO add rotation
  			lightPos =   (rot[layer]*vec4(lightPos_gs[i],1.0)).xyz; 
