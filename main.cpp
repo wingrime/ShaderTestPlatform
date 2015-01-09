@@ -140,9 +140,9 @@ void mouse_move (  int x , int y) {
 
     }
 
-
-    sc->cam.rotEulerY(toRad(x_rm));
+sc->cam.rotEulerY(toRad(x_rm));
     sc->cam.rotEulerX(toRad(y_rm));
+
 
 
 }
@@ -184,9 +184,13 @@ void APIENTRY openglCallbackFunction(GLenum source,
  
  /* todo find  where it was called */
     static Log gl_log("gl_log.log");
-    gl_log.LogW(message);
-    // nice feature;
-    //D_TRAP();
+    if (severity  == GL_DEBUG_SEVERITY_HIGH)
+    {
+        gl_log.LogW(message);
+        // nice feature;
+       //D_TRAP();
+    }
+
 
 
 }
@@ -208,7 +212,7 @@ int main ( int argc, char * argv [] )
     // initialize glut
     glutInit            ( &argc, argv );
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutInitWindowSize  ( v.w, v.h);
+    glutInitWindowSize  ( v.getSize().w,v.getSize().h);
 
 
     // prepare context for 3.3
@@ -228,7 +232,7 @@ int main ( int argc, char * argv [] )
         GLuint unusedIds = 0;
         glDebugMessageControl(GL_DONT_CARE,
             GL_DONT_CARE,
-            GL_DONT_CARE,
+             GL_DONT_CARE,
             0,
             &unusedIds,
             true);
