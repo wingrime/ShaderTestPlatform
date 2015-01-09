@@ -58,7 +58,8 @@ public:
 
     SPostProcess(const SPostProcess&) = delete;
     void Draw();
-    void DrawRBO(); /*Draw to rbo selected on creation*/
+    void DrawRBO(bool redraw); /*Draw to rbo selected on creation*/
+    void inline DrawRBO() { DrawRBO(true); }
 
 
     SShader * getShader();

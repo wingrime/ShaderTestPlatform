@@ -10,47 +10,47 @@
 SVec4 SVec4::Normalize() const {
     float norm = Length();
     MASSERT(norm==0.0);
-    return SVec4(vec.x/norm,vec.y/norm, vec.z/norm, vec.w/norm);
+    return SVec4(x/norm,y/norm, z/norm, w/norm);
 }
 
 SVec4 SVec4::Normalize(const SVec4 &a)
 {
     float l = a.Length();
     MASSERT(l==0.0);
-    return SVec4(a.vec.x / l , a.vec.y /l , a.vec.z /l , a.vec.w / l);
+    return SVec4(a.x / l , a.y /l , a.z /l , a.w / l);
 }
 
 bool SVec4::Eq(const SVec4& a,const SVec4& b) {
-    return ( fabs(a.vec.x - b.vec.x) < 0.0001 && fabs(a.vec.y - b.vec.y) < 0.0001 && fabs(a.vec.z - b.vec.z) < 0.0001 && fabs(a.vec.w - b.vec.w) < 0.0001);
+    return ( fabs(a.x - b.x) < 0.0001 && fabs(a.y - b.y) < 0.0001 && fabs(a.z - b.z) < 0.0001 && fabs(a.w - b.w) < 0.0001);
 }
 float SVec4::Length() const{
-    return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z  + vec.w*vec.w);
+    return sqrt(x*x + y*y + z*z  + w*w);
 }
 float SVec4::Dot(const SVec4& a,const SVec4& b) {
-    return (a.vec.x *b.vec.x + a.vec.y *b.vec.y + a.vec.z *b.vec.z + a.vec.w*a.vec.w);
+    return (a.x *b.x + a.y *b.y + a.z *b.z + a.w*a.w);
 }
 SVec4::SVec4(){
-    vec.x = 0.0f;
-    vec.y = 0.0f;
-    vec.z = 0.0f;
-    vec.w = 0.0f;
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
+    w = 0.0f;
 }
 SVec4::SVec4(const SVec4& v){
-    vec.x = v.vec.x;
-    vec.y = v.vec.y;
-    vec.z = v.vec.z;
-    vec.w = v.vec.w;
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    w = v.w;
 }
-SVec4::SVec4(float x, float y, float z,float w){
-    vec.x = x;
-    vec.y = y;
-    vec.z = z;
-    vec.w = w;
+SVec4::SVec4(float _x, float _y, float _z,float _w){
+    x = _x;
+    y = _y;
+    z = _z;
+    w = _w;
 }
 SVec4::SVec4(const std::string& str){
     const char *s = str.c_str();
     int c = sscanf(s, " %f,%f,%f,%f ",
-            &vec.x,&vec.y,&vec.z,&vec.w);
+            &x,&y,&z,&w);
     //if (c != 4 )
         // better error handling
         //throw VectorError(std::string("Unable construct vector from string:")+str);
@@ -58,36 +58,36 @@ SVec4::SVec4(const std::string& str){
 /*not fully correct*/
 /*for 4D you need 3 vectors to do cross!, but if we set 3rd to (0,0,0,1)*/
 //SVec4 SVec4::operator*(const SVec4& v) const {
-//return (SVec4(vec.y * v.vec.z - vec.z * v.vec.y,
-//             vec.z * v.vec.x - vec.x * v.vec.z,
-//             vec.x * v.vec.y - vec.y * v.vec.x,
+//return (SVec4(vec.y * v.z - vec.z * v.y,
+//             vec.z * v.x - vec.x * v.z,
+//             vec.x * v.y - vec.y * v.x,
 //            0.0f));
 //}
 SVec4 SVec4::Cross3(const SVec4& a, const SVec4& b)  {
-return (SVec4(a.vec.y * b.vec.z - a.vec.z * b.vec.y,
-              a.vec.z * b.vec.x - a.vec.x * b.vec.z,
-              a.vec.x * b.vec.y - a.vec.y * b.vec.x,
+return (SVec4(a.y * b.z - a.z * b.y,
+              a.z * b.x - a.x * b.z,
+              a.x * b.y - a.y * b.x,
               0.0f));
 }
 
 SVec4 SVec4::operator+(const SVec4& v) const {
-return (SVec4(vec.x + v.vec.x,
-              vec.y + v.vec.y,
-              vec.z + v.vec.z,
-              vec.w + v.vec.w));
+return (SVec4(x + v.x,
+              y + v.y,
+              z + v.z,
+              w + v.w));
 }
 
 SVec4 operator-(const SVec4& v1,const SVec4& v2){
-return (SVec4(v1.vec.x - v2.vec.x,
-              v1.vec.y - v2.vec.y,
-              v1.vec.z - v2.vec.z,
-              v1.vec.w - v2.vec.w));
+return (SVec4(v1.x - v2.x,
+              v1.y - v2.y,
+              v1.z - v2.z,
+              v1.w - v2.w));
 }
 
 
 
 void SVec4::Reflect() const{
-    printf("%f %f %f %f\n",vec.x,vec.y,vec.z,vec.w);
+    printf("%f %f %f %f\n",x,y,z,w);
 }
 
 
@@ -155,10 +155,10 @@ SMat4x4::SMat4x4(SVec4 a1,
                  SVec4 a3,
                  SVec4 a4 ) {
 
-    mat.a11 = a1.vec.x; mat.a12 = a2.vec.x;mat.a13 = a3.vec.x; mat.a14 = a4.vec.x;
-    mat.a21 = a1.vec.y; mat.a22 = a2.vec.y;mat.a23 = a3.vec.y; mat.a24 = a4.vec.y;
-    mat.a31 = a1.vec.z; mat.a32 = a2.vec.z;mat.a33 = a3.vec.z; mat.a34 = a4.vec.z;
-    mat.a41 = a1.vec.w; mat.a42 = a2.vec.w;mat.a43 = a3.vec.w; mat.a44 = a4.vec.w;
+    mat.a11 = a1.x; mat.a12 = a2.x;mat.a13 = a3.x; mat.a14 = a4.x;
+    mat.a21 = a1.y; mat.a22 = a2.y;mat.a23 = a3.y; mat.a24 = a4.y;
+    mat.a31 = a1.z; mat.a32 = a2.z;mat.a33 = a3.z; mat.a34 = a4.z;
+    mat.a41 = a1.w; mat.a42 = a2.w;mat.a43 = a3.w; mat.a44 = a4.w;
     //printf("mat\n");
 }
 SMat4x4::SMat4x4(const std::string &str) {
@@ -216,10 +216,10 @@ SMat4x4 SMat4x4::Move(float x,float y,float z) const{
 /*optimize*/
 SMat4x4 SMat4x4::Translate(const SVec4& vec) const{
     SMat4x4 a =  SMat4x4(0.0);
-    a.mat.a14 = vec.vec.x;
-    a.mat.a24 = vec.vec.y;
-    a.mat.a34 = vec.vec.z;
-    a.mat.a44 = vec.vec.w;
+    a.mat.a14 = vec.x;
+    a.mat.a24 = vec.y;
+    a.mat.a34 = vec.z;
+    a.mat.a44 = vec.w;
 
     return (* this)+(a);
 }
@@ -278,16 +278,16 @@ SMat4x4 SMat4x4::Transpose() const {
 
 
 SVec4 operator* (const SMat4x4& m, const SVec4& v){
-    return SVec4(m.mat.a11 * v.vec.x + m.mat.a12 * v.vec.y + m.mat.a13 * v.vec.z+ m.mat.a14 * v.vec.w ,
-                 m.mat.a21 * v.vec.x + m.mat.a22 * v.vec.y + m.mat.a23 * v.vec.z+ m.mat.a24 * v.vec.w ,
-                 m.mat.a31 * v.vec.x + m.mat.a32 * v.vec.y + m.mat.a33 * v.vec.z+ m.mat.a34 * v.vec.w ,
-                 m.mat.a41 * v.vec.x + m.mat.a42 * v.vec.y + m.mat.a43 * v.vec.z+ m.mat.a44 * v.vec.w );
+    return SVec4(m.mat.a11 * v.x + m.mat.a12 * v.y + m.mat.a13 * v.z+ m.mat.a14 * v.w ,
+                 m.mat.a21 * v.x + m.mat.a22 * v.y + m.mat.a23 * v.z+ m.mat.a24 * v.w ,
+                 m.mat.a31 * v.x + m.mat.a32 * v.y + m.mat.a33 * v.z+ m.mat.a34 * v.w ,
+                 m.mat.a41 * v.x + m.mat.a42 * v.y + m.mat.a43 * v.z+ m.mat.a44 * v.w );
 
 }
 template <typename T>
 SVec4 operator/ (const SVec4& v,T num){
     MASSERT(num = 0.0);
-    return SVec4(v.vec.x / num , v.vec.y / num  , v.vec.z/ num , v.vec.w/ num);
+    return SVec4(v.x / num , v.y / num  , v.z/ num , v.w/ num);
 }
 
 //#define CHECK_QU() {if (!CheckUnit()) EMSGS("UnitQuaterion not unit lenght!")}
@@ -353,9 +353,9 @@ UnitQuaterion::UnitQuaterion(float x, float y, float z,float w){
 /* WARNING: vector.w will be ignored */
 UnitQuaterion::UnitQuaterion(const SVec4& v, float fi){
     float sin_fi = sin(fi/2);
-    q.x = sin_fi*v.vec.x;
-    q.y = sin_fi*v.vec.y;
-    q.z = sin_fi*v.vec.z;
+    q.x = sin_fi*v.x;
+    q.y = sin_fi*v.y;
+    q.z = sin_fi*v.z;
     q.w = cos(fi/2);
     //CHECK_QU();
 }

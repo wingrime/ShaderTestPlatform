@@ -32,12 +32,12 @@ T inline toDeg(T rad){
 
 class SVec4 {
 public:
-    SVec4(float x,float y, float z, float w);
+    SVec4(float _x, float _y, float _z, float _w);
     SVec4(const SVec4& v);
     SVec4();
     SVec4(const std::string& str);
 
-    union vec {
+    union  {
         struct {
             float x;float y;float z;float w;
         };
@@ -47,7 +47,7 @@ public:
         struct {
             float raw[4];
         };
-    } vec;
+    } ;
 
     //SVec4 operator*(const SVec4& v) const;
     // not corrent, in R4 it will require 3 vector for cross product
@@ -64,7 +64,11 @@ public:
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar( vec);
+        ar( CEREAL_NVP(x),
+            CEREAL_NVP(y),
+            CEREAL_NVP(z),
+            CEREAL_NVP(w)
+            );
     }
 
     static SVec4 Cross3(const SVec4 &a, const SVec4 &b);
@@ -197,6 +201,7 @@ public:
     SVec2(float x,float y);
     SVec2(const SVec2& v);
     SVec2();
+    //SVec2(const std::string& str);
     union  {
         struct {
             float x;float y;
@@ -211,6 +216,7 @@ public:
             float raw[2];
         };
     };
+
     /*serialize support */
     template <class Archive>
     void serialize( Archive & ar )

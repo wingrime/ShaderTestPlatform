@@ -77,12 +77,12 @@ void SPostProcess::Draw() {
 
 }
 
-void SPostProcess::DrawRBO()
+void SPostProcess::DrawRBO(bool redraw)
 {
     if (p_prog->IsReady)
     {
         MASSERT(!d_RBO);
-        d_RBO->Bind(true);
+        d_RBO->Bind(redraw);
         glBindVertexArray ( vao );
         p_prog-> Bind();
         if (d_texSRC1)

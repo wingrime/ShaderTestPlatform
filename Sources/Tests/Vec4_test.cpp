@@ -5,35 +5,35 @@
 TEST(SVec4, DefaultConstructor ) {
 
     SVec4 v;
-    EXPECT_EQ(v.vec.x == 0.0,true);
-    EXPECT_EQ(v.vec.y == 0.0,true);
-    EXPECT_EQ(v.vec.z == 0.0,true);
-    EXPECT_EQ(v.vec.w == 0.0,true);
-    EXPECT_EQ(v.vec.a == 0.0,true);
-    EXPECT_EQ(v.vec.r == 0.0,true);
-    EXPECT_EQ(v.vec.g == 0.0,true);
-    EXPECT_EQ(v.vec.b == 0.0,true);
+    EXPECT_EQ(v.x == 0.0,true);
+    EXPECT_EQ(v.y == 0.0,true);
+    EXPECT_EQ(v.z == 0.0,true);
+    EXPECT_EQ(v.w == 0.0,true);
+    EXPECT_EQ(v.a == 0.0,true);
+    EXPECT_EQ(v.r == 0.0,true);
+    EXPECT_EQ(v.g == 0.0,true);
+    EXPECT_EQ(v.b == 0.0,true);
 }
 TEST(SVec4, NormalConstructor ) {
 
     SVec4 v(1.0,2.0,3.0,4.0);
-    EXPECT_FLOAT_EQ(v.vec.x ,1.0);
-    EXPECT_FLOAT_EQ(v.vec.y , 2.0);
-    EXPECT_FLOAT_EQ(v.vec.z , 3.0);
-    EXPECT_FLOAT_EQ(v.vec.w , 4.0);
-    EXPECT_FLOAT_EQ(v.vec.r , 1.0);
-    EXPECT_FLOAT_EQ(v.vec.g , 2.0);
-    EXPECT_FLOAT_EQ(v.vec.b , 3.0);
-    EXPECT_FLOAT_EQ(v.vec.a , 4.0);
+    EXPECT_FLOAT_EQ(v.x ,1.0);
+    EXPECT_FLOAT_EQ(v.y , 2.0);
+    EXPECT_FLOAT_EQ(v.z , 3.0);
+    EXPECT_FLOAT_EQ(v.w , 4.0);
+    EXPECT_FLOAT_EQ(v.r , 1.0);
+    EXPECT_FLOAT_EQ(v.g , 2.0);
+    EXPECT_FLOAT_EQ(v.b , 3.0);
+    EXPECT_FLOAT_EQ(v.a , 4.0);
 }
 
 TEST(SVec4, CopyConstructor ) {
 
     SVec4 v(SVec4(SVec4(1.0,2.0,3.0,4.0)));
-    EXPECT_FLOAT_EQ(v.vec.x ,1.0);
-    EXPECT_FLOAT_EQ(v.vec.y , 2.0);
-    EXPECT_FLOAT_EQ(v.vec.z , 3.0);
-    EXPECT_FLOAT_EQ(v.vec.w , 4.0);
+    EXPECT_FLOAT_EQ(v.x ,1.0);
+    EXPECT_FLOAT_EQ(v.y , 2.0);
+    EXPECT_FLOAT_EQ(v.z , 3.0);
+    EXPECT_FLOAT_EQ(v.w , 4.0);
 
 }
 

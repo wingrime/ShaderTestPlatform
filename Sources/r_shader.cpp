@@ -170,7 +170,7 @@ int SProg::SetUniform( const std::string& name ,const SMat4x4& mat )
 
 int SProg::SetUniform(int loc, const SVec4 &vec)
 {
-    glUniform4fv(loc, 1, (float *)vec.vec.raw);
+    glUniform4fv(loc, 1, (float *)vec.raw);
     return ESUCCESS;
 }
 
@@ -203,7 +203,7 @@ int SProg::SetUniform(const std::string& name, const SVec4& vec)
         LOGW(string_format("No uniform vec4 \"%s\"", name.c_str())+ std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
         return EFAIL;
     }
-    glUniform4fv(loc, 1, (float *)vec.vec.raw);
+    glUniform4fv(loc, 1, (float *)vec.raw);
 
     return ESUCCESS;
 }

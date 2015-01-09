@@ -118,9 +118,9 @@ CObjV3 CObjMeshParser::CalcNormal(const CObjV3& v1, const CObjV3& v2, const CObj
     SVec4 n = SVec4::Normalize( SVec4::Cross3( (vec1 - vec2) ,(vec1 - vec3)) );
 
     CObjV3 e;
-    e.x = n.vec.x;
-    e.y = n.vec.y;
-    e.z = n.vec.z;
+    e.x = n.x;
+    e.y = n.y;
+    e.z = n.z;
     return e;
 
 }
