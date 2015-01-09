@@ -109,15 +109,24 @@ void CObjMeshParser::SortByMaterial()
 
 CObjV3 CObjMeshParser::CalcNormal(const CObjV3& v1, const CObjV3& v2, const CObjV3& v3)
 {
-    SVec4 vec1(v1.x,v1.y,v1.z,0.0);
-
-    SVec4 vec2(v2.x,v2.y,v2.z,0.0);
-
-    SVec4 vec3(v3.x,v3.y,v3.z,0.0);
-
-    SVec4 n = SVec4::Normalize( SVec4::Cross3( (vec1 - vec2) ,(vec1 - vec3)) );
 
     CObjV3 e;
+
+    SVec4 vec1(v1.x,v1.y,v1.z,0.0);
+    SVec4 vec2(v2.x,v2.y,v2.z,0.0);
+    SVec4 vec3(v3.x,v3.y,v3.z,0.0);
+
+    SVec4 n_n = SVec4::Cross3((vec1 - vec2) ,(vec1 - vec3));
+
+    if (n_n.Length() == 0 ) {
+        /* normal is broken*/
+        e.x = 0;
+        e.y = 0;
+        e.z = 0;
+        return e;
+
+    }
+    SVec4 n = SVec4::Normalize( n_n );
     e.x = n.x;
     e.y = n.y;
     e.z = n.z;
