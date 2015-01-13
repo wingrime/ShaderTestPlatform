@@ -39,8 +39,8 @@ GLuint  SProg::LoadShader (const char * source, GLenum type, const std::string &
 }
 
 int SProg::LookupUniformLocation(const std::string &name) {
-
-    if (d_location_lookup.find(name) == d_location_lookup.end() ) {
+    auto it = d_location_lookup.find(name);
+    if ( it == d_location_lookup.end() ) {
         int loc = glGetUniformLocation ( d_program, name.c_str() );
         if ( loc < 0 ) {
             return EFAIL;
@@ -49,7 +49,7 @@ int SProg::LookupUniformLocation(const std::string &name) {
         return loc;
 
     } else
-        return d_location_lookup[name];
+        return (*it).second;
 }
 /*fragment with vertext prog*/
 SProg::SProg(const std::string& vprog,const std::string& fprog, const std::string& gprog)
