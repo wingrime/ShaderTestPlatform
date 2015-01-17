@@ -195,6 +195,7 @@ int main ( int argc, char * argv [] )
     MainLog log;
     Log gl_log("gl_log.log");
 
+    LOGV("GIT REVISION:"  GIT_SHA1 );
     /*backtrace on windows*/
     LoadLibraryA("backtrace.dll");
     RBO v(1000,1000);
