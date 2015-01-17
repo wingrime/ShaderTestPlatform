@@ -538,20 +538,21 @@ int SScene::Render() {
         if (d_toggle_brightpass ) {
 
         pp_stage_hdr_bloom->DrawRBO(false);
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)0.0);
+        int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("glurSize");
+        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)0.0);
         pp_stage_hdr_blur_hor->DrawRBO(false);
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*1.0));
+        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*1.0));
         pp_stage_hdr_blur_vert->DrawRBO(false);
 
         /*ping pong 1*/
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*2.0));
+        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*2.0));
         pp_stage_hdr_blur_hor2->DrawRBO(false);
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*2.0));
+        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*2.0));
         pp_stage_hdr_blur_vert2->DrawRBO(false);
         /*ping pong 2*/
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*3.0));
+        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*3.0));
         pp_stage_hdr_blur_hor2->DrawRBO(false);
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*3.0));
+        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*3.0));
         pp_stage_hdr_blur_vert2->DrawRBO(false);
         } else {
             pp_stage_hdr_blur_vert2->getResultRBO()->Bind(true); /*cleanup*/
