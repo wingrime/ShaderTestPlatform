@@ -99,5 +99,29 @@ int SShader::SetUniform(const std::string &var, const SVec4 &vec)
     return ESUCCESS;
 }
 
+int SShader::SetUniform( int loc, float i)
+{
+    d_int_update_list.push_back( std::pair<int, int >( loc, i) );
+    return ESUCCESS;
+}
+
+int SShader::SetUniform(int loc, int i)
+{
+    d_float_update_list.push_back( std::pair<int, float >( loc, i) );
+    return ESUCCESS;
+}
+
+int SShader::SetUniform(int loc, const SVec4 &vec)
+{
+    d_vector_update_list.push_back( std::pair<int,SVec4 >( loc, vec) );
+    return ESUCCESS;
+}
+
+int SShader::SetUniform(int loc, const SMat4x4 &mat)
+{
+    d_matrix_update_list.push_back( std::pair<int, const SMat4x4 >( loc, mat) );
+    return ESUCCESS;
+}
+
 
 

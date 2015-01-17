@@ -40,6 +40,11 @@ public:
     int SetUniform(const std::string& var,int i );
     int SetUniform(const std::string& var,const SMat4x4& mat );
     int SetUniform(const std::string& var,const SVec4& vec );
+    /*via location*/
+    int SetUniform(int loc, float i );
+    int SetUniform(int loc,int i );
+    int SetUniform(int loc,const SVec4& vec );
+    int SetUniform(int loc,const SMat4x4& mat );
 
     //mesh settings
     int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type){
