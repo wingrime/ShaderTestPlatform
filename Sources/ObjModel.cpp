@@ -319,9 +319,9 @@ void SObjModel::Render(RenderContext& r) {
                r.sh_bands->Bind(9);
             }
 
-            r.shader->SetUniform("model",model);
-            r.shader->SetUniform("view",r.camera->getViewMatrix());
-            r.shader->SetUniform("cam_proj",r.camera->getProjMatrix());
+            r.shader->SetUniform(r.d_modelMatrixLoc,model);
+            r.shader->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
+            r.shader->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
             r.shader->Bind();
 
 

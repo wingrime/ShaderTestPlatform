@@ -23,14 +23,24 @@ class RenderContext {
          	viewport(v),
          	camera(c),
          	sm_map(false)
-         {}
+         {
+            /*speedup test*/
+            d_viewMatrixLoc = s->getUniformLocation("view");
+            d_projMatrixLoc = s->getUniformLocation("cam_proj");
+            d_modelMatrixLoc = s->getUniformLocation("model");
+        }
         RenderContext(const RBO* v,SShader* s, SCamera *c, std::shared_ptr<SRBOTexture> sm_tex)
         	:sm_texture(sm_tex),
         	shader(s),
          	viewport(v),
          	camera(c),
          	sm_map(true)
-        {}
+        {
+            /*speedup test*/
+            d_viewMatrixLoc = s->getUniformLocation("view");
+            d_projMatrixLoc = s->getUniformLocation("cam_proj");
+            d_modelMatrixLoc = s->getUniformLocation("model");
+        }
         RenderContext(const RBO* v,SShader* s, SCamera *c, 
                     std::shared_ptr<SRBOTexture> sm_tex,
                     std::shared_ptr<SRBOTexture> rsm_normal_tex,
@@ -44,7 +54,12 @@ class RenderContext {
          	rsm_normal_texture(rsm_normal_tex),
          	rsm_vector_texture(rsm_vector_tex),
          	rsm_albedo_texture(rsm_albedo_tex)
-        {}
+        {
+            /*speedup test*/
+            d_viewMatrixLoc = s->getUniformLocation("view");
+            d_projMatrixLoc = s->getUniformLocation("cam_proj");
+            d_modelMatrixLoc = s->getUniformLocation("model");
+        }
         RenderContext(const RenderContext&) = delete;
     	SShader *shader;
     	const RBO *viewport;
@@ -54,5 +69,9 @@ class RenderContext {
         std::shared_ptr<SRBOTexture> rsm_vector_texture;
         std::shared_ptr<SRBOTexture> rsm_albedo_texture;
         std::shared_ptr<SRBOTexture> sh_bands;
+        /*speedup test*/
+        int d_viewMatrixLoc;
+        int d_projMatrixLoc;
+        int d_modelMatrixLoc;
     	bool sm_map;
 };
