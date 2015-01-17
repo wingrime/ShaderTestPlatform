@@ -42,7 +42,9 @@ SScene::SScene(RBO *v)
 {
     /*Setup error handler*/
     MainLog::GetInstance()->SetCallback([=](Log::Verbosity v, const std::string &s)-> void { con->Msg(s); });
-    con->Msg("Model View\nShestacov Alexsey 2014-2015 (c)\n");
+    con->Msg("git revision: " GIT_SHA1 "\n");
+    con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
+
     int w = rtHDRScene->getSize().w;
     int h = rtHDRScene->getSize().h;
     /*bloom shaders */

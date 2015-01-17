@@ -90,9 +90,16 @@ message ("${RENDER_HEADERS}")
 
 
 message ("${RENDER_TESTS}")
+#add git revision to variable
+exec_program(
+    "git"
+    ARGS "rev-parse HEAD"
+    OUTPUT_VARIABLE VERSION )
 
 
-
+add_definitions( -DGIT_SHA1="${VERSION}" )
+message ("${VERSION}")
+message ("GIT OUTPUT")
 
 add_executable("main" main.cpp Scene.cpp ${RENDER_HEADERS})
 
