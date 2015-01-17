@@ -25,6 +25,11 @@ STexture *bump;
 STexture *alpha;
 
 };
+struct SubMeshIDs {
+unsigned int vao;
+unsigned int vbo;
+unsigned int ibo;
+};
 
 class MeshIndexer {
 public:
@@ -50,7 +55,7 @@ class SObjModel {
         void SetModelMat(const SMat4x4& m);
     private:
         /*Utils*/
-        void BindTextures(const std::shared_ptr<CObjSubmesh> &submesh);
+        void BindTextures(Material *m);
         void LoadTextures();
         void BindVAOs ();
 
@@ -67,11 +72,10 @@ class SObjModel {
 
 
 
-        std::unordered_map<unsigned int , unsigned int > submesh_vbo;
-        std::unordered_map<unsigned int , unsigned int > submesh_vao;
-        std::unordered_map<unsigned int , unsigned int > submesh_ibo;
+        std::unordered_map<unsigned int , SubMeshIDs > submesh_idx;
+
         std::unordered_map<std::string, std::unique_ptr<STexture> > d_textures;
-        std::unordered_map<std::string, Material> d_textures_loaded;
+        std::unordered_map<std::string, Material> d_materails;
         std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
 
         

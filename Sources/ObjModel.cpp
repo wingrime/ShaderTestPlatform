@@ -65,14 +65,13 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     sprog.Bind();
     for (auto it = d_sm.begin(); it != d_sm.end();++it) {
         auto &submesh =  (*it);
-        glBindVertexArray( submesh_vao[(*it)->id] );
-        glBindBuffer ( GL_ARRAY_BUFFER, submesh_vbo[(*it)->id] );
+        glBindVertexArray( submesh_idx[(*it)->id].vao );
+        glBindBuffer ( GL_ARRAY_BUFFER, submesh_idx[(*it)->id].vbo );
 
             sprog.SetAttrib( "position", 3, sizeof(CObjVertexN), offsetof(CObjVertexN,p),GL_FLOAT);
             sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
             sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
 
-        BindTextures(submesh);
         glBindVertexArray(0);
     }
     sprog.SetUniform("texIMG",0);
@@ -133,10 +132,7 @@ SObjModel::SObjModel(const std::string&  fname)
 void SObjModel::SetModelMat(const SMat4x4& m){
 	model = m;
 }
-void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
-
-
-    Material * m = &d_textures_loaded[submesh->m_name];
+void SObjModel::BindTextures(Material * m) {
     if (m->alpha && m->alpha->IsReady)
         m->alpha->Bind(2);
     else
@@ -149,49 +145,6 @@ void SObjModel::BindTextures(const std::shared_ptr<CObjSubmesh> &submesh) {
         m->bump->Bind(1);
     else
         texNormal->Bind(1);
-            /*
-    //texture diffuse
-    if (d_materials.find(submesh->m_name) != d_materials.end()) {
-        auto &material = d_materials[submesh->m_name];
-        if (d_textures.find(material->map_Kd) != d_textures.end()) {
-            auto &diffuse_texture =  d_textures[material->map_Kd];
-            if (diffuse_texture->IsReady)
-                diffuse_texture->Bind(0);
-            else
-                texDiffuse->Bind(0);
-        } else
-            texDiffuse->Bind(0);   
-    } else
-    texDiffuse->Bind(0);
-
-    //texture bump
-    if (d_materials.find(submesh->m_name) != d_materials.end()) {
-        auto &material = d_materials[submesh->m_name];
-        if (d_textures.find(material->map_bump) != d_textures.end()) {
-            auto &bump_texture =  d_textures[material->map_bump];
-            if (bump_texture->IsReady)
-                bump_texture->Bind(1);
-            else
-                texNormal->Bind(1);
-        } else
-            texNormal->Bind(1);   
-    } else
-    texNormal->Bind(1);
-    //texture alpha
-    if (d_materials.find(submesh->m_name) != d_materials.end()) {
-        auto &material = d_materials[submesh->m_name];
-        if (d_textures.find(material->map_d) != d_textures.end()) {
-            auto &alpha_texture =  d_textures[material->map_d];
-            if (alpha_texture->IsReady)
-                alpha_texture->Bind(2);
-            else
-                texDiffuse->Bind(2);
-        } else
-            texDiffuse->Bind(2);   
-    } else
-        texDiffuse->Bind(2);
-
-*/
 }
 
 void SObjModel::LoadTextures() {
@@ -221,8 +174,8 @@ void SObjModel::LoadTextures() {
             if (d_textures.find(diffuse) == d_textures.end()) {
                // printf("material %s Diffuse %s Bump %s Alpha %s \n",submesh->m_name.c_str(),  material->map_Kd.c_str(), material->map_bump.c_str(), material->map_d.c_str());
 
-                d_textures_loaded[submesh->m_name].diffuse =  new STexture(diffuse);
-                d_textures[diffuse].reset( d_textures_loaded[submesh->m_name].diffuse);
+                d_materails[submesh->m_name].diffuse =  new STexture(diffuse);
+                d_textures[diffuse].reset( d_materails[submesh->m_name].diffuse);
                 if (!d_textures[diffuse]->IsReady) {
                    LOGE(string_format("OBJ:Diffuse texture load failed %s",diffuse.c_str()));
                 }
@@ -230,16 +183,16 @@ void SObjModel::LoadTextures() {
 
             std::string &bump = material->map_bump;
             if (d_textures.find(bump) == d_textures.end()) {
-                d_textures_loaded[submesh->m_name].bump =  new STexture(bump,false);
-                d_textures[bump].reset(d_textures_loaded[submesh->m_name].bump);
+                d_materails[submesh->m_name].bump =  new STexture(bump,false);
+                d_textures[bump].reset(d_materails[submesh->m_name].bump);
                 if (!d_textures[bump]->IsReady) {
                   LOGE(string_format("OBJ:Bump texture load failed %s",bump.c_str()));
                 }
             }
             std::string &alpha = material->map_d;
             if (d_textures.find(alpha) == d_textures.end()) {
-                d_textures_loaded[submesh->m_name].alpha = new STexture(alpha);
-                d_textures[alpha].reset(d_textures_loaded[submesh->m_name].alpha);
+                d_materails[submesh->m_name].alpha = new STexture(alpha);
+                d_textures[alpha].reset(d_materails[submesh->m_name].alpha);
                 if (!d_textures[alpha]->IsReady) {
                    LOGE(string_format("OBJ:Alpha mask texture load failed %s",alpha.c_str()));
                 }
@@ -285,11 +238,12 @@ void SObjModel::BindVAOs() {
             MASSERT(submesh->indexes.empty());
             glBufferData(GL_ELEMENT_ARRAY_BUFFER,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
 
-            submesh_vbo [ submesh->id ] = temp_vbo;
-            submesh_vao [submesh->id] = temp_vao;
-            submesh_ibo [submesh->id] = temp_ibo;
+            SubMeshIDs idx;
+            idx.vao = temp_vao;
+            idx.vbo = temp_vbo;
+            idx.ibo = temp_ibo;
 
-
+            submesh_idx[submesh->id] = idx;
             glBindVertexArray(0);
         }
 }
@@ -299,8 +253,9 @@ void SObjModel::Render(RenderContext& r) {
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
 
-            BindTextures(submesh);
-            glBindVertexArray ( submesh_vao[submesh->id] );
+            Material m = d_materails[submesh->m_name];
+            BindTextures(&m);
+            glBindVertexArray ( submesh_idx[submesh->id].vao );
             /*shader*/
             /*shadow mapping*/
             if (r.sm_texture) {
