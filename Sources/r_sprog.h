@@ -30,6 +30,7 @@ public:
     /*Shader in line creation*/
     SShader(const std::string& vprog,const std::string& fprog, const std::string& gprog);
     SShader(const std::string& vprog,const std::string& fprog) :SShader(vprog, fprog, "") {}
+    unsigned int getUniformLocation(const std::string& name);
     ~SShader();
     int Bind();
 

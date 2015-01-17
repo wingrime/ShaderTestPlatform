@@ -27,6 +27,11 @@ SShader::SShader(const std::string &vprog, const std::string &fprog, const std::
     IsReady =  prog->IsReady;
 }
 
+unsigned int SShader::getUniformLocation(const std::string &name)
+{
+   return prog->LookupUniformLocation(name);
+}
+
 int SShader::Bind()
 {
 
