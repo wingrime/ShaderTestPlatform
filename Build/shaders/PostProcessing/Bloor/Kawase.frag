@@ -14,11 +14,11 @@ void main ()
 {
  float bS = blurSize/10.0;
   vec2 c = gl_FragCoord.xy/vp.xy;
-  vec4 sum = vec4(0.0);
-  sum += texture2D(texFB, vec2(c.x - 1.0*bS, c.y - 1.0*bS));
-  sum += texture2D(texFB, vec2(c.x + 1.0*bS, c.y + 1.0*bS));
-  sum += texture2D(texFB, vec2(c.x - 1.0*bS, c.y + 1.0*bS));
-  sum += texture2D(texFB, vec2(c.x + 1.0*bS, c.y - 1.0*bS));
+  float sum = 0.0;
+  sum += texture(texFB, vec2(c.x - 1.0*bS, c.y - 1.0*bS)).r;
+  sum += texture(texFB, vec2(c.x + 1.0*bS, c.y + 1.0*bS)).r;
+  sum += texture(texFB, vec2(c.x - 1.0*bS, c.y + 1.0*bS)).r;
+  sum += texture(texFB, vec2(c.x + 1.0*bS, c.y - 1.0*bS)).r;
   sum *= 0.25;
-  color = vec4(sum.rgb,1.0);
+  color = vec4(vec3(sum),1.0);
 }

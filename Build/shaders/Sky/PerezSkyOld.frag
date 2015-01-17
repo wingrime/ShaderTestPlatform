@@ -1,43 +1,43 @@
 /* Base Lighting Shader */
 #version 330
 layout(location = 0) out vec4 dstColor;
+layout(location = 1) out vec4 worldNormal; /*SSAO*/ 
 const float pi = 3.14159;
-//from ShaderFastMathLib
-//
-// Trigonometric functions
-//
-const  float fsl_PI = 3.1415926535897932384626433f;
-const  float fsl_HALF_PI = 0.5f * fsl_PI;
 
-// 4th order polynomial approximation
-// 4 VGRP, 16 ALU Full Rate
-// 7 * 10^-5 radians precision
-// Reference : Handbook of Mathematical Functions (chapter : Elementary Transcendental Functions), M. Abramowitz and I.A. Stegun, Ed.
-float acosFast4(float inX)
-{
-        float x1 = abs(inX);
-        float x2 = x1 * x1;
-        float x3 = x2 * x1;
-        float s;
-
-        s = -0.2121144f * x1 + 1.5707288f;
-        s = 0.0742610f * x2 + s;
-        s = -0.0187293f * x3 + s;
-        s = sqrt(1.0f - x1) * s;
-
-        // acos function mirroring
-        // check per platform if compiles to a selector - no branch neeeded
-        return inX >= 0.0f ? s : fsl_PI - s;
-}
 
 /* BRDF Required vectors*/
+in mat4 sm_proj;
+in mat4 sm_view;
+
+in vec3 lightPos;
+in vec3 vPos;
+in vec2 uv;
+in vec3 t_normal;
+in vec3 t_tangent;
+in vec3 t_binormal;
+
 in vec3 o_normal;
+in vec3 o_pos_v;
+in mat4 o_view;
+in mat4 o_proj;
+in mat4 MV_n;
+in vec4 o_light;
+
+uniform int mesh_flags;
+const int MESH_V_TC_N = 1;
+const int MESH_V_TC = 0;
+/* Source texture */
+uniform sampler2D texIMG;
+uniform sampler2D texBUMP;
+uniform sampler2D texture_alpha_sampler;
+
 
 //
 // Perez zenith func
 //
 vec3 perezZenith ( float t, float thetaSun )
 {
+    const float pi = 3.1415926;
     const vec4  cx1 = vec4 ( 0,       0.00209, -0.00375, 0.00165  );
     const vec4  cx2 = vec4 ( 0.00394, -0.03202, 0.06377, -0.02903 );
     const vec4  cx3 = vec4 ( 0.25886, 0.06052, -0.21196, 0.11693  );
@@ -46,7 +46,7 @@ vec3 perezZenith ( float t, float thetaSun )
     const vec4  cy3 = vec4 ( 0.26688, 0.06670, -0.26756, 0.15346  );
 
     float   t2    = t*t;
-    float   chi   = (4.0 / 9.0 - t / 120.0 ) * (fsl_PI - 2.0 * thetaSun );
+    float   chi   = (4.0 / 9.0 - t / 120.0 ) * (pi - 2.0 * thetaSun );
     vec4    theta = vec4 ( 1, thetaSun, thetaSun*thetaSun, thetaSun*thetaSun*thetaSun );
 
     float   Y = (4.0453 * t - 4.9710) * tan ( chi ) - 0.2155 * t + 2.4192;
@@ -58,7 +58,7 @@ vec3 perezZenith ( float t, float thetaSun )
 
 vec3  perezFunc ( float t, float cosTheta, float cosGamma )
 {
-    float  gamma      = acosFast4 ( cosGamma );
+    float  gamma      = acos ( cosGamma );
     float  cosGammaSq = cosGamma * cosGamma;
     float  aY =  0.17872 * t - 1.46303;
     float  bY = -0.35540 * t + 0.42749;
@@ -83,13 +83,13 @@ vec3  perezFunc ( float t, float cosTheta, float cosGamma )
 
 vec3  perezSky ( float t, float cosTheta, float cosGamma, float cosThetaSun )
 {
-    float thetaSun = acosFast4        ( cosThetaSun );
+    float thetaSun = acos        ( cosThetaSun );
     vec3  zenith   = perezZenith ( t, thetaSun );
     vec3  clrYxy   = zenith * perezFunc ( t, cosTheta, cosGamma ) / perezFunc ( t, 1.0, cosThetaSun );
 
     clrYxy [0] *= smoothstep ( 0.0, 0.5, cosThetaSun );         // make sure when thetaSun > PI/2 we have black color
 
-    clrYxy [0] *= smoothstep ( 0.0, 0.1, cosTheta );         // make sure when theta > PI/2 we have black color
+   clrYxy [0] *= smoothstep ( 0.0, 0.1, cosTheta );         // make sure when theta > PI/2 we have black color
 
     //clrYxy [0] *= cosThetaSun;
     return clrYxy;
@@ -123,20 +123,24 @@ uniform float sky_sunsize = 100.0;
 uniform float sky_turbidity = 2.0;
 uniform float sky_power = 2.0;
 void main() 
-{
+{	
 
-    vec3 sunpos = sky_sunpos.xyz;
-    const vec3 zenitpos = vec3(0.0,1.0,0.0);
 
-    vec3 n_sunpos = normalize(sunpos);
-    vec3 n_o_normal = normalize(o_normal);
-    vec3 n_zenitpos = normalize(zenitpos);
-    //upper hemiosphere
-    float cosGamma = max(dot(n_sunpos,n_o_normal),0.0);
-    float cosTheta = max(dot(n_o_normal,n_zenitpos),0.0);
-    float cosSunTheta = max(dot(n_sunpos,n_zenitpos),0.0);
-    vec3 p_c = vec3(perezSky (sky_turbidity,cosTheta+0.09, cosGamma,cosSunTheta));
+
+	vec3 sunpos = sky_sunpos.xyz;
+	vec3 zenitpos = vec3(0.0,1.0,0.0);
+   float cosGamma = dot(normalize(sunpos), normalize(o_normal));
+   float cosTheta = dot(normalize(o_normal),normalize(zenitpos));
+   float cosSunTheta =dot(normalize(sunpos),normalize(zenitpos));
+   cosTheta = clamp(cosTheta,0.0,1.0);
+	vec3 p_c = vec3(perezSky (sky_turbidity,cosTheta+0.09, cosGamma,cosSunTheta));
     // sun disk specular
-    float sun_spec = pow( max(0.0f , cosGamma ), sky_sunsize)*clamp(cosTheta,0, 0.1)*sky_sunpower;
-    dstColor = vec4(sky_power*(vec3(sun_spec)+max(convertColor(p_c),0.0)),1.0);
+    float s = sky_sunsize;
+    float sun_spec = pow( max(0.0f , dot(normalize(o_normal), normalize(sunpos)) ), s)*clamp(cosTheta,0, 0.1)*sky_sunpower;
+
+	 
+
+	dstColor = vec4(sky_power*(vec3(sun_spec)+max(convertColor(p_c),0.0)),1.0);
+
+    //dstColor = vec4(1.0);
 }

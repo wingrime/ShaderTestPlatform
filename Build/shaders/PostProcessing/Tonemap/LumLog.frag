@@ -20,5 +20,5 @@ void main ()
 	sqrt(0.299 * R^2 + 0.587 * G^2 + 0.114 * B^2)
   */
 
-  color = vec4( log( lum+0.0001), lum,lum,1.0);
+  color = vec4( lum, 0.0,0.0,1.0);
 }

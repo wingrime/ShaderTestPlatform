@@ -42,6 +42,6 @@ void main()
 	//dstColor = vec4(vec3(lv)*texture(texIMG,uv).rgb,1.0);
 	//worldNormal = vec4(o_normal,gl_FragCoord.z); /* world normal (now local)*/
 	//worldPos = vec4(o_pos_v,1.0); /* position (now local) */
-	dstColor = vec4(1.0);
+	//dstColor = vec4(1.0);
 
 }

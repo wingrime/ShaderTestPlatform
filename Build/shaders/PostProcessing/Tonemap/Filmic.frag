@@ -16,8 +16,8 @@ uniform float C = 0.10;
 uniform float D = 0.20;
 uniform float E = 0.01;
 uniform float F = 0.30;
-uniform float LW = 11.2;
-float filmic(float x) {
+uniform float LW = 1.2;
+vec3 filmic(vec3 x) {
   return ((x*(A*x+C*B)+D*E)/ (x*(A*x+B)+D*F))-E/F;
 }
 
@@ -29,33 +29,30 @@ float sRGB(float x) {
     return 1.055*pow(x,(1/2.4) ) - 0.055;
 }
 
-float gamma(float x,float key) {
-if (x < 0)
-  return 0;
-
-float f = filmic(x) / filmic(key);
-return sRGB(f);
+vec3 sRGB_v3(vec3 c) {
+  return vec3(sRGB(c.x),sRGB(c.y),sRGB(c.z));
+}
+/*fast variant that ignores small things*/
+vec3 sRGB_fast(vec3 x) {
+    return 1.055*pow(x,vec3(1/2.4) ) - vec3(0.055);
 }
 
-vec3 gamma_v3( vec3 i,float key) {
-  return vec3(gamma(i.x,key),gamma(i.y,key),gamma(i.z,key));
+vec3 gamma_v3( vec3 c) {
+  return sRGB_v3(filmic(c) / filmic(vec3(LW)));
 }
 
 void main ()
 {
   vec2 c = gl_FragCoord.xy/vp.xy;
   vec3 img_color = ( texture(texHDR,c)).rgb;
-  vec3 img_bloom =  ( texture(texBLUM,c)).rgb;
+  vec3 img_bloom =  vec3(( texture(texBLUM,c)).r);
   vec3 img_ssao =  vec3( texture(texSSAO,c).r);//use single color
   vec4 lumdata =   (texture(texLumKey,vec2(0.5,0.5))).rgba;//use single color
 	
 
-  float lum_max = lumdata.r;
-  float lum_avg = lumdata.g;
-  float lum_max_old = lumdata.b;
-  float lum_avg_old = lumdata.a;
+  float lum_key = lumdata.r;
   /*bloom + img with gamma correction*/
-  color = vec4(img_ssao*gamma_v3((img_bloom +img_color)/(1.0+lum_max) ,1.0) ,1.0);
+  color = vec4(img_ssao*gamma_v3((img_bloom +img_color)/((1.0+lum_key*0.5))) ,1.0);
  //color = vec4( img_ssao,1.0);
 ///color = vec4( vec3(lum_max),1.0);
 // color = vec4( img_color,1.0);

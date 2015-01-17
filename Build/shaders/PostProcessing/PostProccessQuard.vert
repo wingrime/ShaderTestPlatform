@@ -1,6 +1,6 @@
 #version 330
 /* PP shaders project AS-IS*/
-noperspective in vec3 vCord;
+in vec3 vCord;
 
 void main(void)
 {

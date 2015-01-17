@@ -1,6 +1,6 @@
 #version 330
 
-noperspective in vec4 coord;
+in vec4 coord;
 out  vec2 texcoord;
 uniform vec4 quad_size;
 void main(void) {
