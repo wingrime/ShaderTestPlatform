@@ -12,11 +12,11 @@ SScene::SScene(RBO *v)
     ,err_con(new UIConsoleErrorHandler(con))
     ,fps_label(new UILabel(v,0.85,0.1))
     ,cfg_label(new UILabel(v,0.0, 0.6))
-    ,v_sel_label(new UILabel(v,0.0, 0.4))
+    ,v_sel_label(new UILabel(v,0.75, 0.6))
 
     ,rtShadowMap(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_RGBA,SRBOTexture::RT_TEXTURE_RGBA,1,
-                                                    SRBOTexture::RT_TEXTURE_RGBA,1,
-                                                    SRBOTexture::RT_TEXTURE_RGBA,1 ))
+                                                    SRBOTexture::RT_NONE,1,
+                                                    SRBOTexture::RT_NONE,1 ))
     ,rtHDRScene_MSAA(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_NONE, 1 ))
@@ -24,9 +24,9 @@ SScene::SScene(RBO *v)
                                                    SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_NONE, 1 ))
 
-    ,rtHDRBloomResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RGBA)) /* bloom clamp*/
-    ,rtHDRHorBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_RGBA))
-    ,rtHDRVertBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_RGBA))
+    ,rtHDRBloomResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_FLOAT_RED)) /* is it better HDR */
+    ,rtHDRHorBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_FLOAT_RED))
+    ,rtHDRVertBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_FLOAT_RED))
 
     ,rtSSAOVertBlurResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
     ,rtSSAOHorBlurResult(new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
@@ -42,6 +42,7 @@ SScene::SScene(RBO *v)
 {
     /*Setup error handler*/
     MainLog::GetInstance()->SetCallback([=](Log::Verbosity v, const std::string &s)-> void { con->Msg(s); });
+    con->Msg("Model View\nShestacov Alexsey 2014-2015 (c)\n");
     int w = rtHDRScene->getSize().w;
     int h = rtHDRScene->getSize().h;
     /*bloom shaders */
@@ -79,7 +80,6 @@ SScene::SScene(RBO *v)
                                                         "PostProcessing/Tonemap/LumKey.frag")
                                           ,rtHDRLumKey,rtHDRLogLum,rtHDRLumKey);
 
-
     /*final tonemap*/
     pp_stage_hdr_tonemap =  new SPostProcess(pp_prog_hdr_tonemap,rtSCREEN,rtHDRVertBlurResult,rtHDRScene,rtHDRLumKey,rtSSAOVertBlurResult);
 
@@ -110,9 +110,9 @@ SScene::SScene(RBO *v)
 
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
-    test_sphere_model->SetModelMat(SMat4x4().Scale(4.0,4.0,4.0).Move(0.0,400.0,0.0));
+    test_sphere_model->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
 
-    con->Msg("Model View\nShestacov Alexsey 2014-2015 (c)\n");
+
     UpdateCfgLabel();
     UpdateViewSelLabel();
     InitDebugCommands();
@@ -168,17 +168,15 @@ int SScene::downViewItem() {
 }
 
 int SScene::UpdateViewSelLabel() {
-
-
-    v_sel_label->setText(std::string("----------ViewSel-----------\n") + 
-            V_I(V_NORMAL) + string_format("Normal Render\n",d_v_sel[V_NORMAL]) +
-            V_I(V_BLOOM) + string_format("Bloom  \n",d_v_sel[V_BLOOM]) +
+    v_sel_label->setText(std::string("------ViewSel-------\n") +
+            V_I(V_NORMAL) + string_format("Full Render\n",d_v_sel[V_NORMAL]) +
+            V_I(V_BLOOM) + string_format("Bright Pass \n",d_v_sel[V_BLOOM]) +
             V_I(V_BLOOM_BLEND) + string_format("Bloom Blend \n",d_v_sel[V_BLOOM_BLEND]) +
              V_I(V_SSAO) + string_format("SSAO Only \n",d_v_sel[V_SSAO]) +
             V_I(V_DIRECT) + string_format("Direct Render Only \n",d_v_sel[V_DIRECT])  +
             V_I(V_SHADOW_MAP) + string_format("Shadow Map Only \n",d_v_sel[V_SHADOW_MAP]) +
-             V_I(V_VOLUMETRIC) + string_format("Volumetric Only \n",d_v_sel[V_VOLUMETRIC]) +
-             V_I(V_CUBEMAPTEST) + string_format("Cubemap Test \n",d_v_sel[V_CUBEMAPTEST])
+             V_I(V_VOLUMETRIC) + string_format("Volumetric Test \n",d_v_sel[V_VOLUMETRIC]) +
+             V_I(V_CUBEMAPTEST) + string_format("LuxKey\n",d_v_sel[V_CUBEMAPTEST])
             );
 
     return ESUCCESS;
@@ -202,7 +200,7 @@ int SScene::UpdateCfgLabel() {
             C_I(11) + string_format("%f - HDR (E) Toe Numerator\n",d_cfg[11])  +
             C_I(12) + string_format("%f - HDR (F) Toe Numerator\n",d_cfg[12])  +
             C_I(13) + string_format("%f - HDR (LW) Lineral White\n",d_cfg[13])  +
-             C_I(14) + string_format("%f - Base Light Interisty\n",d_cfg[14]) 
+             C_I(14) + string_format("%f - Base Light Power Multipler\n",d_cfg[14])
             );
 
     pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",d_cfg[0]);
@@ -228,7 +226,7 @@ int SScene::UpdateCfgLabel() {
     pp_prog_hdr_tonemap->SetUniform("D",d_cfg[10]);
     pp_prog_hdr_tonemap->SetUniform("E",d_cfg[11]);
     pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
-    pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])*10.0));
+    pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])));
 
     r_prog->SetUniform("lightIntensity",d_cfg[14]);
 
@@ -293,6 +291,38 @@ int SScene::InitDebugCommands()
         con->Msg(os.str());
 
     }));
+    d_console_cmd_handler->AddCommand("dump_model", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+
+         std::ofstream os("model.json");
+        {
+            /*use raii */
+            cereal::JSONOutputArchive archive( os);
+            archive( CEREAL_NVP( model));
+        }
+        //con->Msg(os.str());
+
+    }));
+    d_console_cmd_handler->AddCommand("mem_stats", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        /*
+         * NVX_gpu_memory_info
+         * requied
+         */
+        int dedVideoMem,totalAvailableMem, curAvailableMem, evictionCount, evictedMem;
+            glGetIntegerv(0x9047, &dedVideoMem);
+            glGetIntegerv(0x9048, &totalAvailableMem);
+            glGetIntegerv(0x9049, &curAvailableMem);
+            glGetIntegerv(0x904A, &evictionCount);
+            glGetIntegerv(0x904B, &evictedMem);
+            con->Msg(string_format("Dedicated mem: %d[kb]\nTotal available mem: %d[kb]\nCurrent available mem: %d[kb]\nEviction count: %d\nEvicted mem: %d[kb]\n",
+                            dedVideoMem,totalAvailableMem, curAvailableMem, evictionCount, evictedMem));
+        //con->Msg(os.str());
+
+    }));
+
+
+
 
         d_console_cmd_handler->AddCommand("sm_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
@@ -318,6 +348,10 @@ int SScene::InitDebugCommands()
     }));
     d_console_cmd_handler->AddCommand("toggle_msaa", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         d_toggle_MSAA= !d_toggle_MSAA;
+
+    }));
+    d_console_cmd_handler->AddCommand("toggle_brightpass", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        d_toggle_brightpass= !d_toggle_brightpass;
 
     }));
 
@@ -351,7 +385,7 @@ int SScene::InitDebugCommands()
         const std::vector < std::string >& args = *arg_list;
         SVec4 vect(args[1]);
         r_prog->SetUniform("main_light_dir", vect);
-        d_debugDrawMgr.AddCross({vect.vec.x,vect.vec.y,vect.vec.z},20);
+        d_debugDrawMgr.AddCross({vect.x,vect.y,vect.z},20);
 
     }));
 
@@ -368,6 +402,15 @@ int SScene::InitDebugCommands()
         d_debugDrawMgr.Update();
     }));
 
+    d_console_cmd_handler->AddCommand("load", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        con->Msg("Load new model..");
+        model.reset(new SObjModel(args[1]));
+        model->ConfigureProgram( *r_prog);
+        model->ConfigureProgram( *cam_prog);
+        model->ConfigureProgram( *cubemap_prog_generator);
+
+    }));
 
 }
 int inline SScene::RenderShadowMap(const RBO& v) {
@@ -382,7 +425,7 @@ int SScene::RenderCubemap()
 {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-
+    glDepthMask(true);
     glDepthFunc  ( GL_LEQUAL );
     if (d_toggle_MSAA)
        glEnable( GL_MULTISAMPLE );
@@ -473,7 +516,7 @@ int SScene::Render() {
         RenderShadowMap( *rtShadowMap);
         if (d_toggle_MSAA) {
             RenderDirect( *rtHDRScene_MSAA);
-            rtHDRScene_MSAA->ResolveMSAA(*rtHDRScene);
+           rtHDRScene_MSAA->ResolveMSAA(*rtHDRScene);
         } else
             RenderDirect( *rtHDRScene);
     }
@@ -486,36 +529,39 @@ int SScene::Render() {
     
     /*Bloom + SSAO + RenderShadowMap*/
     if (d_v_sel_current == V_NORMAL) {
-
-
-
-        pp_stage_hdr_bloom->DrawRBO();
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)0.0);
-        pp_stage_hdr_blur_hor->DrawRBO();
-        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*1.0));
-        pp_stage_hdr_blur_vert->DrawRBO();
         /*LumKEY*/
 
-        pp_stage_hdr_lum_log->DrawRBO();
-        pp_stage_hdr_lum_key->DrawRBO();
+        pp_stage_hdr_lum_log->DrawRBO(false);
+        pp_stage_hdr_lum_key->DrawRBO(false);
+        if (d_toggle_brightpass ) {
+
+        pp_stage_hdr_bloom->DrawRBO(false);
+        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)0.0);
+        pp_stage_hdr_blur_hor->DrawRBO(false);
+        pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*1.0));
+        pp_stage_hdr_blur_vert->DrawRBO(false);
+
         /*ping pong 1*/
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*2.0));
-        pp_stage_hdr_blur_hor2->DrawRBO();
+        pp_stage_hdr_blur_hor2->DrawRBO(false);
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*2.0));
-        pp_stage_hdr_blur_vert2->DrawRBO();
+        pp_stage_hdr_blur_vert2->DrawRBO(false);
         /*ping pong 2*/
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*3.0));
-        pp_stage_hdr_blur_hor2->DrawRBO();
+        pp_stage_hdr_blur_hor2->DrawRBO(false);
         pp_prog_hdr_blur_kawase->SetUniform("blurSize",(float)(d_cfg[6]*3.0));
-        pp_stage_hdr_blur_vert2->DrawRBO();
+        pp_stage_hdr_blur_vert2->DrawRBO(false);
+        } else {
+            pp_stage_hdr_blur_vert2->getResultRBO()->Bind(true); /*cleanup*/
+        }
         /*SSAO*/
-        rtSSAOVertBlurResult->Bind(true);
+        rtSSAOVertBlurResult->Bind(false);
         pp_stage_ssao->Draw();
-        pp_stage_ssao_blur_hor->DrawRBO();
-        pp_stage_ssao_blur_vert->DrawRBO();
+        pp_stage_ssao_blur_hor->DrawRBO(false);
+        pp_stage_ssao_blur_vert->DrawRBO(false);
 
 
-        pp_stage_hdr_tonemap->DrawRBO();
+        pp_stage_hdr_tonemap->DrawRBO(false);
 
     } else if (d_v_sel_current == V_BLOOM) {
         rtSCREEN->Bind(true); 
@@ -581,13 +627,13 @@ int SScene::Render() {
         v_sel_label->Draw();
     }
     con->Draw();
-    glFlush();
+   glFlush();
     ui_time.End();
-   
-    fps_label->setText(string_format("DRAW:%4.3f ms\nUI: %4.3f ms\nPP: %4.3f ms\n",\
-                                                             (float)rtime.getTime()*(1.0/ 1000000.0),
-                                                             (float)ui_time.getTime()*(1.0/1000000.0),
-                                                             (float)pp_time.getTime()*(1.0/1000000.0)  ));
+    char buf [90];
+    sprintf(buf,"DRAW:%4.3f ms\nUI: %4.3f ms\nPP: %4.3f ms\n",      (float)rtime.getTime()*(1.0/ 1000000.0), \
+                                                                    (float)ui_time.getTime()*(1.0/1000000.0),\
+                                                                    (float)pp_time.getTime()*(1.0/1000000.0));
+    fps_label->setText(buf);
    
     return true;
 }

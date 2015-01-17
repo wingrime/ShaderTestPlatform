@@ -80,16 +80,17 @@ void key ( unsigned char key, int x, int y )
         if (key == 27)
         {
             console_mode = 0;
-            sc->con->Msg("Exited from console\n");
             sc->con->HandleExitConsole();
             return;
-        } else  if (key == 45) {
+        } else  if (key == 43) {
             sc->con->HandlePrevHistoryCommand();
             return;
-        } else  if (key == 43) {
-            sc->con->HandleNextHistoryCommand();
-            return;
         }
+        // disable due "-" key better accessible
+        //} else  if (key == 43) {
+        //    sc->con->HandleNextHistoryCommand();
+       //     return;
+        //}
         sc->con->HandleInputKey(key);
         return;
     }
@@ -107,11 +108,8 @@ void key ( unsigned char key, int x, int y )
                     sc->rWireframe = 1;
                 }
 
-
 else if (key == '9' ) sc->upViewItem();
 else if (key == '0' ) sc->downViewItem();
-else if (key == 'o' ) sc->rSSAO = !sc->rSSAO;
-
 else if (key == 8 ) {console_mode = 1; sc->con->Cls(); sc->con->Msg("Debug console, [ESC] for exit\n"); }
 else
     s_input->HandleInputKey(key);
@@ -133,18 +131,13 @@ void mouse_move (  int x , int y) {
         y_base = y;
     }
     else {
-    x_rm += (x_o-x_base)*0.5;
-    y_rm +=(y_o-y_base)*0.5;
-    x_base = x;
-    y_base = y;
-
+        x_rm += (x_o-x_base)*0.5;
+        y_rm +=(y_o-y_base)*0.5;
+        x_base = x;
+        y_base = y;
     }
-
-sc->cam.rotEulerY(toRad(x_rm));
+    sc->cam.rotEulerY(toRad(x_rm));
     sc->cam.rotEulerX(toRad(y_rm));
-
-
-
 }
 void special(int key, int x, int y){
     if (key == GLUT_KEY_DOWN) sc->downCfgItem();
@@ -215,16 +208,18 @@ int main ( int argc, char * argv [] )
     glutInitWindowSize  ( v.getSize().w,v.getSize().h);
 
 
-    // prepare context for 3.3
-    glutInitContextVersion ( 4, 4 );
+    // init modern opengl
+    glutInitContextVersion ( 4, 2 );
     glutInitContextFlags   ( GLUT_FORWARD_COMPATIBLE| GLUT_DEBUG);
     glutInitContextProfile ( GLUT_CORE_PROFILE  );
 
-    glutCreateWindow ("m_proj Shestacov Alexsey 2014 (c)" );
+    glutCreateWindow ("m_proj Shestacov Alexsey 2014-2015(c)" );
     glewExperimental = GL_TRUE;
-    
-    glewInit ();
-
+    GLenum err= glewInit ();
+    if (err != GLEW_OK) {
+        LOGE("error create OpenGL context, exiting");
+        return -1;
+    }
 
    if(glDebugMessageCallback){
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -241,32 +236,26 @@ int main ( int argc, char * argv [] )
     else
         LOGW("OpenGl debug callback not avaliable");
 
-                       
-   //*test compute shader*/
-
-   //SCProg *compute = new SCProg("c_test.cpp");
-   //compute->Dispatch(128,1,1);
-
     glutDisplayFunc  ( display );
     glutReshapeFunc  ( reshape );
     glutIdleFunc ( refresh     );
    
 
     glutMouseFunc(mouse);
-    glutMotionFunc ( mouse_move     );
+    glutMotionFunc (mouse_move);
 
     sc.reset(new SScene(&v));
 
     s_input.reset(new InputCommandHandler());
 
     glutKeyboardFunc (key   );
-     glutSpecialFunc(special);
+    glutSpecialFunc(special);
 
+    /*input key handlers*/
     s_input->AddCommand("forward", InputCommandHandler::InputCommand([=] (void) -> void {
        sc->cam.goForward(25.0);
     }));
     s_input->BindKey('w',"forward");
-
 
     s_input->AddCommand("back", InputCommandHandler::InputCommand([=] (void) -> void {
         sc->cam.goForward(-25.1);
@@ -282,9 +271,8 @@ int main ( int argc, char * argv [] )
     s_input->AddCommand("clear_console", InputCommandHandler::InputCommand([=] (void) -> void {
         sc->con->Cls();
     }));
-
     s_input->BindKey('c',"clear_console");   
-
+    /* main loop */
     glutMainLoop ();
 
 }

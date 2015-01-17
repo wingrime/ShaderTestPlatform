@@ -102,7 +102,7 @@ private:
     int d_cfg_current = 0;
     int d_cfg_max = 14;
     /*default parameter set*/
-    float  d_cfg [15] = {0.012, 0.006,0.720,0.26,2.0,0.75,0.015,0.22,0.30,0.10,0.20,0.01,0.30,1.12,1.6};
+    float  d_cfg [15] = {0.012, 0.006,0.720,0.26,2.0,0.75,0.015,0.22,0.30,0.10,0.20,0.01,0.30,1.12,4.6};
     float d_cfg_step = 0.001;
 
 
@@ -159,6 +159,7 @@ private:
    bool d_toggle_cfg_view = true;
    bool d_toggle_fullscreen = false;
    bool d_toggle_MSAA = true;
+   bool d_toggle_brightpass = true;
 public:
     int UpdateScene();
 
