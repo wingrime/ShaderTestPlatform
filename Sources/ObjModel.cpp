@@ -104,7 +104,9 @@ SObjModel::SObjModel(const std::string&  fname)
         MeshIndexer idx(*it);
         d_sm.push_back(std::shared_ptr<CObjSubmesh>(idx.Do()));
         (*it).reset();
-    }
+
+   }
+
     LOGV("Load materials");
 
     {

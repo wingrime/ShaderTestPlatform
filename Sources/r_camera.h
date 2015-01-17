@@ -47,8 +47,8 @@ public:
     SMat4x4 buildViewMatrix();
 
 
-    SMat4x4 getViewMatrix();
-    SMat4x4 getProjMatrix();
+    inline __attribute__((always_inline)) SMat4x4  getViewMatrix() {return view;}
+    inline __attribute__((always_inline)) SMat4x4  getProjMatrix() {return proj;}
     SVec4 getPosition() const;
 
 

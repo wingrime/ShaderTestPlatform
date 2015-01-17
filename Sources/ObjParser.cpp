@@ -91,14 +91,14 @@ std::vector<CObjVertexN> CObjMeshParser::BuildVertsN(const std::vector<CObjV3> &
 }
 
 std::string CObjMeshParser::ParseG(const std::string &str) {
-    char buf[40];
-    sscanf(str.c_str(),"g %30s",buf);
+    char buf[100];
+    sscanf(str.c_str(),"g %90s",buf);
     return std::string(buf);
 }
 
 std::string CObjMeshParser::ParseO(const std::string &str) {
-    char buf[40];
-    sscanf(str.c_str(),"o %30s",buf);
+    char buf[100];
+    sscanf(str.c_str(),"o %90s",buf);
     return std::string(buf);
 }
 
@@ -122,7 +122,7 @@ CObjV3 CObjMeshParser::CalcNormal(const CObjV3& v1, const CObjV3& v2, const CObj
         /* normal is broken*/
         e.x = 0;
         e.y = 0;
-        e.z = 0;
+        e.z = 1.0;
         return e;
 
     }
@@ -134,13 +134,13 @@ CObjV3 CObjMeshParser::CalcNormal(const CObjV3& v1, const CObjV3& v2, const CObj
 
 }
 std::string CObjMeshParser::ParseUSEMTL(const std::string &str) {
-    char buf[40];
-    sscanf(str.c_str(),"usemtl %30s",buf);
+    char buf[100];
+    sscanf(str.c_str(),"usemtl %90s",buf);
     return std::string(buf);
 }
 std::string CObjMeshParser::ParseMTLLIB(const std::string &str) {
-    char buf[40];
-    sscanf(str.c_str(),"mtllib %30s",buf);
+    char buf[100];
+    sscanf(str.c_str(),"mtllib %90s",buf);
     return std::string(buf);
 }
 // TODO: optimize
@@ -264,10 +264,13 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
             } else if (!line.find("usemtl")) {
                 const std::string& mtl = ParseUSEMTL(line);
                 /* sometimes can use different materials for single submesh*/
-                if (!subm->m_name.empty()) {
+                if (d_sm.empty() || !subm->m_name.empty()) {
                     /*begin new submesh*/
                     std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
-                    s->name = subm->name + std::string("_mat_") + mtl;
+                    if (d_sm.empty()) /*for files divieds complitly with materals and  without other dividers*/
+                        s->name = std::string("no_submesh_mat_") + mtl;
+                    else
+                        s->name = subm->name + std::string("_mat_") + mtl;
                     s->m_name = mtl;
                     s->id  = sm_id++;
                     d_sm.push_back(s);

@@ -56,7 +56,7 @@ private:
     /* Link to low level interface*/
     SProg * prog;
 
-    std::vector< std::pair<int, SMat4x4> > d_matrix_update_list;
+    std::vector< std::pair<int, const SMat4x4> > d_matrix_update_list;
     std::vector< std::pair<int, int> >     d_int_update_list;
     std::vector< std::pair<int, float > >  d_float_update_list;
     std::vector< std::pair<int, SVec4 >  > d_vector_update_list;

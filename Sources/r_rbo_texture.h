@@ -41,7 +41,8 @@ public:
     SRBOTexture(int _x, int _y)
     :SRBOTexture(_x,_y,RT_TEXTURE_FLOAT)
     {};
-    SRBOTexture(int _x, int _y, RTType t);
+    SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel);
+    SRBOTexture(int _x, int _y, RTType t) :SRBOTexture(_x,_y,t,1) {}
     SRBOTexture(const SRBOTexture&) = delete;
      ~SRBOTexture();
     int Bind(unsigned int sampler) const; /*bind as texture to sampler*/

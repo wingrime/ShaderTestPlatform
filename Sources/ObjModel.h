@@ -22,7 +22,7 @@
 struct Material {
 STexture * diffuse;
 STexture *bump;
-STexture * alpha;
+STexture *alpha;
 
 };
 

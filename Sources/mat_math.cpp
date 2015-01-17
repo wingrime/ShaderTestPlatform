@@ -191,11 +191,10 @@ SMat4x4::SMat4x4(float a11,float a12,float a13,float a14,
     mat.a41 = a41; mat.a42 = a42; mat.a43 = a43; mat.a44 = a44;
 }
 
-SMat4x4::SMat4x4( const SMat4x4& i){
-    mat.a11 = i.mat.a11; mat.a12 = i.mat.a12; mat.a13 = i.mat.a13; mat.a14 = i.mat.a14;
-    mat.a21 = i.mat.a21; mat.a22 = i.mat.a22; mat.a23 = i.mat.a23; mat.a24 = i.mat.a24;
-    mat.a31 = i.mat.a31; mat.a32 = i.mat.a32; mat.a33 = i.mat.a33; mat.a34 = i.mat.a34;
-    mat.a41 = i.mat.a41; mat.a42 = i.mat.a42; mat.a43 = i.mat.a43; mat.a44 = i.mat.a44;
+SMat4x4::SMat4x4( const SMat4x4& o){
+    for (int i = 0; i< 16 ;i++ ) {
+        mat.raw[i] = o.mat.raw[i];
+    }
 }
 // TODO make delta standart
 bool SMat4x4::Eq(const SMat4x4& a,const SMat4x4& b){

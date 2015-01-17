@@ -108,13 +108,8 @@ SMat4x4 SCamera::buildViewMatrix(){
     view = a;
     return a;
 }
-SMat4x4 SCamera::getViewMatrix(){
-    return view;
-}
 
-SMat4x4 SCamera::getProjMatrix(){
-    return proj;
-}
+
 SVec4 SCamera::getPosition() const {
     return SVec4(xPos,zPos,yPos,1.0);
 }

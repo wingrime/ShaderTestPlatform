@@ -4,16 +4,12 @@
 int RBO::Bind(bool clear) const {
     if (!IsReady)
         return EFAIL;
-        /* in case when viewport is not texture target just use 0*/
-    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo);
+     /* in case when viewport is not texture target just use 0*/
     glBindFramebuffer(GL_FRAMEBUFFER, d_fbo);
 
     if (clear)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport ( 0, 0, (GLsizei)d_w, (GLsizei)d_h );
-   // glDrawBuffer(GL_BACK);                       // Set the back buffer as the draw buffer
-    // glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
     return ESUCCESS;
 }
 
@@ -99,6 +95,8 @@ int RBO::attachRBOTextures()
         break;
     }
 
+    d_buffers =  buffers;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     int rcode = glCheckFramebufferStatus(GL_FRAMEBUFFER) ;
     if(rcode != GL_FRAMEBUFFER_COMPLETE) {
@@ -165,17 +163,22 @@ RBO::RBO(int _w, int _h,RBOType _type,
         std::shared_ptr<SRBOTexture> _texDEPTH)
 :d_w(_w),d_h(_h), d_type(_type) ,d_texIMG(_texIMG),d_texIMG1(_texIMG1),d_texIMG2(_texIMG2),d_texDEPTH(_texDEPTH)
  {
+    unsigned int mip = 1;
+
+    if (d_w > 128, d_h > 128 )
+        mip = 4;
+
     if (d_type == RBO_SCREEN) {
         IsReady = true;
         return;
     }
 
     if (d_texIMG == nullptr) {
-            d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(d_type) ));
+            d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(d_type),mip ));
 
     }
     if (d_texDEPTH == nullptr) {
-            d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type) ));
+            d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type),mip ));
     }
 
     d_isMSAA = d_texIMG->IsMSAA() ;
@@ -187,9 +190,14 @@ RBO::RBO(int _w, int _h,RBOType _type,
 /*single buffer*/
 RBO::RBO(int def_w, int def_h, RBO::RBOType type)
 {
+
     d_w = def_w;
     d_h = def_h;
     d_type = type;
+    /*automatic mip level detection TODO*/
+    unsigned int mip = 1;
+    if (d_w > 256, d_h > 256 )
+        mip = 4;
     if (type == RBO_SCREEN) {
         IsReady = true;
         return;
@@ -201,8 +209,8 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type)
         MASSERT( d_w % 2 != 0); /*should be power of two*/
     }
 
-    d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(type) ));
-    d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type)));
+    d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
+    d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type),mip));
     d_isMSAA = d_texIMG->IsMSAA() ; /* ??? */
     if (attachRBOTextures() == ESUCCESS)
         IsReady = true;
@@ -219,25 +227,27 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, i
     d_h = def_h;
     d_type = type;
     //TODO: add type check
-
+    unsigned int mip = 1;
+    if (d_w > 128, d_h > 128 )
+        mip = 2;
     MASSERT(t0_type == SRBOTexture::RTType::RT_NONE);
     MASSERT(SRBOTexture::isDepthType(t0_type));
     MASSERT(SRBOTexture::isDepthType(t1_type));
     MASSERT(SRBOTexture::isDepthType(t2_type));
     MASSERT(t0_s <= 0);
 
-    d_texIMG.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s,t0_type));
+    d_texIMG.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s,t0_type,mip));
     /*depth*/
-    d_texDEPTH.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s, SRBOTexture::getRelatedDepthType(t0_type) ));
+    d_texDEPTH.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s, SRBOTexture::getRelatedDepthType(t0_type) ,mip));
 
 
     if (t1_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t1_s <= 0);
-        d_texIMG1.reset(new SRBOTexture(d_w/t1_s,d_h/t1_s,t1_type));
+        d_texIMG1.reset(new SRBOTexture(d_w/t1_s,d_h/t1_s,t1_type,mip));
     }
     if (t2_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t2_s <= 0);
-        d_texIMG2.reset(new SRBOTexture(d_w/t2_s,d_h/t2_s,t2_type));
+        d_texIMG2.reset(new SRBOTexture(d_w/t2_s,d_h/t2_s,t2_type,mip));
     }
     d_isMSAA = d_texIMG->IsMSAA() ;
 
@@ -255,20 +265,38 @@ int RBO::ResolveMSAA(const RBO &dst)
       GLenum  buffers1 [] = { GL_COLOR_ATTACHMENT0};
       GLenum  buffers2 [] = { GL_COLOR_ATTACHMENT1};
       GLenum  buffers3 [] = { GL_COLOR_ATTACHMENT2};
-      glReadBuffer(GL_COLOR_ATTACHMENT0);
-      glDrawBuffers ( 1, buffers1 );
-      glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-      //TODO
-      glReadBuffer(GL_COLOR_ATTACHMENT1);
-      glDrawBuffers ( 1, buffers2 );
-      glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
-      glReadBuffer(GL_COLOR_ATTACHMENT2);
-      glDrawBuffers ( 1, buffers3 );
-      glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
+      if (d_buffers >= 1) {
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glDrawBuffers ( 1, buffers1 );
+        glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        if (d_buffers >= 2) {
+            glReadBuffer(GL_COLOR_ATTACHMENT1);
+            glDrawBuffers ( 1, buffers2 );
+            glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
+            if (d_buffers >= 3) {
+                glReadBuffer(GL_COLOR_ATTACHMENT2);
+                glDrawBuffers ( 1, buffers3 );
+                glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
+            }
+        }
+      }
+      //Reset procedure
+      glReadBuffer(GL_FRONT_AND_BACK);
+      GLenum  buffers_1 [] = { GL_COLOR_ATTACHMENT0 };
+      GLenum  buffers_2 [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1 };
+      GLenum  buffers_3 [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
+      switch (d_buffers)
+      {
 
-      //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-      //glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-
-
+      case 1:
+              glDrawBuffers (1, buffers_1 );
+          break;
+      case 2:
+              glDrawBuffers (2, buffers_2 );
+          break;
+      case 3:
+              glDrawBuffers (3, buffers_3 );
+          break;
+      }
       return 0;
 }

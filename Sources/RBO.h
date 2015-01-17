@@ -74,6 +74,8 @@ private:
 
     bool d_isMSAA = false;
 
+    int d_buffers = 0;
+
     std::shared_ptr<SRBOTexture> d_texIMG; /*color attachment 0*/
     std::shared_ptr<SRBOTexture> d_texIMG1; /*color attachment 1*/
     std::shared_ptr<SRBOTexture> d_texIMG2; /*color attachment 2*/

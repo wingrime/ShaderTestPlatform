@@ -18,7 +18,7 @@ UIConsole::~UIConsole()
 }
 void UIConsole::Draw() {
     SVec2 sz = v_port->getSize();
-    fnt->RenderText(d_output_cache,0.0,0.0,    sz.x, sz.y);
+    fnt->RenderText(d_output_cache,0.0,0.05,    sz.x, sz.y);
 }
 int UIConsole::HandlePrevHistoryCommand() {
     if ( !console_history.empty() ) 

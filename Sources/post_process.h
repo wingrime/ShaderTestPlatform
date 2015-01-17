@@ -68,6 +68,8 @@ public:
     std::shared_ptr<SRBOTexture> texSRC2();
     std::shared_ptr<SRBOTexture> texSRC3();
     std::shared_ptr<SRBOTexture> texSRC4();
+
+    std::shared_ptr<RBO> getResultRBO();
 private:
     /*working shader */
     SShader * p_prog;

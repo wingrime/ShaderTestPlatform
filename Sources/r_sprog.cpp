@@ -29,8 +29,9 @@ SShader::SShader(const std::string &vprog, const std::string &fprog, const std::
 
 int SShader::Bind()
 {
-    prog->Bind();
+
     if (prog->IsReady) {
+        prog->Bind();
    for (auto element : d_matrix_update_list ) {
        prog->SetUniform(element.first, element.second);
     }
@@ -78,7 +79,7 @@ int SShader::SetUniform(const std::string &var, const SMat4x4 &mat)
     int loc = prog->LookupUniformLocation(var);
     if (loc == EFAIL)
         return EFAIL;
-    d_matrix_update_list.push_back( std::pair<int, SMat4x4 >( loc, mat) );
+    d_matrix_update_list.push_back( std::pair<int, const SMat4x4 >( loc, mat) );
     //return prog->SetUniform(loc, mat);
     return ESUCCESS;
 }

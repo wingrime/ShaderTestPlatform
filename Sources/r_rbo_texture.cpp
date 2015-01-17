@@ -64,7 +64,7 @@ unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
         case SRBOTexture::RT_TEXTURE_RED:
             return GL_R8;
         case SRBOTexture::RT_TEXTURE_FLOAT:
-            return GL_RGBA32F;
+            return GL_RGBA16F;
         case SRBOTexture::RT_TEXTURE_RGBA:
             return GL_RGBA8;
         case SRBOTexture::RT_TEXTURE_FLOAT_RED:
@@ -118,7 +118,7 @@ int SRBOTexture::ConfigureTexture(const BorderType t) const {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     return 0;
 }
-SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
+SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
     :type(t) , x(_x) ,y (_y)
  {
     glGenTextures(1, &tex);
@@ -130,7 +130,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t)
         t == RT_TEXTURE_FLOAT_RED) {
 
         glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, 1, SRBOTexture::getRelatedGLType(t), x, y);
+        glTexStorage2D(GL_TEXTURE_2D, miplevel, SRBOTexture::getRelatedGLType(t), x, y);
         ConfigureTexture(TEX_CLAMP);
         glBindTexture(GL_TEXTURE_2D,0);
         d_isMSAA  = false;
