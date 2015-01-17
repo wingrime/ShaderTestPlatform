@@ -538,7 +538,7 @@ int SScene::Render() {
         if (d_toggle_brightpass ) {
 
         pp_stage_hdr_bloom->DrawRBO(false);
-        int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("glurSize");
+        int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("blurSize");
         pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)0.0);
         pp_stage_hdr_blur_hor->DrawRBO(false);
         pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*1.0));
