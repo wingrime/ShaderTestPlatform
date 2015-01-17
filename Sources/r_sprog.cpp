@@ -101,13 +101,13 @@ int SShader::SetUniform(const std::string &var, const SVec4 &vec)
 
 int SShader::SetUniform( int loc, float i)
 {
-    d_int_update_list.push_back( std::pair<int, int >( loc, i) );
+    d_float_update_list.push_back( std::pair<int, float >( loc, i) );
     return ESUCCESS;
 }
 
 int SShader::SetUniform(int loc, int i)
 {
-    d_float_update_list.push_back( std::pair<int, float >( loc, i) );
+    d_int_update_list.push_back( std::pair<int, int >( loc, i) );
     return ESUCCESS;
 }
 
