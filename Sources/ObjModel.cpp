@@ -28,7 +28,7 @@
 #include "ObjParser.h"
 std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 {
-    LOGV(string_format("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d ",d_inmesh->m_name.c_str(),d_inmesh->name.c_str(),d_inmesh->id, d_inmesh->vn.size()));
+    LOGV(string_format("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d ",d_inmesh->name.c_str(),d_inmesh->m_name.c_str(),d_inmesh->id, d_inmesh->vn.size()));
     std::shared_ptr<CObjSubmesh> mesh;
     mesh.reset(new CObjSubmesh());
     mesh->m_name = d_inmesh->m_name;
@@ -175,7 +175,10 @@ void SObjModel::LoadTextures() {
 
             std::string &diffuse = material->map_Kd;
             if (d_textures.find(diffuse) == d_textures.end()) {
-               // printf("material %s Diffuse %s Bump %s Alpha %s \n",submesh->m_name.c_str(),  material->map_Kd.c_str(), material->map_bump.c_str(), material->map_d.c_str());
+                LOGV(string_format("material %s Diffuse %s Bump %s Alpha %s",submesh->m_name.c_str(),
+                                   material->map_Kd.c_str(),
+                                   material->map_bump.c_str(),
+                                   material->map_d.c_str()));
 
                 d_materails[submesh->m_name].diffuse =  new STexture(diffuse);
                 d_textures[diffuse].reset( d_materails[submesh->m_name].diffuse);
