@@ -26,13 +26,11 @@
 #include "string_format.h"
 #include "Log.h"
 #include "ObjParser.h"
-
 std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 {
-
+    LOGV(string_format("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d ",d_inmesh->m_name.c_str(),d_inmesh->name.c_str(),d_inmesh->id, d_inmesh->vn.size()));
     std::shared_ptr<CObjSubmesh> mesh;
-    mesh.reset(new CObjSubmesh()) ;
-
+    mesh.reset(new CObjSubmesh());
     mesh->m_name = d_inmesh->m_name;
     mesh->name = d_inmesh->name;
     mesh->id = d_inmesh->id;
@@ -55,6 +53,7 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
         }
 
     }
+    LOGV(string_format("Indexing result: indepened_triangles=%d",mesh->vn.size()) );
     return  (mesh);
 
 }
@@ -91,20 +90,24 @@ int SObjModel::ConfigureProgram(SShader& sprog){
 
 SObjModel::SObjModel(const std::string&  fname) 
 {
+    LOGV(std::string("Opening obj model ")+fname);
     CObjMeshParser parser(fname);
     if (!parser.IsReady)
         {
-            LOGE(std::string("Unable open model :") + fname);
+            LOGE(std::string("Unable open model"));
             return;
         }
-    LOGV("Indexing mesh\n");
+
     auto submesh_set = parser.getSM();
+    long total_triangles = 0;
     for (auto it = submesh_set.begin(); it != submesh_set.end();++it) {
         MeshIndexer idx(*it);
-        d_sm.push_back(std::shared_ptr<CObjSubmesh>(idx.Do()));
+        auto res = std::shared_ptr<CObjSubmesh>(idx.Do());
+        total_triangles += res->vn.size();
+        d_sm.push_back(res);
         (*it).reset();
-
    }
+    LOGV(string_format("Mesh information: Submesh count:%d, Total mesh triangles:%d", d_sm.size(), total_triangles ));
 
     LOGV("Load materials");
 
