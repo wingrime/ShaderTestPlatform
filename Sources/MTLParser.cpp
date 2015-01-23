@@ -3,7 +3,7 @@
 #include "Log.h"
 MTLParser::MTLParser(const std::string& fname) {
     std::ifstream tst;
-
+    std::hash<std::string> hash_fn;
     std::string mtln("default_mtl");
 
     tst.open(fname);
@@ -13,6 +13,7 @@ MTLParser::MTLParser(const std::string& fname) {
                     mtln = ParseNEWMTL(line);
                     if (d_materials.count(mtln) == 0 ) {/* all materials are unique*/
                         d_materials[mtln] = std::unique_ptr<CMTLMaterial>(new CMTLMaterial());
+                        d_materials[mtln]->name_hash = hash_fn(mtln);
                     }
             } else if (line.find("map_Ka" ) != std::string::npos) {
                     d_materials[mtln]->map_Ka = Parsemap_Ka(line);

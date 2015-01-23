@@ -23,6 +23,7 @@ struct Material {
 STexture * diffuse;
 STexture *bump;
 STexture *alpha;
+std::size_t name_hash;
 
 };
 struct SubMeshIDs {

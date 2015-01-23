@@ -24,6 +24,8 @@ struct CMTLColor {
 };
 
 struct CMTLMaterial {
+    /*name hash for fast comparsion*/
+    std::size_t name_hash;
     CMTLColor Ka; /* ambient color   */
     CMTLColor Kd; /* diffuse color   */
     CMTLColor Ks; /* specular color  */

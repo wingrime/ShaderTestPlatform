@@ -179,7 +179,7 @@ void SObjModel::LoadTextures() {
                                    material->map_Kd.c_str(),
                                    material->map_bump.c_str(),
                                    material->map_d.c_str()));
-
+                d_materails[submesh->m_name].name_hash = material->name_hash;
                 d_materails[submesh->m_name].diffuse =  new STexture(diffuse);
                 d_textures[diffuse].reset( d_materails[submesh->m_name].diffuse);
                 if (!d_textures[diffuse]->IsReady) {
@@ -256,34 +256,40 @@ void SObjModel::BindVAOs() {
 void SObjModel::Render(RenderContext& r) {
     /*activate shader and load model matrix*/
     if (r.shader->IsReady) {
+        r.shader->SetUniform(r.d_modelMatrixLoc,model);
+        r.shader->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
+        r.shader->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
+        std::size_t last_hash = -1;
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
-
             Material m = d_materails[submesh->m_name];
-            BindTextures(&m);
             glBindVertexArray ( submesh_idx[submesh->id].vao );
-            /*shader*/
-            /*shadow mapping*/
-            if (r.sm_texture) {
-               r.sm_texture->Bind(5);
-            }
-            if (r.rsm_normal_texture) {
-               r.rsm_normal_texture->Bind(6);
-           }
-            if (r.rsm_vector_texture) {
-               r.rsm_vector_texture->Bind(7);
-            }
-            if (r.rsm_albedo_texture) {
-               r.rsm_albedo_texture->Bind(8);
-            }
-            if (r.sh_bands) {
-               r.sh_bands->Bind(9);
+            if (last_hash != m.name_hash){
+                last_hash = m.name_hash;
+                BindTextures(&m);
+
+                /*shader*/
+                /*shadow mapping*/
+                if (r.sm_texture) {
+                   r.sm_texture->Bind(5);
+                }
+                if (r.rsm_normal_texture) {
+                   r.rsm_normal_texture->Bind(6);
+               }
+                if (r.rsm_vector_texture) {
+                   r.rsm_vector_texture->Bind(7);
+                }
+                if (r.rsm_albedo_texture) {
+                   r.rsm_albedo_texture->Bind(8);
+                }
+                if (r.sh_bands) {
+                   r.sh_bands->Bind(9);
+                }
+
+
+                r.shader->Bind();
             }
 
-            r.shader->SetUniform(r.d_modelMatrixLoc,model);
-            r.shader->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
-            r.shader->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
-            r.shader->Bind();
 
 
             int idx_c = submesh->indexes.size();
