@@ -1,0 +1,12 @@
+{ 
+	"launch.h" : 1000 ,
+	"launch.w" : 1000 ,
+
+	"launch.ogl_major" : 4 ,
+	"launch.ogl_minor" : 2 ,
+
+	"scene.toggle_msaa" : 1,
+	"scene.toggle_debug_viewport_cfg" : 0,
+	"scene.toggle_debug_viewport_fps" : 0,
+	"scene.toggle_brightpass" : 0
+}
