@@ -88,9 +88,9 @@ int SCamera::goForward(float s) {
 
     /*Move from current to new offset*/
     float s2 = 1.0+s;
-    xPos += view.mat.a31*s2;
-    yPos += view.mat.a32*s2;
-    zPos += view.mat.a33*s2;
+    xPos += view.a31*s2;
+    yPos += view.a32*s2;
+    zPos += view.a33*s2;
     buildViewMatrix();
 
    
@@ -108,6 +108,7 @@ SMat4x4 SCamera::buildViewMatrix(){
     view = a;
     return a;
 }
+
 
 
 SVec4 SCamera::getPosition() const {

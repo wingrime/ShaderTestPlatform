@@ -25,7 +25,7 @@ TEST(Camera, MoveForward) {
     */
     cam->goForward(1.0);
     SMat4x4 m = cam->getViewMatrix();
-    EXPECT_FLOAT_EQ(cam->getViewMatrix().mat.a34 ,2.0 );
+    EXPECT_FLOAT_EQ(cam->getViewMatrix().a34 ,2.0 );
     delete cam;
 
 }

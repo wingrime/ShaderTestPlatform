@@ -9,12 +9,12 @@ public:
         float focal_length = 1.0 / tan(  FOV / 2.0);
 
 
-         mat.a11 = focal_length;
-         mat.a22  = focal_length/Aspect;
-         mat.a33 = -( (Far + Near) / (Far - Near));
-         mat.a34 =  -((2 *Far * Near) / ( Far- Near));
-         mat.a43 = -1.0f;
-         mat.a44 = 0.0f;
+         a11 = focal_length;
+         a22  = focal_length/Aspect;
+         a33 = -( (Far + Near) / (Far - Near));
+         a34 =  -((2 *Far * Near) / ( Far- Near));
+         a43 = -1.0f;
+         a44 = 0.0f;
 
          /*Orto*/
 /*
@@ -24,23 +24,23 @@ public:
          float t = 1;
          float l = -1;
          float b = -1;
-         mat.a11 = 2*n / (r - l );
-         mat.a13 = (r+l)/ (r-l );
-         mat.a22  = 2*n/ (t -b);
-         mat.a23 = (t+b) / (t-b);
-         mat.a33 = -((f+n)/ (f-n));
-         mat.a34 =  -((2 *f*n) / ( f-n));
-         mat.a43 = -1.0f;
-         mat.a44 = 0.0f;
+         a11 = 2*n / (r - l );
+         a13 = (r+l)/ (r-l );
+         a22  = 2*n/ (t -b);
+         a23 = (t+b) / (t-b);
+         a33 = -((f+n)/ (f-n));
+         a34 =  -((2 *f*n) / ( f-n));
+         a43 = -1.0f;
+         a44 = 0.0f;
 */
          /*
         //infinity far;
-         mat.a11 = focal_length;
-         mat.a22  = (focal_length/Aspect);
-         mat.a33 = -1.0;
-         mat.a34 = -2.0* (1.0f);
-         mat.a43 = -1.0f;
-         mat.a44 = 0.0f;
+         a11 = focal_length;
+         a22  = (focal_length/Aspect);
+         a33 = -1.0;
+         a34 = -2.0* (1.0f);
+         a43 = -1.0f;
+         a44 = 0.0f;
          printf("proj\n");
          Reflect();
 */
@@ -60,14 +60,14 @@ public:
          float t = 1;
          float l = -1;
          float b = -1;
-         mat.a11 = 2*n / (r - l );
-         mat.a13 = (r+l)/ (r-l );
-         mat.a22  = 2*n/ (t -b);
-         mat.a23 = (t+b) / (t-b);
-         mat.a33 = -((f+n)/ (f-n));
-         mat.a34 =  -((2 *f*n) / ( f-n));
-         mat.a43 = -1.0f;
-         mat.a44 = 0.0f;
+         a11 = 2*n / (r - l );
+         a13 = (r+l)/ (r-l );
+         a22  = 2*n/ (t -b);
+         a23 = (t+b) / (t-b);
+         a33 = -((f+n)/ (f-n));
+         a34 =  -((2 *f*n) / ( f-n));
+         a43 = -1.0f;
+         a44 = 0.0f;
 
     };
 };
@@ -76,11 +76,11 @@ public:
     SInfinityFarMatrix(float FOV) : SMat4x4() {
 
         float focal_length = 1.0 / tan(  FOV / 2.0);
-         mat.a11 = focal_length;
-         mat.a22  = (focal_length/FOV);
-         mat.a33 = -1.0;
-         mat.a34 = -2.0* (1.0f);
-         mat.a43 = -1.0f;
+         a11 = focal_length;
+         a22  = (focal_length/FOV);
+         a33 = -1.0;
+         a34 = -2.0* (1.0f);
+         a43 = -1.0f;
 
     };
 };
@@ -96,9 +96,9 @@ public:
          float f = Far;
          float n = Near;
 
-         mat.a22  = (f+n)/ (f-n);
-         mat.a42 =  -((2.0 *f*n) / ( f-n));
-         mat.a44 = 0.0;
-         mat.a24 = 1.0;
+         a22  = (f+n)/ (f-n);
+         a42 =  -((2.0 *f*n) / ( f-n));
+         a44 = 0.0;
+         a24 = 1.0;
     };
 };

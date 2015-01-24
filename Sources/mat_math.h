@@ -79,10 +79,10 @@ SVec4 operator-(const SVec4& v1,const SVec4& v2);
 
 class SMat4x4 {
 public:
-    SMat4x4(float a11,float a12,float a13,float a14,
-            float a21,float a22,float a23,float a24,
-            float a31,float a32,float a33,float a34,
-            float a41,float a42,float a43,float a44);
+    SMat4x4(float _a11, float _a12, float _a13, float _a14,
+            float _a21, float _a22, float _a23, float _a24,
+            float _a31, float _a32, float _a33, float _a34,
+            float _a41, float _a42, float _a43, float _a44);
     
     SMat4x4(SVec4 a1,
             SVec4 a2,
@@ -103,17 +103,17 @@ public:
 
 
     //internals
-    union mat {
+    union  {
         struct {
             float a11;float a12;float a13;float a14;
             float a21;float a22;float a23;float a24;
             float a31;float a32;float a33;float a34;
             float a41;float a42;float a43;float a44;
         };
-        struct {
+        //struct {
         float raw[16];
-        };
-    } mat;
+        //};
+    };
 
     //operators
     SMat4x4 operator+(const SMat4x4& i) const;
@@ -144,10 +144,10 @@ public:
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar( CEREAL_NVP(mat.a11),CEREAL_NVP(mat.a12),CEREAL_NVP(mat.a13),CEREAL_NVP(mat.a14),
-           CEREAL_NVP(mat.a21),CEREAL_NVP(mat.a22),CEREAL_NVP(mat.a23),CEREAL_NVP(mat.a24),
-           CEREAL_NVP(mat.a31),CEREAL_NVP(mat.a32),CEREAL_NVP(mat.a33),CEREAL_NVP(mat.a34),
-           CEREAL_NVP(mat.a41),CEREAL_NVP(mat.a42),CEREAL_NVP(mat.a43),CEREAL_NVP(mat.a44));
+        ar( CEREAL_NVP(a11),CEREAL_NVP(a12),CEREAL_NVP(a13),CEREAL_NVP(a14),
+           CEREAL_NVP(a21),CEREAL_NVP(a22),CEREAL_NVP(a23),CEREAL_NVP(a24),
+           CEREAL_NVP(a31),CEREAL_NVP(a32),CEREAL_NVP(a33),CEREAL_NVP(a34),
+           CEREAL_NVP(a41),CEREAL_NVP(a42),CEREAL_NVP(a43),CEREAL_NVP(a44));
     }
 
 };

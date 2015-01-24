@@ -97,57 +97,57 @@ SMat4x4::~SMat4x4(){
 
 
 SMat4x4 SMat4x4::operator+(const SMat4x4& i) const {
-return (SMat4x4(mat.a11+i.mat.a11,mat.a12+i.mat.a12,mat.a13+i.mat.a13,mat.a14+i.mat.a14,
-               mat.a21+i.mat.a21,mat.a22+i.mat.a22,mat.a23+i.mat.a23,mat.a24+i.mat.a24,
-               mat.a31+i.mat.a31,mat.a32+i.mat.a32,mat.a33+i.mat.a33,mat.a34+i.mat.a34,
-               mat.a41+i.mat.a41,mat.a42+i.mat.a42,mat.a43+i.mat.a43,mat.a44+i.mat.a44
+return (SMat4x4(a11+i.a11,a12+i.a12,a13+i.a13,a14+i.a14,
+               a21+i.a21,a22+i.a22,a23+i.a23,a24+i.a24,
+               a31+i.a31,a32+i.a32,a33+i.a33,a34+i.a34,
+               a41+i.a41,a42+i.a42,a43+i.a43,a44+i.a44
                ));    
 }
 SMat4x4 SMat4x4::operator-(const SMat4x4& i) const {
-return (SMat4x4(mat.a11-i.mat.a11,mat.a12-i.mat.a12,mat.a13-i.mat.a13,mat.a14-i.mat.a14,
-               mat.a21-i.mat.a21,mat.a22-i.mat.a22,mat.a23-i.mat.a23,mat.a24-i.mat.a24,
-               mat.a31-i.mat.a31,mat.a32-i.mat.a32,mat.a33-i.mat.a33,mat.a34-i.mat.a34,
-               mat.a41-i.mat.a41,mat.a42-i.mat.a42,mat.a43-i.mat.a43,mat.a44-i.mat.a44
+return (SMat4x4(a11-i.a11,a12-i.a12,a13-i.a13,a14-i.a14,
+               a21-i.a21,a22-i.a22,a23-i.a23,a24-i.a24,
+               a31-i.a31,a32-i.a32,a33-i.a33,a34-i.a34,
+               a41-i.a41,a42-i.a42,a43-i.a43,a44-i.a44
                ));    
 }
 SMat4x4 SMat4x4::operator*(const SMat4x4& i) const {
     return (SMat4x4(
-                mat.a11 * i.mat.a11 + mat.a12 * i.mat.a21 + mat.a13 * i.mat.a31 + mat.a14 * i.mat.a41, 
-                mat.a11 * i.mat.a12 + mat.a12 * i.mat.a22 + mat.a13 * i.mat.a32 + mat.a14 * i.mat.a42, 
-                mat.a11 * i.mat.a13 + mat.a12 * i.mat.a23 + mat.a13 * i.mat.a33 + mat.a14 * i.mat.a43,              
-                mat.a11 * i.mat.a14 + mat.a12 * i.mat.a24 + mat.a13 * i.mat.a34 + mat.a14 * i.mat.a44, 
+                a11 * i.a11 + a12 * i.a21 + a13 * i.a31 + a14 * i.a41,
+                a11 * i.a12 + a12 * i.a22 + a13 * i.a32 + a14 * i.a42,
+                a11 * i.a13 + a12 * i.a23 + a13 * i.a33 + a14 * i.a43,
+                a11 * i.a14 + a12 * i.a24 + a13 * i.a34 + a14 * i.a44,
                 
-                mat.a21 * i.mat.a11 + mat.a22 * i.mat.a21 + mat.a23 * i.mat.a31 + mat.a24 * i.mat.a41,              
-                mat.a21 * i.mat.a12 + mat.a22 * i.mat.a22 + mat.a23 * i.mat.a32 + mat.a24 * i.mat.a42, 
-                mat.a21 * i.mat.a13 + mat.a22 * i.mat.a23 + mat.a23 * i.mat.a33 + mat.a24 * i.mat.a43, 
-                mat.a21 * i.mat.a14 + mat.a22 * i.mat.a24 + mat.a23 * i.mat.a34 + mat.a24 * i.mat.a44, 
+                a21 * i.a11 + a22 * i.a21 + a23 * i.a31 + a24 * i.a41,
+                a21 * i.a12 + a22 * i.a22 + a23 * i.a32 + a24 * i.a42,
+                a21 * i.a13 + a22 * i.a23 + a23 * i.a33 + a24 * i.a43,
+                a21 * i.a14 + a22 * i.a24 + a23 * i.a34 + a24 * i.a44,
 
-                mat.a31 * i.mat.a11 + mat.a32 * i.mat.a21 + mat.a33 * i.mat.a31 + mat.a34 * i.mat.a41, 
-                mat.a31 * i.mat.a12 + mat.a32 * i.mat.a22 + mat.a33 * i.mat.a32 + mat.a34 * i.mat.a42, 
-                mat.a31 * i.mat.a13 + mat.a32 * i.mat.a23 + mat.a33 * i.mat.a33 + mat.a34 * i.mat.a43, 
-                mat.a31 * i.mat.a14 + mat.a32 * i.mat.a24 + mat.a33 * i.mat.a34 + mat.a34 * i.mat.a44, 
+                a31 * i.a11 + a32 * i.a21 + a33 * i.a31 + a34 * i.a41,
+                a31 * i.a12 + a32 * i.a22 + a33 * i.a32 + a34 * i.a42,
+                a31 * i.a13 + a32 * i.a23 + a33 * i.a33 + a34 * i.a43,
+                a31 * i.a14 + a32 * i.a24 + a33 * i.a34 + a34 * i.a44,
 
-                mat.a41 * i.mat.a11 + mat.a42 * i.mat.a21 + mat.a43 * i.mat.a31 + mat.a44 * i.mat.a41, 
-                mat.a41 * i.mat.a12 + mat.a42 * i.mat.a22 + mat.a43 * i.mat.a32 + mat.a44 * i.mat.a42, 
-                mat.a41 * i.mat.a13 + mat.a42 * i.mat.a23 + mat.a43 * i.mat.a33 + mat.a44 * i.mat.a43,               
-                mat.a41 * i.mat.a14 + mat.a42 * i.mat.a24 + mat.a43 * i.mat.a34 + mat.a44 * i.mat.a44
+                a41 * i.a11 + a42 * i.a21 + a43 * i.a31 + a44 * i.a41,
+                a41 * i.a12 + a42 * i.a22 + a43 * i.a32 + a44 * i.a42,
+                a41 * i.a13 + a42 * i.a23 + a43 * i.a33 + a44 * i.a43,
+                a41 * i.a14 + a42 * i.a24 + a43 * i.a34 + a44 * i.a44
                 ));
 }
 
 
 void SMat4x4::Reflect() const{
-    printf("%f %f %f %f\n",mat.a11,mat.a12,mat.a13,mat.a14);
-    printf("%f %f %f %f\n",mat.a21,mat.a22,mat.a23,mat.a24);
-    printf("%f %f %f %f\n",mat.a31,mat.a32,mat.a33,mat.a34);
-    printf("%f %f %f %f\n",mat.a41,mat.a42,mat.a43,mat.a44);
+    printf("%f %f %f %f\n",a11,a12,a13,a14);
+    printf("%f %f %f %f\n",a21,a22,a23,a24);
+    printf("%f %f %f %f\n",a31,a32,a33,a34);
+    printf("%f %f %f %f\n",a41,a42,a43,a44);
 }
 std::string SMat4x4::ReflectStr() const{
     
     return string_format("Matrix4x4\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n", 
-                            mat.a11,mat.a12,mat.a13,mat.a14,
-                            mat.a21,mat.a22,mat.a23,mat.a24, 
-                            mat.a31,mat.a32,mat.a33,mat.a34, 
-                            mat.a41,mat.a42,mat.a43,mat.a44 );
+                            a11,a12,a13,a14,
+                            a21,a22,a23,a24,
+                            a31,a32,a33,a34,
+                            a41,a42,a43,a44 );
 }
 
 SMat4x4::SMat4x4(SVec4 a1,
@@ -155,19 +155,19 @@ SMat4x4::SMat4x4(SVec4 a1,
                  SVec4 a3,
                  SVec4 a4 ) {
 
-    mat.a11 = a1.x; mat.a12 = a2.x;mat.a13 = a3.x; mat.a14 = a4.x;
-    mat.a21 = a1.y; mat.a22 = a2.y;mat.a23 = a3.y; mat.a24 = a4.y;
-    mat.a31 = a1.z; mat.a32 = a2.z;mat.a33 = a3.z; mat.a34 = a4.z;
-    mat.a41 = a1.w; mat.a42 = a2.w;mat.a43 = a3.w; mat.a44 = a4.w;
+    a11 = a1.x; a12 = a2.x;a13 = a3.x; a14 = a4.x;
+    a21 = a1.y; a22 = a2.y;a23 = a3.y; a24 = a4.y;
+    a31 = a1.z; a32 = a2.z;a33 = a3.z; a34 = a4.z;
+    a41 = a1.w; a42 = a2.w;a43 = a3.w; a44 = a4.w;
     //printf("mat\n");
 }
 SMat4x4::SMat4x4(const std::string &str) {
     const char *s = str.c_str();
     int c = sscanf(s, " %f %f %f %f ; %f %f %f %f ; %f %f %f %f ; %f %f %f %f ", 
-            &mat.a11,&mat.a12,&mat.a13,&mat.a14,
-            &mat.a21,&mat.a22,&mat.a23,&mat.a24,
-            &mat.a31,&mat.a32,&mat.a33,&mat.a34,
-            &mat.a41,&mat.a42,&mat.a43,&mat.a44);
+            &a11,&a12,&a13,&a14,
+            &a21,&a22,&a23,&a24,
+            &a31,&a32,&a33,&a34,
+            &a41,&a42,&a43,&a44);
    // if (c != 16 )
    //     throw MatrixError(std::string("Unable construct matrix from string:")+str);
     //better error handing
@@ -175,31 +175,31 @@ SMat4x4::SMat4x4(const std::string &str) {
 
 SMat4x4::SMat4x4(float v) {
 
-    mat.a11 = v;    mat.a12 = 0.0f; mat.a13 = 0.0f; mat.a14 = 0.0f;
-    mat.a21 = 0.0f; mat.a22 = v;    mat.a23 = 0.0f; mat.a24 = 0.0f;
-    mat.a31 = 0.0f; mat.a32 = 0.0f; mat.a33 = v;    mat.a34 = 0.0f;
-    mat.a41 = 0.0f; mat.a42 = 0.0f; mat.a43 = 0.0f; mat.a44 = v;
+    a11 = v;    a12 = 0.0f; a13 = 0.0f; a14 = 0.0f;
+    a21 = 0.0f; a22 = v;    a23 = 0.0f; a24 = 0.0f;
+    a31 = 0.0f; a32 = 0.0f; a33 = v;    a34 = 0.0f;
+    a41 = 0.0f; a42 = 0.0f; a43 = 0.0f; a44 = v;
 }
-SMat4x4::SMat4x4(float a11,float a12,float a13,float a14,
-            float a21,float a22,float a23,float a24,
-            float a31,float a32,float a33,float a34,
-            float a41,float a42,float a43,float a44){
+SMat4x4::SMat4x4(float _a11,float _a12,float _a13,float _a14,
+            float _a21,float _a22,float _a23,float _a24,
+            float _a31,float _a32,float _a33,float _a34,
+            float _a41,float _a42,float _a43,float _a44){
 
-    mat.a11 = a11; mat.a12 = a12; mat.a13 = a13; mat.a14 = a14;
-    mat.a21 = a21; mat.a22 = a22; mat.a23 = a23; mat.a24 = a24;
-    mat.a31 = a31; mat.a32 = a32; mat.a33 = a33; mat.a34 = a34;
-    mat.a41 = a41; mat.a42 = a42; mat.a43 = a43; mat.a44 = a44;
+    a11 = _a11; a12 = _a12; a13 = _a13; a14 = _a14;
+    a21 = _a21; a22 = _a22; a23 = _a23; a24 = _a24;
+    a31 = _a31; a32 = _a32; a33 = _a33; a34 = _a34;
+    a41 = _a41; a42 = _a42; a43 = _a43; a44 = _a44;
 }
 
 SMat4x4::SMat4x4( const SMat4x4& o){
     for (int i = 0; i< 16 ;i++ ) {
-        mat.raw[i] = o.mat.raw[i];
+        raw[i] = o.raw[i];
     }
 }
 // TODO make delta standart
 bool SMat4x4::Eq(const SMat4x4& a,const SMat4x4& b){
     for ( int i = 0 ; i < 16 ; i++ ) {
-        if ( abs(a.mat.raw[i] - b.mat.raw[i]) > 0.00001 )
+        if ( abs(a.raw[i] - b.raw[i]) > 0.00001 )
             return false;
     }
     return true;
@@ -207,27 +207,27 @@ bool SMat4x4::Eq(const SMat4x4& a,const SMat4x4& b){
 /*not much optimal*/
 SMat4x4 SMat4x4::Move(float x,float y,float z) const{
     SMat4x4 a =  SMat4x4(0.0);
-    a.mat.a14 = x;
-    a.mat.a24 = y;
-    a.mat.a34 = z;
+    a.a14 = x;
+    a.a24 = y;
+    a.a34 = z;
     return (* this)+a;
 }
 /*optimize*/
 SMat4x4 SMat4x4::Translate(const SVec4& vec) const{
     SMat4x4 a =  SMat4x4(0.0);
-    a.mat.a14 = vec.x;
-    a.mat.a24 = vec.y;
-    a.mat.a34 = vec.z;
-    a.mat.a44 = vec.w;
+    a.a14 = vec.x;
+    a.a24 = vec.y;
+    a.a34 = vec.z;
+    a.a44 = vec.w;
 
     return (* this)+(a);
 }
 
 SMat4x4 SMat4x4::Scale(float x,float y,float z) const {
     SMat4x4 a =  SMat4x4();
-    a.mat.a11 = x;
-    a.mat.a22 = y;
-    a.mat.a33 = z;
+    a.a11 = x;
+    a.a22 = y;
+    a.a33 = z;
     return (a)*(* this);
 }
 
@@ -237,10 +237,10 @@ SMat4x4 SMat4x4::RotX(float ang) const{
     float ang_c,ang_s;
     ang_c = cos(ang);
     ang_s = sin (ang);
-    op.mat.a22 = ang_c;
-    op.mat.a23 =-ang_s;
-    op.mat.a32 = ang_s; 
-    op.mat.a33 = ang_c;
+    op.a22 = ang_c;
+    op.a23 =-ang_s;
+    op.a32 = ang_s;
+    op.a33 = ang_c;
     return (op)*(*this); 
 }
 
@@ -249,10 +249,10 @@ SMat4x4 SMat4x4::RotY(float ang) const{
     float ang_c,ang_s;
     ang_c = cos(ang);
     ang_s = sin(ang);
-    op.mat.a11 = ang_c;
-    op.mat.a31 = -ang_s;
-    op.mat.a13 = ang_s; 
-    op.mat.a33 =  ang_c;
+    op.a11 = ang_c;
+    op.a31 = -ang_s;
+    op.a13 = ang_s;
+    op.a33 =  ang_c;
     return (op)*(*this); 
 }
 SMat4x4 SMat4x4::RotZ(float ang) const{
@@ -260,27 +260,27 @@ SMat4x4 SMat4x4::RotZ(float ang) const{
     float ang_c,ang_s;
     ang_c = cos(ang);
     ang_s = sin (ang);
-    op.mat.a11 = ang_c;
-    op.mat.a12 = -ang_s;
-    op.mat.a22 = ang_c; 
-    op.mat.a21 = ang_s;
+    op.a11 = ang_c;
+    op.a12 = -ang_s;
+    op.a22 = ang_c;
+    op.a21 = ang_s;
     return (op)*(*this); 
 }
 SMat4x4 SMat4x4::Transpose() const {
-	return (SMat4x4(mat.a11,mat.a21,mat.a31,mat.a41, 
-								mat.a12,mat.a22,mat.a32,mat.a42,
-								mat.a13,mat.a23,mat.a33,mat.a43,
-								mat.a14,mat.a24,mat.a34,mat.a44));
+    return (SMat4x4(a11,a21,a31,a41,
+                                a12,a22,a32,a42,
+                                a13,a23,a33,a43,
+                                a14,a24,a34,a44));
 }
 
 
 
 
 SVec4 operator* (const SMat4x4& m, const SVec4& v){
-    return SVec4(m.mat.a11 * v.x + m.mat.a12 * v.y + m.mat.a13 * v.z+ m.mat.a14 * v.w ,
-                 m.mat.a21 * v.x + m.mat.a22 * v.y + m.mat.a23 * v.z+ m.mat.a24 * v.w ,
-                 m.mat.a31 * v.x + m.mat.a32 * v.y + m.mat.a33 * v.z+ m.mat.a34 * v.w ,
-                 m.mat.a41 * v.x + m.mat.a42 * v.y + m.mat.a43 * v.z+ m.mat.a44 * v.w );
+    return SVec4(m.a11 * v.x + m.a12 * v.y + m.a13 * v.z+ m.a14 * v.w ,
+                 m.a21 * v.x + m.a22 * v.y + m.a23 * v.z+ m.a24 * v.w ,
+                 m.a31 * v.x + m.a32 * v.y + m.a33 * v.z+ m.a34 * v.w ,
+                 m.a41 * v.x + m.a42 * v.y + m.a43 * v.z+ m.a44 * v.w );
 
 }
 template <typename T>

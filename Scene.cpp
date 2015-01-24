@@ -401,7 +401,7 @@ int SScene::InitDebugCommands()
     d_console_cmd_handler->AddCommand("updc", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         SMat4x4 m = cam.getViewMatrix();
-        d_debugDrawMgr.AddCross({m.mat.a14,m.mat.a24,m.mat.a34},1000);
+        d_debugDrawMgr.AddCross({m.a14,m.a24,m.a34},1000);
         d_debugDrawMgr.Update();
     }));
 
