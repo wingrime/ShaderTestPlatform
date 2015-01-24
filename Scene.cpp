@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "r_cprog.h"
+#include <chrono>
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
@@ -492,6 +493,7 @@ int inline SScene::RenderDirect(const RBO& v) {
     return 0;
 }
 int SScene::Render() {
+    auto start = std::chrono::steady_clock::now();
     step  += 0.002f;
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
@@ -522,7 +524,6 @@ int SScene::Render() {
         } else
             RenderDirect( *rtHDRScene);
     }
-    glFlush();
     rtime.End();
     pp_time.Begin();
 
@@ -618,8 +619,6 @@ int SScene::Render() {
 
         //pp_stage_hdr_lum_key->Draw();
     }
-
-    glFlush();
     pp_time.End();
     ui_time.Begin();
  
@@ -630,12 +629,16 @@ int SScene::Render() {
         v_sel_label->Draw();
     }
     con->Draw();
-   glFlush();
     ui_time.End();
     char buf [90];
-    sprintf(buf,"DRAW:%4.3f ms\nUI: %4.3f ms\nPP: %4.3f ms\n",      (float)rtime.getTime()*(1.0/ 1000000.0), \
+    auto end = std::chrono::steady_clock::now();
+
+    auto diff = end- start;
+
+    sprintf(buf,"DRAW:%4.3f ms\nUI: %4.3f ms\nPP: %4.3f ms\nCPU: %4.3f\n",      (float)rtime.getTime()*(1.0/ 1000000.0), \
                                                                     (float)ui_time.getTime()*(1.0/1000000.0),\
-                                                                    (float)pp_time.getTime()*(1.0/1000000.0));
+                                                                    (float)pp_time.getTime()*(1.0/1000000.0),\
+                                                                      std::chrono::duration <float, std::milli> (diff).count() );
     fps_label->setText(buf);
    
     return true;
