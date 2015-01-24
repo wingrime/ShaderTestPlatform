@@ -11,23 +11,25 @@ SPerfMan::~SPerfMan() {
 	glDeleteQueries(1,&q);
 }
 int SPerfMan::Begin(){
+     /*try save last result that should be avaliable from last frame ,
+      *   if data is not aval, don't modify res
+      */
+    if (!d_first_run)
+        glGetQueryObjectuiv(q, GL_QUERY_RESULT_NO_WAIT, &res);
+    else
+        d_first_run = false;
 	glBeginQuery(GL_TIME_ELAPSED, q);
 	return ESUCCESS;
 }
 int SPerfMan::End(){
+
+
 	glEndQuery(GL_TIME_ELAPSED );
-	glGetQueryObjectuiv(q, GL_QUERY_RESULT, &res);
-	if ( res > mtime)
-		mtime = res;
-	avgtime = (avgtime + res )/ 2.0; /*Moving average*/
+    glGetQueryObjectuiv(q, GL_QUERY_RESULT_NO_WAIT, &res);
 	return ESUCCESS;
 }
 unsigned int SPerfMan::getTime(){
+    //stall pipeline
+    //glGetQueryObjectuiv(q, GL_QUERY_RESULT, &res);
 	return res;
-}
-unsigned int SPerfMan::getMaxTime(){
-	return mtime;
-}
-unsigned int SPerfMan::getAvgTime(){
-	return avgtime;
 }
