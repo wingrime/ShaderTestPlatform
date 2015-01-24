@@ -88,7 +88,8 @@ class SObjModel {
             ar( CEREAL_NVP(IsReady),
                 CEREAL_NVP(model),
                 CEREAL_NVP(d_materials),
-                CEREAL_NVP(d_textures)
+                CEREAL_NVP(d_textures),
+                CEREAL_NVP(d_sm)
                 );
         }
 

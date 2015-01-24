@@ -115,7 +115,14 @@ struct CObjSubmesh {
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar(CEREAL_NVP(name),CEREAL_NVP(m_name),CEREAL_NVP(vn),CEREAL_NVP(indexes));
+        ar(
+                    CEREAL_NVP(name),
+                    CEREAL_NVP(m_name),
+                    CEREAL_NVP(id),
+ //disabled due size
+ //                 CEREAL_NVP(vn),
+ //                 CEREAL_NVP(indexes))
+           );
     }
 };
 
