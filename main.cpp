@@ -23,7 +23,7 @@ Global TODOs:
 /*hand made front render based on ft2*/
 #include "UIConsole.h"
 #include "UILabel.h"
-
+#include "c_config.h"
 /* shader class*/
 #include "r_sprog.h"
 
@@ -193,12 +193,22 @@ int main ( int argc, char * argv [] )
 {
     std::ios::sync_with_stdio(false);
     MainLog log;
+    MainConfig config;
+
     Log gl_log("gl_log.log");
 
     LOGV("GIT REVISION:"  GIT_SHA1 );
     /*backtrace on windows*/
     LoadLibraryA("backtrace.dll");
-    RBO v(1000,1000);
+
+    int h = config["launch.h"].GetInt();
+    int w = config["launch.w"].GetInt();
+    int ogl_major = config["launch.ogl_major"].GetInt();
+    int ogl_minor = config["launch.ogl_minor"].GetInt();
+
+    printf("create window: %d , %d\n", h,w);
+
+    RBO v(w,h);
 
 
 
@@ -210,7 +220,7 @@ int main ( int argc, char * argv [] )
 
 
     // init modern opengl
-    glutInitContextVersion ( 4, 2 );
+    glutInitContextVersion ( ogl_major, ogl_minor );
     glutInitContextFlags   ( GLUT_FORWARD_COMPATIBLE| GLUT_DEBUG);
     glutInitContextProfile ( GLUT_CORE_PROFILE  );
 
