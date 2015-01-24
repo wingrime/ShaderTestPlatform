@@ -47,6 +47,14 @@ SScene::SScene(RBO *v)
     con->Msg("git revision: " GIT_SHA1 "\n");
     con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
 
+    MainConfig *cfg = MainConfig::GetInstance();
+    /*load configuration*/
+    d_toggle_MSAA = (bool)cfg->operator []("scene.toggle_msaa").GetInt();
+    d_toggle_cfg_view = (bool)cfg->operator []("scene.toggle_debug_viewport_cfg").GetInt();
+    d_toggle_fps_view = (bool)cfg->operator []("scene.toggle_debug_viewport_fps").GetInt();
+    d_toggle_brightpass = (bool)cfg->operator []("scene.toggle_brightpass").GetInt();
+
+
     int w = rtHDRScene->getSize().w;
     int h = rtHDRScene->getSize().h;
     /*bloom shaders */
