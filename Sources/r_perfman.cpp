@@ -29,7 +29,7 @@ int SPerfMan::End(){
 	return ESUCCESS;
 }
 unsigned int SPerfMan::getTime(){
-    //stall pipeline
-    //glGetQueryObjectuiv(q, GL_QUERY_RESULT, &res);
+    /*try get last result if avaliavble*/
+    glGetQueryObjectuiv(q, GL_QUERY_RESULT_NO_WAIT, &res);
 	return res;
 }
