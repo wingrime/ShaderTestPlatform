@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "r_cprog.h"
 #include <chrono>
+#include "c_config.h"
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
@@ -445,7 +446,7 @@ int SScene::RenderCubemap()
     step ++;
     rtCubemap->Bind();
     SMat4x4 pos = SMat4x4().Move(0.0+step*100,-200.0,0.0);
-    d_debugDrawMgr.AddCross({0.0-step*100,200,1.0},50);
+    d_debugDrawMgr.AddCross({(float)(0.0-step*100.0),200,1.0},50);
     d_debugDrawMgr.Update();
     SCamera cubemap_cam(pos,SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0)));
     RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator ,&cubemap_cam);
