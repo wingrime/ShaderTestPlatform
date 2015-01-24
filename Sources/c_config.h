@@ -5,7 +5,7 @@
 #include "Singltone.h"
 /*overide assert*/
 #ifndef RAPIDJSON_ASSERT
-#define RAPIDJSON_ASSERT(x)  if (!(x)) {LOGE("Malformed JSON");}
+#define RAPIDJSON_ASSERT(x)  if (!(x)) {LOGE("JSON Parsing error");}
 #endif
 #include "cereal/external/rapidjson/document.h"
 #include "c_filebuffer.h"
