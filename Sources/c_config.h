@@ -1,15 +1,13 @@
 #pragma once
 #include <string>
 #include "e_base.h"
-
+#include "Log.h"
+#include "Singltone.h"
 /*overide assert*/
-#define RAPIDJSON_ASSERT(x)  if (!(x)) {throw JSONError("Mailformed JSON");} 
+#define RAPIDJSON_ASSERT(x)  if (!(x)) {LOGE("Malformed JSON");}
 
 #include "cereal/external/rapidjson/document.h"
 #include "c_filebuffer.h"
-
-
-
 
 class Config : public rapidjson::Document {
 public:
@@ -21,20 +19,8 @@ public:
 private:
     FileBuffer *raw;
 };
-Config::Config(const std::string& fname) {
-    raw = new FileBuffer(fname);
-    if (!raw->IsReady){
-        EMSGS("Can't open config file");
-        return;
-    }
-    //TODO add error check;
-    if (Parse<0>( (char *) raw->buffer).HasParseError()) {
-        puts((char *) raw->buffer);
-        EMSGS("Can't parse config file(JSON mailformed)");
-        return;
-        }
-    IsReady = true;
+
+class MainConfig :public Singltone<MainConfig>  ,public Config {
+public:
+    MainConfig() :Config("config.json") {}
 };
-Config::~Config() {
-    delete raw;
-}
