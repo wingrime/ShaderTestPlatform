@@ -436,7 +436,7 @@ int SScene::RenderCubemap()
         glDisable( GL_MULTISAMPLE );
     UpdateScene();
 
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    glPolygonMode( GL_FRONT, GL_FILL );
     glCullFace(GL_FRONT);
 
     glEnable(GL_DEPTH_TEST);
@@ -590,12 +590,13 @@ int SScene::Render() {
         rtSCREEN->Bind(true);
         pp_stage_hdr_blur_vert2->Draw();
     } else if (d_v_sel_current == V_SSAO) {
-        rtSSAOVertBlurResult->Bind(true);
-        pp_stage_ssao->Draw();
-        rtSSAOHorBlurResult->Bind(true);
-        pp_stage_ssao_blur_hor->Draw();
+        //rtSSAOVertBlurResult->Bind(true);
         rtSCREEN->Bind(true);
-        pp_stage_ssao_blur_vert->Draw();
+        pp_stage_ssao->Draw();
+        //rtSSAOHorBlurResult->Bind(true);
+        //pp_stage_ssao_blur_hor->Draw();
+        //rtSCREEN->Bind(true);
+        //pp_stage_ssao_blur_vert->Draw();
     } else if (d_v_sel_current == V_SHADOW_MAP) {
         rtSCREEN->Bind(true); 
         RenderShadowMap( *rtSCREEN);
