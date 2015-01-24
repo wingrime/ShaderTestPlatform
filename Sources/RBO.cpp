@@ -281,7 +281,7 @@ int RBO::ResolveMSAA(const RBO &dst)
         }
       }
       //Reset procedure
-      glReadBuffer(GL_FRONT_AND_BACK);
+      glReadBuffer(GL_COLOR_ATTACHMENT0);
       GLenum  buffers_1 [] = { GL_COLOR_ATTACHMENT0 };
       GLenum  buffers_2 [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1 };
       GLenum  buffers_3 [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
