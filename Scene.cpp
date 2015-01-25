@@ -6,7 +6,7 @@ SScene::SScene(RBO *v)
     :rtSCREEN(v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
     ,d_console_cmd_handler(new ConsoleCommandHandler())
-    ,d_shadowmap_cam(SMat4x4(),SPerspectiveProjectionMatrix(10.0f, 10000.0f,1.0f,toRad(26.0)))
+    ,d_shadowmap_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,sky_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,step(0.0f)
@@ -435,8 +435,10 @@ int inline SScene::RenderShadowMap(const RBO& v) {
 
 int SScene::RenderCubemap()
 {
+    glClearColor(1.0,1.0,1.0,1.0);
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+
     glDepthMask(true);
     glDepthFunc  ( GL_LEQUAL );
     if (d_toggle_MSAA)
@@ -460,7 +462,7 @@ int SScene::RenderCubemap()
     RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator ,&cubemap_cam);
     RenderContext r_ctx2(rtCubemap.get() , r_prog ,&cubemap_cam);
 
-    sky_dome_model->Render(r_ctx);
+    //sky_dome_model->Render(r_ctx);
     model->Render(r_ctx);
     // Convolve it !!
     SCProg cs("Cubemap/cubemap_convolve.comp");
@@ -504,6 +506,7 @@ int inline SScene::RenderDirect(const RBO& v) {
 int SScene::Render() {
     auto start = std::chrono::steady_clock::now();
     step  += 0.002f;
+    glClearColor(0.0,0.0,0.0,1.0);
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
     glDepthFunc  ( GL_LEQUAL );
