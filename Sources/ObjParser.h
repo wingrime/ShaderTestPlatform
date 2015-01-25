@@ -118,7 +118,7 @@ struct CObjSubmesh {
         ar(
                     CEREAL_NVP(name),
                     CEREAL_NVP(m_name),
-                    CEREAL_NVP(id),
+                    CEREAL_NVP(id)
  //disabled due size
  //                 CEREAL_NVP(vn),
  //                 CEREAL_NVP(indexes))
