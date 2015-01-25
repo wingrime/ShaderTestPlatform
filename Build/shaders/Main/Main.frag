@@ -23,7 +23,7 @@ in mat4 o_proj;
 in mat4 MV_n;
 in vec4 o_light;
 in mat4 sm_mat;
-in vec4 sm_pos;
+//in vec4 sm_pos;
 uniform int mesh_flags;
 /* Source texture */
 uniform float bump_amount = 50.0;
@@ -204,6 +204,10 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 
 	float shadow;
 
+        //sm_mat = bias*sm_proj*sm_view;
+        vec4 sm_pos = sm_mat*vec4(o_pos_v ,1.0);
+        sm_pos.xyz /= sm_pos.w;
+
 	//if (length(sm_pos.xyz) < 1.0 && dot(sm_pos.xyz, vec3())  ) {
 	if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w > 0.0) {
 		for (int i=0;i<sm_samples;i+=4)
@@ -276,8 +280,8 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 		SH[c].r = texelFetch(sh_bands_sampler, ivec2(c,1u),0).r;
 		SH[c].g = texelFetch(sh_bands_sampler, ivec2(c,2u),0).r;
 		SH[c].b = texelFetch(sh_bands_sampler, ivec2(c,3u),0).r;
-	}
-	vec3 ambient_spectral_harmonics = appplySHamonics(SH,d_normal);
+        }
+        vec3 ambient_spectral_harmonics = appplySHamonics(SH,d_normal);
 
 
 

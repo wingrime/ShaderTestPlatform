@@ -30,7 +30,7 @@ out mat4 o_proj;
 out vec4 o_light;
 out mat4 sm_mat;
 
-out vec4 sm_pos;
+//out vec4 sm_pos;
 
 
 out mat4 MV_n;
@@ -46,9 +46,10 @@ const mat4 bias = (mat4(0.5 , 0.0 , 0.0, 0.0 ,
 					  0.0 , 0.0 , 0.5, 0.0 ,
 					  0.5 , 0.5 , 0.5, 1.0 ));
 
+// back to fragment shader due
 sm_mat = bias*sm_proj*sm_view;
-sm_pos = sm_mat*vec4(o_pos_v ,1.0);
-sm_pos.xyz /= sm_pos.w; 
+//sm_pos = sm_mat*vec4(o_pos_v ,1.0);
+//sm_pos.xyz /= sm_pos.w;
 
 mat4 M = model;
 mat4 MV = view*model;
