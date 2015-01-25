@@ -7,6 +7,6 @@
 
 	"scene.toggle_msaa" : 1,
 	"scene.toggle_debug_viewport_cfg" : 0,
-	"scene.toggle_debug_viewport_fps" : 0,
+	"scene.toggle_debug_viewport_fps" : 1,
 	"scene.toggle_brightpass" : 0
 }
