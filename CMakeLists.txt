@@ -50,10 +50,15 @@ set(GLEW_LIBRARY "${PROJECT_SOURCE_DIR}/External/glew/lib")
 #to do try fix find
 set(FREEGLUT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/include")
 set(FREEGLUT_LIBRARY "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/lib")
+#lua
+set(LUA_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/External/lua/src")
+set(LUA_LIBRARIES "${PROJECT_SOURCE_DIR}/External/lua")
+
 
 find_package(Freetype REQUIRED)	
 find_package(glew REQUIRED)	
-find_package(freeglut REQUIRED)	
+find_package(freeglut REQUIRED)
+find_package(lua REQUIRED)
 
 if(FREETYPE_FOUND)
 		include_directories(${FREETYPE_INCLUDE_DIRS})
@@ -70,8 +75,19 @@ if(FREEGLUT_FOUND)
 		link_directories(${FREEGLUT_LINK_DIRS})
 		list(APPEND CORE_LINK_LIBS ${FREEGLUT_LIBRARY})
 endif()
+if(LUA_FOUND)
+                include_directories(${LUA_INCLUDE_DIR})
+                list(APPEND CORE_LINK_LIBS ${LUA_LIBRARIES})
+endif()
+#include only library
 # cereal
 include_directories(${PROJECT_SOURCE_DIR}/External/cereal/include)
+#lua config
+include_directories(${PROJECT_SOURCE_DIR}/External/lua/)
+#selene
+include_directories(${PROJECT_SOURCE_DIR}/External/selene/include/)
+
+
 # gtest
 include_directories(${PROJECT_SOURCE_DIR}/External/gtest/include)
 # for gtest-all.cc
@@ -107,6 +123,8 @@ target_link_libraries(main "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
 target_link_libraries(main OpenGL32)
 target_link_libraries(main "${FREETYPE_LIBRARY}")
+target_link_libraries(main "${LUA_LIBRARIES}/liblua.dll.a" )
+
 set_target_properties( main PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Build")
 
 add_custom_command(TARGET main
@@ -115,6 +133,7 @@ add_custom_command(TARGET main
           COMMAND ${CMAKE_COMMAND} -E copy "$ENV{FREETYPE_DIR}/bin/freetype6.dll" "${PROJECT_SOURCE_DIR}/Build/"
           COMMAND ${CMAKE_COMMAND} -E copy "${GLEW_LIBRARY}/../bin/libglew.dll" "${PROJECT_SOURCE_DIR}/Build/"
           COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
+          COMMAND ${CMAKE_COMMAND} -E copy "${LUA_LIBRARIES}/liblua.dll" "${PROJECT_SOURCE_DIR}/Build/"
           )
 add_executable("tests"  "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
 target_link_libraries(tests "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
