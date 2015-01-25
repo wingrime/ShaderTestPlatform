@@ -7,3 +7,7 @@ cd ..
 cd cereal
 git pull origin
 cd ..
+
+cd selene
+git pull origin
+cd ..

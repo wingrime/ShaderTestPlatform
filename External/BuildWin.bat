@@ -16,3 +16,14 @@ echo skip cereal lib
 echo make -G "MinGW Makefiles" 
 echo mingw32-make
 cd ..
+
+cd lua 
+cmake -G "MinGW Makefiles"
+mingw32-make
+cd ..
+
+echo todo
+cd selene
+cmake -G "MinGW Makefiles"
+mingw32-make
+cd ..
