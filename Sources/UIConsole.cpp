@@ -1,4 +1,6 @@
 #include "UIConsole.h"
+#include "mat_math.h"
+#include "RBO.h"
 int UIConsole::HandleExitConsole() {
     d_console_input.clear();
     RebuildOut();

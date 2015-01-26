@@ -1,5 +1,5 @@
 #include "ObjParser.h"
-
+#include "mat_math.h"
 CObjVertexN CObjMeshParser::BuildVertN(const CObjV3 &p, const CObjV2 &tc,const CObjV3 &n) {
     CObjVertexN  v = { p , n , tc};
     return v;

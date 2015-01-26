@@ -1,12 +1,12 @@
 #pragma once
-#include "mat_math.h"
-#include "r_projmat.h"
 
 /*serialization*/
 #include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/binary.hpp>
 #include <fstream>
+/*inhertance, can't avoid*/
+#include "r_projmat.h"
 
 class SCamera {
 public:

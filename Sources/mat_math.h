@@ -10,7 +10,6 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/binary.hpp>
 
-#include "MAssert.h"
 #include <type_traits>
 //TODO
 // && operator

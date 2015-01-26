@@ -1,14 +1,15 @@
 #pragma once
-#include "mat_math.h"
-
-#include "c_filebuffer.h"
-
+#include <unordered_map>
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
 
+#include "c_filebuffer.h"
 
+class SVec4;
+class SMat4x4;
 /*LowLevel interface to shader program*/
+
 class SProg {
     public:
 

@@ -2,6 +2,7 @@
 #include "ErrorCodes.h"
 #include "Log.h"
 #include "MAssert.h"
+#include "ImageBuffer.h"
 unsigned int STexture::getGLId() const {
     return tex;
 }

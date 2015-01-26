@@ -1,15 +1,12 @@
 #pragma once
+
+#include <string.h>
+#include <fstream>
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
-
-
-
-
-#include "string_format.h"
-
-#include <string.h>
 
 /*serialization*/
 #include <cereal/access.hpp>
@@ -18,13 +15,6 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
-
-#include "ImageBuffer.h"
-#include "e_base.h"
-
-
-
 
 class STexture {
 public:

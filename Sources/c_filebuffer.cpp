@@ -5,7 +5,7 @@
 #include    <stdlib.h>
 #include    <string.h>
 #include    <vector>
-
+#include "string_format.h"
 #include "c_filebuffer.h"
 #include "Log.h"
 

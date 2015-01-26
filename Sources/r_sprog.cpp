@@ -1,4 +1,3 @@
-#include "r_sprog.h"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -7,7 +6,11 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include "ErrorCodes.h"
 
+#include "r_sprog.h"
+#include "r_shader.h"
+#include "mat_math.h"
 
 /*Hi-level interface to shader program*/
 /*
@@ -18,14 +21,24 @@ Objectives:
     -   Automaticaly handle variables update when they 
     are changed.
 */
-
-
-
-SShader::SShader(const std::string &vprog, const std::string &fprog, const std::string &gprog)
+SShader::SShader (const std::string &vprog, const std::string &fprog, const std::string &gprog)
     :prog(new SProg(vprog, fprog, gprog))
 {
     IsReady =  prog->IsReady;
 }
+//mesh settings
+int SShader::SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type)
+{
+    if(ESUCCESS == prog->Bind()) {
+        prog->SetAttrib(name, numComponents, stride, offset,  type);
+        return ESUCCESS;
+    } else {
+        return EFAIL;
+    }
+}
+
+
+
 
 unsigned int SShader::getUniformLocation(const std::string &name)
 {

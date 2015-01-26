@@ -1,6 +1,7 @@
 #include "MTLParser.h"
 #include "string_format.h"
 #include "Log.h"
+#include <fstream>
 MTLParser::MTLParser(const std::string& fname) {
     std::ifstream tst;
     std::hash<std::string> hash_fn;

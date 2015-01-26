@@ -2,13 +2,12 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
-#include "r_texture.h" // FIXME
+/* enums can't forward */
 #include "r_rbo_texture.h"
-#include "mat_math.h"
+
+class SVec2;
 
 /*RenderTarget Type*/
-
-
 class RBO {
 
 public:

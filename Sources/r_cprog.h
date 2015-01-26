@@ -1,15 +1,12 @@
 #pragma once
-
-#include "c_filebuffer.h"
-
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
 
 #include <string>
-
-#include "Log.h"
+/*inhertance - can't avoid include */
+#include "c_filebuffer.h"
 
 /* Compute shader stand-alone module*/
 

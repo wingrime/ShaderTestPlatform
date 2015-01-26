@@ -1,6 +1,8 @@
 #include "r_shader.h"
 #include "ErrorCodes.h"
 #include "Log.h"
+#include "mat_math.h"
+#include "string_format.h"
 
 int SProg::Bind() {
     if (IsReady) {

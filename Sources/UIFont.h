@@ -6,7 +6,7 @@ TODOs:
 - count lines writed and retrun result
 */
 #include <string>
-#include <map>
+#include <unordered_map>
 
 
 
@@ -15,8 +15,8 @@ TODOs:
 #include FT_FREETYPE_H
 #define DEF_fontname "Anonymous Pro.ttf"
 #define DEF_fontsize 20
-#include "r_sprog.h"
 
+class SProg;
 
 class UIFont {
 	public: 

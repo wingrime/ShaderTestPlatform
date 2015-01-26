@@ -1,12 +1,15 @@
 #pragma once
-
-#include "RBO.h"
 #include <string>
 #include <vector>
-#include "UIFont.h"
 #include <memory>
 
 #include "Command.h"
+#include "e_base.h"
+/* font factory compile time depedency*/
+#include "UIFont.h"
+
+class RBO;
+
 
 class UIConsole {
 public:

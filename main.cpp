@@ -5,52 +5,19 @@ Global TODOs:
 - online attribute control
 - skybox
 */
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <windows.h>
+#include <memory>
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
-#include    <stdio.h>
 
-#include    <string.h>
-#include <math.h>
-/* STL */
-#include <vector>
-/*filebuffer interface*/
-#include "c_filebuffer.h"
-/*hand made matrix math*/
-#include "mat_math.h"
-
-/*hand made front render based on ft2*/
-#include "UIConsole.h"
-#include "UILabel.h"
 #include "c_config.h"
-/* shader class*/
-#include "r_sprog.h"
 
-#include "ObjModel.h"
-#include "sky_model.h"
-#include "post_process.h"
-
-/*GL performance measurement */
-#include "r_perfman.h"
-
-/*GL compute shader*/
-#include "r_cprog.h"
-
-#include "r_camera.h"
-#include "r_context.h"
-/*lua toolkit*/
-//#include <selene.h>
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/archives/json.hpp>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include "r_texture.h"
-#include "r_rbo_texture.h"
-#include "RBO.h"
-#include <windows.h>
-#include "MAssert.h"
 #include "Log.h"
 #include "Command.h"
 #include "Scene.h"
@@ -209,10 +176,6 @@ int main ( int argc, char * argv [] )
     printf("create window: %d , %d\n", h,w);
 
     RBO v(w,h);
-
-
-
-
     // initialize glut
     glutInit            ( &argc, argv );
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );

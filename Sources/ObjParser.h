@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <fstream>
 /*serialization*/
 #include <cereal/access.hpp>
 #include <cereal/types/memory.hpp>
@@ -10,9 +11,8 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
 
-#include "mat_math.h"
+
 
 struct CObjV3 {
     float x;

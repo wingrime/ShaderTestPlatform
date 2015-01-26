@@ -6,14 +6,12 @@
 #include <GL/gl.h>
 #include <GL/wglew.h>
 
-/* shader class*/
-#include "r_sprog.h"
+#include <memory>
 
-#include "mat_math.h"
 
-#include "RBO.h"
-
-#include "r_texture.h"
+class SRBOTexture;
+class RBO;
+class SShader;
 
 
 /* Prost Process */

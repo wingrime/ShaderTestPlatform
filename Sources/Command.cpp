@@ -1,6 +1,5 @@
 #include "Command.h"
-
-
+#include <sstream>
 
 
 int ConsoleCommandHandler::HandleCommand(const std::string& str) {

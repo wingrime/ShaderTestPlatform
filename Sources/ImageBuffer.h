@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include "AbstractBuffer.h"
 
 class ImageBuffer: public AbstractBuffer {

@@ -1,7 +1,8 @@
 #include "UIFont.h"
 /*file buffer class*/
 #include "c_filebuffer.h"
-
+#include "mat_math.h"
+#include "r_shader.h"
 
 UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz) {
 

@@ -1,5 +1,7 @@
 #include "c_config.h"
 #include "Log.h"
+#include "c_filebuffer.h"
+#include "e_base.h"
 Config::Config(const std::string& fname) {
     raw = new FileBuffer(fname);
     if (!raw->IsReady){

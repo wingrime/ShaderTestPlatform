@@ -1,19 +1,19 @@
 //TODO: get rid many of this using templates
 #pragma once
-#include "mat_math.h"
 
-#include "c_filebuffer.h"
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
-#include <unordered_map>
-#include <string>
-#include <vector>
 
-#include "r_shader.h"
-#include "MAssert.h"
-#include "ErrorCodes.h"
+
+class SProg;
+class SMat4x4;
+class SVec4;
+
 /*Hi-level interface to shader program*/
 /*
 Objectives:
@@ -29,6 +29,7 @@ public:
 
     /*Shader in line creation*/
     SShader(const std::string& vprog,const std::string& fprog, const std::string& gprog);
+
     SShader(const std::string& vprog,const std::string& fprog) :SShader(vprog, fprog, "") {}
     unsigned int getUniformLocation(const std::string& name);
     ~SShader();
@@ -46,15 +47,7 @@ public:
     int SetUniform(int loc,const SVec4& vec );
     int SetUniform(int loc,const SMat4x4& mat );
 
-    //mesh settings
-    int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type){
-        if(ESUCCESS == prog->Bind()) {
-            prog->SetAttrib(name, numComponents, stride, offset,  type);
-            return ESUCCESS;
-        } else {
-            return EFAIL;
-        }
-    }
+    int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type);
 
 
     bool IsReady = false;

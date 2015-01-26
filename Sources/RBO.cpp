@@ -1,6 +1,7 @@
 #include "RBO.h"
 #include "ErrorCodes.h"
 #include "MAssert.h"
+#include "mat_math.h"
 int RBO::Bind(bool clear) const {
     if (!IsReady)
         return EFAIL;

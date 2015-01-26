@@ -1,7 +1,11 @@
 #include "ObjModel.h"
-
-
-
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <map>
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
@@ -11,21 +15,14 @@
 #include "mat_math.h"
 #include "RBO.h"
 #include "r_texture.h"
-
 #include "r_projmat.h"
+#include "r_context.h"
+#include "MAssert.h"
 
-
-
-#include <vector>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <map>
 #include "string_format.h"
 #include "Log.h"
 #include "ObjParser.h"
+#include "ErrorCodes.h"
 std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 {
     LOGV(string_format("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d ",d_inmesh->name.c_str(),d_inmesh->m_name.c_str(),d_inmesh->id, d_inmesh->vn.size()));

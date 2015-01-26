@@ -1,8 +1,5 @@
 #pragma once
-
 #include <string>
-
-#include "r_texture.h"
 
 /*serialization*/
 #include <cereal/access.hpp>
@@ -11,9 +8,6 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
-
-
 
 
 class SRBOTexture {

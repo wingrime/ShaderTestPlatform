@@ -1,8 +1,9 @@
 #pragma once
 #include "Singltone.h"
-#include <string>
 #include <fstream>
+#include <string>
 #include <functional>
+
 class Log
 {
 public:

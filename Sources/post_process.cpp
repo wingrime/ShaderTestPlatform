@@ -1,5 +1,9 @@
 #include "post_process.h"
 #include "MAssert.h"
+#include "RBO.h"
+#include "r_sprog.h"
+#include "mat_math.h"
+
 SPostProcess::SPostProcess(SShader *prog, int w, int h,
                            const std::shared_ptr<SRBOTexture> &texSRC1,
                            const std::shared_ptr<SRBOTexture> &texSRC2,

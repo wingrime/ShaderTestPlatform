@@ -1,4 +1,11 @@
 #pragma once
+
+
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/archives/json.hpp>
+#include <memory>
+#include "selene.h"
+
 #include "RBO.h"
 #include "ObjModel.h"
 #include "post_process.h"
@@ -8,12 +15,10 @@
 #include "UIConsole.h"
 #include "Log.h"
 #include "Command.h"
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/archives/json.hpp>
-#include <memory>
+
 #include "DebugDraw.h"
 /*lua*/
-#include "selene.h"
+
 
 class SScene {
 public:

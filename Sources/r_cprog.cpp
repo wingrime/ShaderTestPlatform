@@ -1,5 +1,6 @@
 #include "r_cprog.h"
 #include "ErrorCodes.h"
+#include "Log.h"
 
 SSBuffer::SSBuffer(int sz) {
     glGenBuffers(1, &d_ssbo);

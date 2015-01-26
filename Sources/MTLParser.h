@@ -9,7 +9,7 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
+
 struct CMTLColor {
     float r;
     float g;

@@ -1,8 +1,5 @@
 #pragma once
-
-#include "r_context.h"
-#include "MTLParser.h"
-
+#include <algorithm>
 /*serialization*/
 #include <cereal/access.hpp>
 #include <cereal/types/memory.hpp>
@@ -10,14 +7,16 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
-
-#include <algorithm>
-
-#include "MAssert.h"
 
 
+#include "MTLParser.h"
 #include "ObjParser.h"
+#include "mat_math.h"
+
+
+class RenderContext;
+class SShader;
+class STexture;
 
 struct Material {
 STexture * diffuse;

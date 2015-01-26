@@ -3,9 +3,7 @@
 */
 #pragma once
 
-#include "string_format.h"
 #include "AbstractBuffer.h"
-
 
 class FileBuffer :public AbstractBuffer{
     public:

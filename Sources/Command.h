@@ -1,10 +1,10 @@
 #pragma once
 #include <memory>
+#include <iosfwd>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include "ErrorCodes.h"
-#include <sstream>
 
 class AbstractCommandHandler {
 public:

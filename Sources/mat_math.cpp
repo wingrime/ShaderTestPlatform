@@ -5,7 +5,7 @@
 #include <cmath>
 #include "string_format.h"
 #include "mat_math.h"
-
+#include "MAssert.h"
 
 SVec4 SVec4::Normalize() const {
     float norm = Length();

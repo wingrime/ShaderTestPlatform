@@ -1,6 +1,5 @@
 #pragma once
-#include <string>
-#include "e_base.h"
+
 #include "Log.h"
 #include "Singltone.h"
 /*overide assert*/
@@ -8,7 +7,8 @@
 #define RAPIDJSON_ASSERT(x)  if (!(x)) {LOGE("JSON Parsing error");}
 #endif
 #include "cereal/external/rapidjson/document.h"
-#include "c_filebuffer.h"
+
+class FileBuffer;
 
 class Config : public rapidjson::Document {
 public:
