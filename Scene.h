@@ -12,6 +12,8 @@
 #include <cereal/archives/json.hpp>
 #include <memory>
 #include "DebugDraw.h"
+/*lua*/
+#include "selene.h"
 
 class SScene {
 public:
@@ -91,7 +93,7 @@ public:
     bool rSSAO  = false;
 
    // lua
-    //sel::State state{true};
+    sel::State state{true};
 private:
     float step;
     bool d_first_render;
@@ -160,8 +162,10 @@ private:
    bool d_toggle_fullscreen = false;
    bool d_toggle_MSAA = true;
    bool d_toggle_brightpass = true;
+   /**/
+   bool d_scripted_mode = false;
 public:
-    int UpdateScene();
+    int UpdateScene(float dt);
 
 private:
     int InitDebugCommands();

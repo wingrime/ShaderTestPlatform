@@ -2,6 +2,7 @@
 #include "r_cprog.h"
 #include <chrono>
 #include "c_config.h"
+#include "r_context.h"
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
@@ -129,6 +130,23 @@ SScene::SScene(RBO *v)
     UpdateViewSelLabel();
     InitDebugCommands();
     d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,6000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
+    /*Init lua env*/
+    struct Env {
+        Env() {}
+        /*basic log*/
+        int loge(std::string msg) {LOGE(msg);}
+        int logw(std::string msg) {LOGW(msg);}
+        int logv(std::string msg) {LOGV(msg);}
+        /*movement*/
+
+
+
+    };
+    state["Env"].SetClass<Env>("loge",&Env::loge,
+                               "logw",&Env::logw
+                               );
+
+
     d_first_render = false;
 
 }
@@ -252,7 +270,11 @@ int SScene::Reshape(int w, int h) {
 
     return ESUCCESS;
 }
-int SScene::UpdateScene() {
+int SScene::UpdateScene(float dt) {
+    /*run lua*/
+    if (d_scripted_mode) {
+        state["update"](dt);
+    }
    sky_cam.SyncFromCamera(cam);
     r_prog->Bind();
     r_prog->SetUniform("sm_projection_mat",d_shadowmap_cam.getProjMatrix());
@@ -423,6 +445,18 @@ int SScene::InitDebugCommands()
         model->ConfigureProgram( *cubemap_prog_generator);
 
     }));
+    d_console_cmd_handler->AddCommand("script", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        con->Msg("Load scripst..");
+        state.Load(args[1]);
+        state["init"]();
+
+        d_scripted_mode = true;
+
+    }));
+
+
+
 
 }
 int inline SScene::RenderShadowMap(const RBO& v) {
@@ -445,7 +479,6 @@ int SScene::RenderCubemap()
        glEnable( GL_MULTISAMPLE );
     else
         glDisable( GL_MULTISAMPLE );
-    UpdateScene();
 
     glPolygonMode( GL_FRONT, GL_FILL );
     glCullFace(GL_FRONT);
@@ -514,7 +547,7 @@ int SScene::Render() {
        glEnable( GL_MULTISAMPLE );
     else
         glDisable( GL_MULTISAMPLE );
-    UpdateScene();
+    UpdateScene(0.01); /*add real ms*/
     glEnable(GL_DEPTH_TEST);
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     glCullFace(GL_FRONT);
