@@ -1,10 +1,11 @@
 #pragma once
-
-
+/*Low-level render impl
+* experimental educational project
+*/
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/archives/json.hpp>
 #include <memory>
-#include "selene.h"
+#include "Singltone.h"
 
 #include "RBO.h"
 #include "ObjModel.h"
@@ -17,8 +18,7 @@
 #include "Command.h"
 
 #include "DebugDraw.h"
-/*lua*/
-
+#include "MAssert.h"
 
 class SScene {
 public:
@@ -27,17 +27,16 @@ public:
 
     int Reshape(int w, int h);
 
+    /*on screen UI shold be rid from there*/
     int UpdateCfgLabel();
     int UpdateViewSelLabel();
-
-
     int upCfgItem();
     int downCfgItem();
     int incCfgItem();
     int decCfgItem();
-
     int upViewItem();
     int downViewItem();
+
 
 
     
@@ -97,8 +96,6 @@ public:
     bool rWireframe = false;
     bool rSSAO  = false;
 
-   // lua
-    sel::State state{true};
 private:
     float step;
     bool d_first_render;
@@ -167,8 +164,6 @@ private:
    bool d_toggle_fullscreen = false;
    bool d_toggle_MSAA = true;
    bool d_toggle_brightpass = true;
-   /**/
-   bool d_scripted_mode = false;
 public:
     int UpdateScene(float dt);
 
@@ -177,4 +172,8 @@ private:
 
     DebugDraw d_debugDrawMgr;
 
+};
+class MainScene :public Singltone<SScene>  ,public SScene{
+public:
+    MainScene(RBO *t) :SScene (t), Singltone(this){}
 };

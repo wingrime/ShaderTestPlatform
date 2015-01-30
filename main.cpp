@@ -21,25 +21,55 @@ Global TODOs:
 #include "Log.h"
 #include "Command.h"
 #include "Scene.h"
+#include <chrono>
+#include "selene.h"
 
-/*Singleton */
-std::shared_ptr<SScene> sc; 
+/*Singletons */
+/*
+ * Must be moved to Singltone interface as be ready
+*/
+sel::State state;
 std::shared_ptr<InputCommandHandler> s_input;
 /* Global configuration*/
-
+static long int g_scriptCallFrequency = 0;
+static long int g_frameNumber = 0;
 void display ()
-{   
+{
+    /* main engine loop */
+   static std::chrono::steady_clock::time_point last_t;
+   //full time difference;
+   float dt = std::chrono::duration<float, std::milli> ( (std::chrono::steady_clock::now() - last_t) ).count();
+   // update time
+   last_t = std::chrono::steady_clock::now();
+
+   g_frameNumber ++;
+
+    SScene * sc = MainScene::GetInstance();
+    auto start = std::chrono::steady_clock::now();
     sc->Render();
+    if (g_scriptCallFrequency) {
+        if ((g_frameNumber % g_scriptCallFrequency) == 0)
+        {
+            state["update"](dt);
+        }
+
+    }
+
     glutSwapBuffers ();
+
 }
 
 void reshape ( int w, int h )
 {
+    SScene * sc = MainScene::GetInstance();
+
     sc->Reshape(w,h);
 
 }
 void key ( unsigned char key, int x, int y )
 {
+    SScene * sc = MainScene::GetInstance();
+
     static int wireframe = 0;
     static int fullscreen = 0;
     static int console_mode = 0;
@@ -63,7 +93,10 @@ void key ( unsigned char key, int x, int y )
     }
 
     if ( key == 27 || key == 'q' || key == 'Q' )  
-        exit ( 0 );
+    {
+         glutLeaveMainLoop();
+         return;
+    }
             else if (key == 'p')
                     //wireframe
                 if (wireframe) {
@@ -84,6 +117,8 @@ else
 }
 
 void mouse_move (  int x , int y) {
+    SScene * sc = MainScene::GetInstance();
+
     static int x_base = -10000 ;
     static int y_base = -10000 ;
 
@@ -107,6 +142,8 @@ void mouse_move (  int x , int y) {
     sc->cam.rotEulerX(toRad(y_rm));
 }
 void special(int key, int x, int y){
+    SScene * sc = MainScene::GetInstance();
+
     if (key == GLUT_KEY_DOWN) sc->downCfgItem();
     else if (key == GLUT_KEY_UP) sc->upCfgItem();
     else if (key == GLUT_KEY_LEFT) sc->decCfgItem();
@@ -154,7 +191,34 @@ void APIENTRY openglCallbackFunction(GLenum source,
 
 
 }
+int initLuaBindings(sel::State& state)
+{
+    /*Init lua env*/
+    state.OpenLib("math",luaopen_math);
+    struct Env {
+        Env() {}
+        /*basic log*/
+       // state.OpenLib(
+        int loge(std::string msg) {LOGE(msg);}
+        int logw(std::string msg) {LOGW(msg);}
+        int logv(std::string msg) {LOGV(msg);}
+        int  fwd(double a) {MainScene::GetInstance()->cam.goForward(a);}
+        int setUpdateCallFrequency(int f) {g_scriptCallFrequency = f; }
 
+    };
+    state["Env"].SetClass<Env>("loge",&Env::loge,
+                               "logw",&Env::logw,
+                               "logv",&Env::logv,
+                               //setup script frequency
+                               "setUpdateCallFrequency",&Env::setUpdateCallFrequency,
+                               "fwd", &Env::fwd
+                               );
+
+    //state[Scene].
+
+
+    return 0;
+}
 
 int main ( int argc, char * argv [] )
 {
@@ -167,28 +231,27 @@ int main ( int argc, char * argv [] )
     LOGV("GIT REVISION:"  GIT_SHA1 );
     /*backtrace on windows*/
     LoadLibraryA("backtrace.dll");
+    LOGV("Backtrace dll loaded");
+
+    LOGV("Init gl context");
 
     int h = config["launch.h"].GetInt();
     int w = config["launch.w"].GetInt();
     int ogl_major = config["launch.ogl_major"].GetInt();
     int ogl_minor = config["launch.ogl_minor"].GetInt();
-
-    printf("create window: %d , %d\n", h,w);
-
-    RBO v(w,h);
+    //printf("create window: %d , %d\n", h,w);
+    RBO  v(w,h);
     // initialize glut
     glutInit            ( &argc, argv );
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
     glutInitWindowSize  ( v.getSize().w,v.getSize().h);
-
-
     // init modern opengl
     glutInitContextVersion ( ogl_major, ogl_minor );
     glutInitContextFlags   ( GLUT_FORWARD_COMPATIBLE| GLUT_DEBUG);
     glutInitContextProfile ( GLUT_CORE_PROFILE  );
 
     glutCreateWindow ("m_proj Shestacov Alexsey 2014-2015(c)" );
-    glewExperimental = GL_TRUE;
+    glewExperimental = GL_TRUE; /*Required for some new glFunctions otherwice will crash*/
     GLenum err= glewInit ();
     if (err != GLEW_OK) {
         LOGE("error create OpenGL context, exiting");
@@ -210,20 +273,29 @@ int main ( int argc, char * argv [] )
     else
         LOGW("OpenGl debug callback not avaliable");
 
-    glutDisplayFunc  ( display );
-    glutReshapeFunc  ( reshape );
-    glutIdleFunc ( refresh     );
-   
 
-    glutMouseFunc(mouse);
-    glutMotionFunc (mouse_move);
 
-    sc.reset(new SScene(&v));
+    LOGV("Create Scene");
 
+    MainScene msc(&v);
+
+    //sc.reset(new SScene(&v));
+    SScene * sc = MainScene::GetInstance();
     s_input.reset(new InputCommandHandler());
 
-    glutKeyboardFunc (key   );
+
+
+
+    /*glut callbacks*/
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutIdleFunc(refresh);
+    glutMouseFunc(mouse);
+    glutMotionFunc(mouse_move);
+    glutKeyboardFunc(key);
     glutSpecialFunc(special);
+
+
 
     /*input key handlers*/
     s_input->AddCommand("forward", InputCommandHandler::InputCommand([=] (void) -> void {
@@ -245,8 +317,26 @@ int main ( int argc, char * argv [] )
     s_input->AddCommand("clear_console", InputCommandHandler::InputCommand([=] (void) -> void {
         sc->con->Cls();
     }));
-    s_input->BindKey('c',"clear_console");   
+    s_input->BindKey('c',"clear_console");
+
+
+    LOGV("Init Script");
+
+    initLuaBindings(state);
+
+    //state.Load("init.lua");
+    //state["init"]();
+
+    if (state.Load("init.lua")) {
+        state["init"]();
+    } else
+        LOGE("No init.lua script find or load failed!");
+    Singltone<sel::State>  g_script_state(&state);
+
+
     /* main loop */
+    LOGV("Entering main loop");
     glutMainLoop ();
+    LOGV("Leave main loop");
 
 }

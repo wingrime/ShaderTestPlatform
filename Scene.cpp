@@ -130,25 +130,8 @@ SScene::SScene(RBO *v)
     UpdateViewSelLabel();
     InitDebugCommands();
     d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,6000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
-    /*Init lua env*/
-    struct Env {
-        Env() {}
-        /*basic log*/
-        int loge(std::string msg) {LOGE(msg);}
-        int logw(std::string msg) {LOGW(msg);}
-        int logv(std::string msg) {LOGV(msg);}
-        /*movement*/
-
-
-
-    };
-    state["Env"].SetClass<Env>("loge",&Env::loge,
-                               "logw",&Env::logw
-                               );
-
 
     d_first_render = false;
-
 }
 
 int SScene::upCfgItem() {
@@ -196,6 +179,8 @@ int SScene::downViewItem() {
     UpdateViewSelLabel();
     return 0;
 }
+
+
 
 int SScene::UpdateViewSelLabel() {
     v_sel_label->setText(std::string("------ViewSel-------\n") +
@@ -271,10 +256,6 @@ int SScene::Reshape(int w, int h) {
     return ESUCCESS;
 }
 int SScene::UpdateScene(float dt) {
-    /*run lua*/
-    if (d_scripted_mode) {
-        state["update"](dt);
-    }
    sky_cam.SyncFromCamera(cam);
     r_prog->Bind();
     r_prog->SetUniform("sm_projection_mat",d_shadowmap_cam.getProjMatrix());
@@ -447,11 +428,9 @@ int SScene::InitDebugCommands()
     }));
     d_console_cmd_handler->AddCommand("script", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        con->Msg("Load scripst..");
-        state.Load(args[1]);
-        state["init"]();
-
-        d_scripted_mode = true;
+        //con->Msg("Load scripst..");
+        //state.Load(args[1]);
+        //state["init"]();
 
     }));
 
