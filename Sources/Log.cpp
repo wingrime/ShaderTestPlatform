@@ -13,12 +13,12 @@ Log::Log(Log::Verbosity _v, const std::string &s)
 
 }
 
-void Log::LogW(const std::string &s)
+int Log::LogW(const std::string &s)
 {
     d_logfile_stream <<  "[W]" << s << std::endl;
 }
 
-void Log::LogE(const std::string &s)
+int Log::LogE(const std::string &s)
 {
    d_logfile_stream <<  "[E]" << s << std::endl;
 
@@ -30,7 +30,7 @@ void Log::LogE(const std::string &s)
    d_logfile_stream.flush();
 }
 
-void Log::LogV(const std::string &s)
+int Log::LogV(const std::string &s)
 {
     d_logfile_stream <<  "[V]" << s << std::endl;
 }

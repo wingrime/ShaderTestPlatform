@@ -23,5 +23,5 @@ private:
 
 class MainConfig :public Singltone<MainConfig>  ,public Config {
 public:
-    MainConfig() :Config("config.json") {}
+    MainConfig() :Config("config.json") , Singltone(this){}
 };

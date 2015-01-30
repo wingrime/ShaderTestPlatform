@@ -18,9 +18,9 @@ public:
     Log(): Log(L_WARNING,"Default.log") {}
     Log(const std::string& fname): Log(L_WARNING, fname) {}
     ~Log();
-    void LogW(const std::string& s);
-    void LogE(const std::string& s);
-    void LogV(const std::string& s);
+    int LogW(const std::string& s);
+    int LogE(const std::string& s);
+    int LogV(const std::string& s);
     void SetCallback(std::function<void(Log::Verbosity v,const std::string& s)> callback );
 private:
     Verbosity v;
@@ -31,7 +31,7 @@ private:
 };
 class MainLog :public Singltone<MainLog>  ,public Log{
 public:
-    MainLog() :Log ("Main.log"){}
+    MainLog() :Log ("Main.log") , Singltone(this) {}
 };
 #define LOGW(a) (MainLog::GetInstance()->LogW(a))
 #define LOGE(a) (MainLog::GetInstance()->LogE(a))

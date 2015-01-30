@@ -2,10 +2,10 @@
 template < class T >
 class Singltone {
 public:
-    static T* GetInstance() {return g_instance;}
+    static inline T*  GetInstance() {return g_instance;}
     void Release();
     virtual ~Singltone();
-    Singltone();
+    Singltone(T *inst);
 
 private:
     static T* g_instance;
@@ -30,10 +30,10 @@ Singltone<T>::~Singltone()
     g_instance = 0;
 }
 template < class T>
-Singltone<T>::Singltone()
+Singltone<T>::Singltone(T* inst)
 {
     if (!g_instance)
-        g_instance = (T*)this;
+        g_instance = inst;
     else {
         /*ASSERT should be there */
     }
