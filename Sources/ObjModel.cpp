@@ -12,6 +12,7 @@
 
 /* shader class*/
 #include "r_sprog.h"
+#include "r_shader.h"
 #include "mat_math.h"
 #include "RBO.h"
 #include "r_texture.h"
@@ -221,6 +222,10 @@ void SObjModel::BindVAOs() {
         std::string map_d; alpha map
         std::string map_bump;
     */
+
+    /*https://devtalk.nvidia.com/default/topic/561172/gldrawarrays-without-vao-for-procedural-geometry-using-gl_vertexid-doesn-t-work-in-debug-context/ */
+    glGenVertexArrays ( 1, &d_emptyVAO );
+   // glBindVertexArray(d_emptyVAO);
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
             /*gen buffers for submesh*/
@@ -230,7 +235,7 @@ void SObjModel::BindVAOs() {
             temp_ibo = 0;
             glGenVertexArrays ( 1, &temp_vao );
             glGenBuffers ( 1, &temp_vbo );
-            glBindVertexArray(temp_vao);
+            //glBindVertexArray(temp_vao);
             glBindBuffer(GL_ARRAY_BUFFER,temp_vbo);
             glGenBuffers(1, &temp_ibo);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, temp_ibo);
@@ -247,20 +252,34 @@ void SObjModel::BindVAOs() {
             idx.ibo = temp_ibo;
 
             submesh_idx[submesh->id] = idx;
-            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER,0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+
         }
+        //glBindVertexArray(0);
 }
 void SObjModel::Render(RenderContext& r) {
+    glBindVertexArray(d_emptyVAO);
+
     /*activate shader and load model matrix*/
     if (r.shader->IsReady) {
-        r.shader->SetUniform(r.d_modelMatrixLoc,model);
-        r.shader->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
-        r.shader->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
+
+        r.shader->Bind();//Commit changes
+        SProg *s  = r.shader->getDirect();
+        s->Bind();
+        /*request shader locations*/
+        unsigned int locPositions = s->LookupAttribLocation("position");
+        unsigned int locNormals = s->LookupAttribLocation("normal");
+        unsigned int locUV = s->LookupAttribLocation("UV");
+        s->SetUniform(r.d_modelMatrixLoc,model);
+        s->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
+        s->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
         std::size_t last_hash = -1;
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
             Material m = d_materails[submesh->m_name];
-            glBindVertexArray ( submesh_idx[submesh->id].vao );
+            //glBindVertexArray ( submesh_idx[submesh->id].vao );
+
             if (last_hash != m.name_hash){
                 last_hash = m.name_hash;
                 BindTextures(&m);
@@ -284,17 +303,31 @@ void SObjModel::Render(RenderContext& r) {
                 }
 
 
-                r.shader->Bind();
+                //r.shader->Bind();
             }
+            glBindBuffer(GL_ARRAY_BUFFER, submesh_idx[submesh->id].vbo);
 
+            //s->SetAttrib( "position", 3, sizeof(CObjVertexN), offsetof(CObjVertexN,p),GL_FLOAT);
+            //s->SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
+            //s->SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
+            //s->Bind();
+            /*direct approach*/
+            glVertexAttribPointer ( locPositions, 3 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,p) );
+            glEnableVertexAttribArray ( locPositions );
+            glVertexAttribPointer ( locNormals, 3 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,n) );
+            glEnableVertexAttribArray ( locNormals );
+            glVertexAttribPointer ( locUV, 2 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,tc) );
+            glEnableVertexAttribArray ( locUV );
 
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, submesh_idx[submesh->id].ibo);
 
             int idx_c = submesh->indexes.size();
             glDrawElements(GL_TRIANGLES, idx_c, GL_UNSIGNED_INT, (GLvoid *)0);
-            glBindVertexArray ( 0 );
+            //glBindVertexArray ( 0 );
 
         }
     }
+    glBindVertexArray(0);
 }
 
 SObjModel::~SObjModel() {

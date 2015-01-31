@@ -78,7 +78,10 @@ class SObjModel {
         std::unordered_map<std::string, Material> d_materails;
         std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
 
-        
+        /*https://devtalk.nvidia.com/default/topic/561172/gldrawarrays-without-vao-for-procedural-geometry-using-gl_vertexid-doesn-t-work-in-debug-context/ */
+        unsigned int d_emptyVAO;
+
+
         friend class cereal::access;
         /*serialize support */
         template <class Archive>
