@@ -77,10 +77,10 @@ void key ( unsigned char key, int x, int y )
         if (key == 27)
         {
             console_mode = 0;
-            sc->con->HandleExitConsole();
+            sc->dbg_ui.con->HandleExitConsole();
             return;
         } else  if (key == 43) {
-            sc->con->HandlePrevHistoryCommand();
+            sc->dbg_ui.con->HandlePrevHistoryCommand();
             return;
         }
         // disable due "-" key better accessible
@@ -88,7 +88,7 @@ void key ( unsigned char key, int x, int y )
         //    sc->con->HandleNextHistoryCommand();
        //     return;
         //}
-        sc->con->HandleInputKey(key);
+        sc->dbg_ui.con->HandleInputKey(key);
         return;
     }
 
@@ -108,9 +108,9 @@ void key ( unsigned char key, int x, int y )
                     sc->rWireframe = 1;
                 }
 
-else if (key == '9' ) sc->upViewItem();
-else if (key == '0' ) sc->downViewItem();
-else if (key == 8 ) {console_mode = 1; sc->con->Cls(); sc->con->Msg("Debug console, [ESC] for exit\n"); }
+else if (key == '9' ) sc->dbg_ui.upViewItem();
+else if (key == '0' ) sc->dbg_ui.downViewItem();
+else if (key == 8 ) {console_mode = 1; sc->dbg_ui.con->Cls(); sc->dbg_ui.con->Msg("Debug console, [ESC] for exit\n"); }
 else
     s_input->HandleInputKey(key);
 
@@ -144,13 +144,13 @@ void mouse_move (  int x , int y) {
 void special(int key, int x, int y){
     SScene * sc = MainScene::GetInstance();
 
-    if (key == GLUT_KEY_DOWN) sc->downCfgItem();
-    else if (key == GLUT_KEY_UP) sc->upCfgItem();
-    else if (key == GLUT_KEY_LEFT) sc->decCfgItem();
-    else if (key == GLUT_KEY_RIGHT) sc->incCfgItem();
+    if (key == GLUT_KEY_DOWN) sc->dbg_ui.downCfgItem();
+    else if (key == GLUT_KEY_UP) sc->dbg_ui.upCfgItem();
+    else if (key == GLUT_KEY_LEFT) sc->dbg_ui.decCfgItem();
+    else if (key == GLUT_KEY_RIGHT) sc->dbg_ui.incCfgItem();
    // FIXME else s_input->HandleInputKey(key); FIXME
 
-sc->UpdateCfgLabel();
+sc->dbg_ui.UpdateCfgLabel();
 }
 
 void mouse(int button, int state, int x, int y)  {
@@ -315,7 +315,7 @@ int main ( int argc, char * argv [] )
     s_input->BindKey('f',"toogle_fullscreen");
 
     s_input->AddCommand("clear_console", InputCommandHandler::InputCommand([=] (void) -> void {
-        sc->con->Cls();
+        sc->dbg_ui.con->Cls();
     }));
     s_input->BindKey('c',"clear_console");
 

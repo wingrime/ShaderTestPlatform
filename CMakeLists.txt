@@ -117,7 +117,7 @@ add_definitions( -DGIT_SHA1="${VERSION}" )
 message ("${VERSION}")
 message ("GIT OUTPUT")
 
-add_executable("main" main.cpp Scene.cpp ${RENDER_HEADERS})
+add_executable("main" main.cpp Scene.cpp DebugUI.cpp ${RENDER_HEADERS})
 
 target_link_libraries(main "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
