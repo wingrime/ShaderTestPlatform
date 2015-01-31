@@ -459,7 +459,7 @@ int SScene::RenderCubemap()
     else
         glDisable( GL_MULTISAMPLE );
 
-    glPolygonMode( GL_FRONT, GL_FILL );
+    //glPolygonMode( GL_FRONT, GL_FILL );
     glCullFace(GL_FRONT);
 
     glEnable(GL_DEPTH_TEST);
