@@ -3,6 +3,10 @@
 #include <chrono>
 #include "c_config.h"
 #include "r_context.h"
+
+#include "RenderState.h"
+
+
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
@@ -11,6 +15,9 @@ SScene::SScene(RBO *v)
     ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,sky_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,step(0.0f)
+    ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
+    ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
+    ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
     
     ,err_con(new UIConsoleErrorHandler(con))
     ,fps_label(new UILabel(v,0.85,0.1))
@@ -455,15 +462,14 @@ int SScene::RenderCubemap()
     glDepthMask(true);
     glDepthFunc  ( GL_LEQUAL );
     if (d_toggle_MSAA)
-       glEnable( GL_MULTISAMPLE );
+       msaa_pass.Bind();
     else
-        glDisable( GL_MULTISAMPLE );
+       normal_pass.Bind();
 
-    //glPolygonMode( GL_FRONT, GL_FILL );
-    glCullFace(GL_FRONT);
+    //glCullFace(GL_FRONT);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc  ( GL_LEQUAL );
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthFunc  ( GL_LEQUAL );
     static int step = 0;
     step ++;
     rtCubemap->Bind();
@@ -522,14 +528,15 @@ int SScene::Render() {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
     glDepthFunc  ( GL_LEQUAL );
-    if (d_toggle_MSAA)
-       glEnable( GL_MULTISAMPLE );
-    else
-        glDisable( GL_MULTISAMPLE );
+
     UpdateScene(0.01); /*add real ms*/
-    glEnable(GL_DEPTH_TEST);
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    glCullFace(GL_FRONT);
+    if (d_toggle_MSAA)
+       msaa_pass.Bind();
+    else
+       normal_pass.Bind();
+    //glEnable(GL_DEPTH_TEST);
+    //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    //glCullFace(GL_FRONT);
     if (!d_first_render ) {
         d_first_render = true;
         RenderCubemap();
@@ -551,8 +558,7 @@ int SScene::Render() {
     rtime.End();
     pp_time.Begin();
 
-    glDisable(GL_DEPTH_TEST);
-    glDepthFunc(GL_NEVER);  
+    ui_pass.Bind();
     
     /*Bloom + SSAO + RenderShadowMap*/
     if (d_v_sel_current == V_NORMAL) {

@@ -19,6 +19,7 @@
 
 #include "DebugDraw.h"
 #include "MAssert.h"
+#include "RenderState.h"
 
 class SScene {
 public:
@@ -157,6 +158,11 @@ private:
 public:
    UIConsole *con; 
 private:
+
+   RenderPass normal_pass;
+   RenderPass msaa_pass;
+   RenderPass ui_pass;
+
    UIConsoleErrorHandler *err_con;
 
    bool d_toggle_fps_view = true; 
