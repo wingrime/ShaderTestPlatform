@@ -3,17 +3,15 @@
 #include "c_filebuffer.h"
 #include "mat_math.h"
 #include "r_shader.h"
+#include "Log.h"
 
 UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz) {
-
 
 	ft = lib;
 
 	/*TODO use filebuffer*/
-	if(FT_New_Face(UIFont::ft, fnt_name.c_str(), 0, &face))
-    //	throw FontLoadError("Could not open font\n");
-    printf("font not loaded");
- //FT_Select_Charmap( face, ft_encoding_unicode  );
+    if(FT_New_Face(UIFont::ft, fnt_name.c_str(), 0, &face))
+        LOGE("Font not loaded!");
 
     FT_Set_Pixel_Sizes(face, sz, 0);
     float size = sz, scale = 100.0;
@@ -24,16 +22,13 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
 
     ui_prog = new  SProg("UI/UIText.vert","UI/UIText.frag");
 
-
-
-  glGenVertexArrays ( 1, &vao );
-  glBindVertexArray ( vao );
+    glGenVertexArrays ( 1, &vao );
+    glBindVertexArray ( vao );
 	
 
 	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*8, 0, GL_STATIC_DRAW); /* Create Empty VBO*/
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*8, 0, GL_STATIC_DRAW); /* Create Empty VBO*/
 
       GLfloat box[4][2] = {
         { 0, 0},
@@ -41,15 +36,12 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
         { 0, 1},
         { 1, 1},
     };
-
-  glBufferSubData(GL_ARRAY_BUFFER, 0,sizeof(box), box); /*initial Fill*/
-
-  glActiveTexture(GL_TEXTURE0);
-
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
+    glBufferSubData(GL_ARRAY_BUFFER, 0,sizeof(box), box); /*initial Fill*/
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
  
-  FT_Select_Charmap(face,FT_ENCODING_ADOBE_STANDARD);
+    FT_Select_Charmap(face,FT_ENCODING_ADOBE_STANDARD);
 	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -59,27 +51,27 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  ui_prog->Bind();
-  ui_prog->SetUniform("tex",0);
-  ui_prog->SetUniform("color",SVec4(1,1,1,1));
-  ui_prog->SetAttrib( "coord", 2, sizeof(float)*2, 0,GL_FLOAT);
+    ui_prog->Bind();
+    ui_prog->SetUniform("tex",0);
+    ui_prog->SetUniform("color",SVec4(1,1,1,1));
+    ui_prog->SetAttrib( "coord", 2, sizeof(float)*2, 0,GL_FLOAT);
 
- glBindVertexArray ( 0 );
+    glBindVertexArray ( 0 );
 
 }
 
 unsigned int UIFont::BitMapTexture(int w, int r, unsigned char* buffer) {
-      
-      unsigned int texID;
-      /* Create new texture */
-      glGenTextures(1, &texID);
-      glBindTexture(GL_TEXTURE_2D, texID);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(
+
+    unsigned int texID;
+    /* Create new texture */
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(
         GL_TEXTURE_2D,
         0,
         GL_RED,
@@ -90,64 +82,57 @@ unsigned int UIFont::BitMapTexture(int w, int r, unsigned char* buffer) {
         GL_UNSIGNED_BYTE,
         buffer
         );
-      glBindTexture(GL_TEXTURE_2D, 0);
-      return texID;
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return texID;
 }
 int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp_sx, float vp_sy) {
+    float sx = 2.0 / vp_sx;
+    float sy = 2.0 / vp_sy;
 
+    float x = sx + (x_uv-0.5)*2 ;
+    float y = sy - (y_uv-0.5)*2;
 
- 
-  float sx = 2.0 / vp_sx;
-  float sy = 2.0 / vp_sy;
+    float start_x = x;
+    float start_y = y;
+    /*should be moved to state*/
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBindVertexArray ( vao);
+    glBindBuffer ( GL_ARRAY_BUFFER, vbo );
+    ui_prog->Bind();
+    /*problematic*/
+    int line_gap = (face->size->metrics.height - (face->size->metrics.ascender + face->size->metrics.descender))*3.0;
+    const char *p;
 
-  float x = sx + (x_uv-0.5)*2 ;
-  float y = sy - (y_uv-0.5)*2;
+    FT_GlyphSlot g;
+    for(p = text.c_str(); *p; p++) {
 
-  float start_x = x;
-  float start_y = y;
+        glActiveTexture(GL_TEXTURE0);
+        CharData t;
+        if (texmap.find(*p) == texmap.end() )
+        {
+            if(FT_Load_Char(face, *p, FT_LOAD_RENDER))
+                continue;
 
-  glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBindVertexArray ( vao);
-  glBindBuffer ( GL_ARRAY_BUFFER, vbo );
-  ui_prog->Bind();
-	int line_gap = (face->size->metrics.height - (face->size->metrics.ascender + face->size->metrics.descender))*3.0;	
-
-	
-  const char *p;
-
-  FT_GlyphSlot g;
-  for(p = text.c_str(); *p; p++) {
-    glActiveTexture(GL_TEXTURE0); 
-    CharData t;
-    if (texmap.find(*p) == texmap.end() )
-    {
-      if(FT_Load_Char(face, *p, FT_LOAD_RENDER))
-        continue;
-
-
-      g = face->glyph;
-      if (*p == '\n') {
-
-   	    x =start_x;
-        /*FIX ME: looks like not adequate*/
-   	    y -=((line_gap )>>6) * sy; //(g->metrics.horiBearingX);// >> 6) * sy;
-		  continue;
-   	  }
-      unsigned int texID = BitMapTexture(g->bitmap.width,g->bitmap.rows,g->bitmap.buffer);
-      /* Create new texture */
-     
-      t.tex_id = texID;
-      t.bitmap_left = g->bitmap_left;
-      t.bitmap_top = g->bitmap_top;
-      t.bitmap_width = g->bitmap.width;
-      t.bitmap_rows = g->bitmap.rows;
-      t.advance_x = g->advance.x;
-      t.advance_y = g->advance.y;
-      texmap.insert(TexPair(*p,t));
-      
+            g = face->glyph;
+            if (*p == '\n') {
+                x = start_x;
+                /*FIX ME: looks like not adequate*/
+                y -=((line_gap )>>6) * sy; //(g->metrics.horiBearingX);// >> 6) * sy;
+                continue;
+            }
+            unsigned int texID = BitMapTexture(g->bitmap.width,g->bitmap.rows,g->bitmap.buffer);
+            /* Create new texture */
+            t.tex_id = texID;
+            t.bitmap_left = g->bitmap_left;
+            t.bitmap_top = g->bitmap_top;
+            t.bitmap_width = g->bitmap.width;
+            t.bitmap_rows = g->bitmap.rows;
+            t.advance_x = g->advance.x;
+            t.advance_y = g->advance.y;
+            texmap.insert(TexPair(*p,t));
     } else {
-      t = texmap[(*p)];
+            t = texmap[(*p)];
     }
     glBindTexture(GL_TEXTURE_2D, t.tex_id);
     /*Build quad*/
