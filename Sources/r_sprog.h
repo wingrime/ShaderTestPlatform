@@ -51,6 +51,8 @@ public:
 
 
     bool IsReady = false;
+
+    inline SProg * getDirect() {return prog;}
 private:
     /* Link to low level interface*/
     SProg * prog;

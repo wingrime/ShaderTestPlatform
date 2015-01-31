@@ -53,6 +53,15 @@ int SProg::LookupUniformLocation(const std::string &name) {
     } else
         return (*it).second;
 }
+
+unsigned int SProg::LookupAttribLocation(const std::string &name)
+{
+    //TODO: cache ?
+    //TODO: error check
+    int loc = glGetAttribLocation ( d_program, name.c_str() );
+    return loc;
+
+}
 /*fragment with vertext prog*/
 SProg::SProg(const std::string& vprog,const std::string& fprog, const std::string& gprog)
     :   v_pname(vprog) ,
@@ -233,5 +242,19 @@ int SProg::SetAttrib (const std::string& name, int numComponents, GLsizei stride
         
     glEnableVertexAttribArray ( loc );
     
-     return ESUCCESS;
+    return ESUCCESS;
+}
+
+int SProg::SetAttrib(unsigned int location, int numComponents, GLsizei stride, unsigned int offset, GLenum type)
+{
+    glVertexAttribPointer ( location,                  // index
+                            numComponents,        // number of intues per vertex
+                            type,                 // type (GL_FLOAT)
+                            GL_FALSE,       /*fixed point data not used*/
+                            stride,               // stride (offset to next vertex data)
+                            (const GLvoid*) offset );
+
+    glEnableVertexAttribArray ( location );
+
+    return ESUCCESS;
 }

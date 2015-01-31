@@ -31,10 +31,12 @@ class SProg {
         int SetUniform(int loc,const SMat4x4& mat );
 
         int LookupUniformLocation(const std::string& name);
+        unsigned int LookupAttribLocation(const std::string& name);
 
         int Bind();
-        //TODO: Make this hidden
+        //TODO: should be removed,
         int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type);
+        int SetAttrib(unsigned int location, int numComponents, GLsizei stride, unsigned int offset, GLenum type);
         bool IsReady = false;
 
     private:
