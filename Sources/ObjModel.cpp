@@ -59,18 +59,7 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 int SObjModel::ConfigureProgram(SShader& sprog){
     if (!IsReady)
         return EFAIL;
-    sprog.Bind();
-    for (auto it = d_sm.begin(); it != d_sm.end();++it) {
-        auto &submesh =  (*it);
-        glBindVertexArray( submesh_idx[(*it)->id].vao );
-        glBindBuffer ( GL_ARRAY_BUFFER, submesh_idx[(*it)->id].vbo );
 
-            sprog.SetAttrib( "position", 3, sizeof(CObjVertexN), offsetof(CObjVertexN,p),GL_FLOAT);
-            sprog.SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
-            sprog.SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
-
-        glBindVertexArray(0);
-    }
     sprog.SetUniform("texIMG",0);
     sprog.SetUniform("texBUMP",1);
     sprog.SetUniform("texture_alpha_sampler",2);
@@ -81,7 +70,7 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     sprog.SetUniform("rsm_vector_sampler",7);
     sprog.SetUniform("rsm_albedo_sampler",8);
     sprog.SetUniform("sh_bands_sampler",9);
-
+    sprog.Bind();
 
     return 0;
 }
@@ -230,30 +219,23 @@ void SObjModel::BindVAOs() {
             auto &submesh =  (*it);
             /*gen buffers for submesh*/
             /*vertixes*/
-            temp_vao = 0;
             temp_vbo = 0;
             temp_ibo = 0;
-            glGenVertexArrays ( 1, &temp_vao );
             glGenBuffers ( 1, &temp_vbo );
-            //glBindVertexArray(temp_vao);
-            glBindBuffer(GL_ARRAY_BUFFER,temp_vbo);
             glGenBuffers(1, &temp_ibo);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, temp_ibo);
 
             MASSERT(submesh->vn.empty());
-            glBufferData ( GL_ARRAY_BUFFER, submesh->vn.size() *sizeof(CObjVertexN) , submesh->vn.data(), GL_STATIC_DRAW);
-
             MASSERT(submesh->indexes.empty());
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
-
+            //gl 4.5 without EXT
+            glNamedBufferDataEXT(temp_vbo,submesh->vn.size() *sizeof(CObjVertexN), submesh->vn.data(), GL_STATIC_DRAW);
+            glNamedBufferDataEXT(temp_ibo,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
             SubMeshIDs idx;
-            idx.vao = temp_vao;
             idx.vbo = temp_vbo;
             idx.ibo = temp_ibo;
 
             submesh_idx[submesh->id] = idx;
-            glBindBuffer(GL_ARRAY_BUFFER,0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+            //glBindBuffer(GL_ARRAY_BUFFER,0);
+            //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 
         }
         //glBindVertexArray(0);
@@ -263,17 +245,18 @@ void SObjModel::Render(RenderContext& r) {
 
     /*activate shader and load model matrix*/
     if (r.shader->IsReady) {
-
         r.shader->Bind();//Commit changes
         SProg *s  = r.shader->getDirect();
         s->Bind();
         /*request shader locations*/
-        unsigned int locPositions = s->LookupAttribLocation("position");
-        unsigned int locNormals = s->LookupAttribLocation("normal");
-        unsigned int locUV = s->LookupAttribLocation("UV");
+        int locPositions = s->LookupAttribLocation("position");
+        int locNormals = s->LookupAttribLocation("normal");
+        int locUV = s->LookupAttribLocation("UV");
+
         s->SetUniform(r.d_modelMatrixLoc,model);
         s->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
         s->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
+
         std::size_t last_hash = -1;
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
@@ -301,25 +284,24 @@ void SObjModel::Render(RenderContext& r) {
                 if (r.sh_bands) {
                    r.sh_bands->Bind(9);
                 }
-
-
-                //r.shader->Bind();
             }
-            glBindBuffer(GL_ARRAY_BUFFER, submesh_idx[submesh->id].vbo);
-
-            //s->SetAttrib( "position", 3, sizeof(CObjVertexN), offsetof(CObjVertexN,p),GL_FLOAT);
-            //s->SetAttrib( "normal", 3, sizeof(CObjVertexN),  offsetof(CObjVertexN,n),GL_FLOAT);
-            //s->SetAttrib( "UV", 2, sizeof(CObjVertexN),  offsetof(CObjVertexN,tc),GL_FLOAT);
-            //s->Bind();
+            auto& idx = submesh_idx[submesh->id];
+            glBindBuffer(GL_ARRAY_BUFFER, idx.vbo);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx.ibo);
             /*direct approach*/
+            if (locPositions != EFAIL) {
             glVertexAttribPointer ( locPositions, 3 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,p) );
             glEnableVertexAttribArray ( locPositions );
+            }
+            if (locNormals != EFAIL) {
             glVertexAttribPointer ( locNormals, 3 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,n) );
             glEnableVertexAttribArray ( locNormals );
+            }
+            if (locUV != EFAIL) {
             glVertexAttribPointer ( locUV, 2 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,tc) );
             glEnableVertexAttribArray ( locUV );
+            }
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, submesh_idx[submesh->id].ibo);
 
             int idx_c = submesh->indexes.size();
             glDrawElements(GL_TRIANGLES, idx_c, GL_UNSIGNED_INT, (GLvoid *)0);
