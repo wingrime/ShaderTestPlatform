@@ -31,7 +31,7 @@ class SProg {
         int SetUniform(int loc,const SMat4x4& mat );
 
         int LookupUniformLocation(const std::string& name);
-        unsigned int LookupAttribLocation(const std::string& name);
+        int LookupAttribLocation(const std::string& name);
 
         int Bind();
         //TODO: should be removed,
@@ -42,6 +42,7 @@ class SProg {
     private:
 
         std::unordered_map<std::string, int> d_location_lookup;
+        std::unordered_map<std::string, int> d_attrib_lookup;
         GLuint d_program;
         GLuint vs;
         GLuint fs;

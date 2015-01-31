@@ -45,6 +45,7 @@ int SProg::LookupUniformLocation(const std::string &name) {
     if ( it == d_location_lookup.end() ) {
         int loc = glGetUniformLocation ( d_program, name.c_str() );
         if ( loc < 0 ) {
+            d_location_lookup[name] =EFAIL;
             return EFAIL;
         }
         d_location_lookup[name] = loc;
@@ -54,12 +55,20 @@ int SProg::LookupUniformLocation(const std::string &name) {
         return (*it).second;
 }
 
-unsigned int SProg::LookupAttribLocation(const std::string &name)
+int SProg::LookupAttribLocation(const std::string &name)
 {
-    //TODO: cache ?
-    //TODO: error check
-    int loc = glGetAttribLocation ( d_program, name.c_str() );
-    return loc;
+    auto it = d_attrib_lookup.find(name);
+    if ( it == d_attrib_lookup.end() ) {
+        int loc = glGetAttribLocation ( d_program, name.c_str() );
+        if ( loc < 0 ) {
+            d_attrib_lookup[name] = EFAIL;
+            return EFAIL;
+        }
+        d_attrib_lookup[name] = loc;
+        return loc;
+
+    } else
+        return (*it).second;
 
 }
 /*fragment with vertext prog*/
