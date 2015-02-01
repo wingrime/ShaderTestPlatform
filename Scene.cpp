@@ -195,16 +195,6 @@ SScene::SScene(RBO *v)
     cubemap_prog_generator = new SShader("Cubemap/cubemap_gen.vert","Cubemap/cubemap_gen.frag","Cubemap/cubemap_gen.geom");
 
 
-    d_render_list.push_back(std::shared_ptr<SObjModel> (new SObjModel("sponza.obj")) );
-    d_render_list.push_back(std::shared_ptr<SObjModel> (new SObjModel("sky_dome.obj")) );
-    d_render_list[1]->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
-
-    for (auto& r : d_render_list ) {
-        r->ConfigureProgram(*r_prog);
-    }
-
-
-
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
 
@@ -222,6 +212,14 @@ int SScene::Reshape(int w, int h) {
         cam.setProjMatrix( SPerspectiveProjectionMatrix(100.0f, 10000.0f,(float)h / (float)w,toRad(26.0)) );
 
         return ESUCCESS;
+}
+
+int SScene::AddObjectToRender(std::shared_ptr<SObjModel> obj)
+{
+    obj->ConfigureProgram(*r_prog);
+    d_render_list.push_back(obj);
+    return 0;
+
 }
 
 int SScene::toggleBrightPass(bool b)

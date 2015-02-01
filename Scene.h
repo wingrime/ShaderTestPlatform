@@ -32,6 +32,9 @@ public:
 
     std::vector< std::shared_ptr <SObjModel> > d_render_list;
 
+    int AddObjectToRender(std::shared_ptr <SObjModel> obj);
+
+
     std::shared_ptr<SObjModel> sky_dome_model;
 
     SCamera cam;

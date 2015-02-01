@@ -341,6 +341,12 @@ int main ( int argc, char * argv [] )
     sc->toggleMSAA((bool)config["scene.toggle_msaa"].GetInt());
     sc->toggleBrightPass((bool)config["scene.toggle_brightpass"].GetInt());
 
+    /*load models*/
+    sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sponza.obj")) );
+    sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sky_dome.obj")) );
+    /*remove me please*/
+    sc->d_render_list[1]->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
+
     /* main loop */
     LOGV("Entering main loop");
     sc->dbg_ui.con->Msg("git revision: " GIT_SHA1 "\n");
