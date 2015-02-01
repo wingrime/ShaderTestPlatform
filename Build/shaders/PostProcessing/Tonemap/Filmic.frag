@@ -1,5 +1,6 @@
 #version 330
 uniform vec4 vp; /* viewport conf*/
+in vec2 uv;
 layout(location = 0) out vec4 color;
 uniform sampler2D texSRC1;
 uniform sampler2D texSRC2;
@@ -43,10 +44,9 @@ vec3 gamma_v3( vec3 c) {
 
 void main ()
 {
-  vec2 c = gl_FragCoord.xy/vp.xy;
-  vec3 img_color = ( texture(texHDR,c)).rgb;
-  vec3 img_bloom =  vec3(( texture(texBLUM,c)).r);
-  vec3 img_ssao =  vec3( texture(texSSAO,c).r);//use single color
+  vec3 img_color = ( texture(texHDR,uv)).rgb;
+  vec3 img_bloom =  vec3(( texture(texBLUM,uv)).r);
+  vec3 img_ssao =  vec3( texture(texSSAO,uv).r);//use single color
   vec4 lumdata =   (texture(texLumKey,vec2(0.5,0.5))).rgba;//use single color
 	
 

@@ -1,5 +1,6 @@
 #version 330
 uniform vec4 vp; /* viewport conf*/
+in vec2 uv;
 layout(location = 0) out vec4 color;
 uniform sampler2D texSRC1;
 uniform sampler2D texSRC2;
@@ -45,7 +46,7 @@ float shadow_test(vec2 uv , float z) {
 void main ()
 {
 
-	vec2 c = gl_FragCoord.xy/vp.xy;
+	vec2 c = uv;
 
 	float light_depth =  texture(light_depth_sampler,c).r;
 	float camera_depth =  texture(screen_depth_sampler,c).r;

@@ -6,7 +6,7 @@ uniform sampler2D texSRC2;
 
 #define texDEPTH texSRC2
 #define texFB texSRC1
-
+in vec2 uv;
 
 uniform float b_dist2 = 0;//0.005;
 uint hash (uint x) {
@@ -60,7 +60,7 @@ void main ()
 {
 
 
-	vec2 c = gl_FragCoord.xy/vp.xy;
+	vec2 c = uv;
 	//vec3 n = normal_from_depth(c);
 	vec3 n =  normalize(texture(texFB,c).xyz*2.0-1.0);
         //seed = hash(hash(1u+hash(1u+ hash(1u+floatBitsToUint(n.x)))+hash(1u+hash(1u+floatBitsToUint(n.y+c.y))) +hash(1u+hash(1u+floatBitsToUint(n.z+c.x)) )));

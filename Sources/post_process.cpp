@@ -139,10 +139,10 @@ std::shared_ptr<RBO> SPostProcess::getResultRBO()
 
 void SPostProcess::InitQuard()
 {
-    GLfloat vertices[] = { -1, -1, 0, //bottom left corner
-                           -1,  1, 0, //top left corner
-                            1,  1, 0, //top right corner
-                            1, -1, 0}; // bottom right rocner
+    GLfloat vertices[] = { -1, -1, //bottom left corner
+                           -1,  1, //top left corner
+                            1,  1, //top right corner
+                            1, -1 }; // bottom right rocner
 
     GLubyte indices[] = {0,1,2, // first triangle (bottom left - top left - top right)
                          0,2,3}; // second triangle (bottom left - top right - bottom right)
@@ -153,14 +153,14 @@ void SPostProcess::InitQuard()
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData ( GL_ARRAY_BUFFER,sizeof(GLfloat)*12, vertices, GL_STATIC_DRAW);
+    glBufferData ( GL_ARRAY_BUFFER,sizeof(GLfloat)*8, vertices, GL_STATIC_DRAW);
 
 
     glGenBuffers(1, &ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,  sizeof(GLubyte)*6, indices, GL_STATIC_DRAW);
 
-    p_prog->SetAttrib( "vCord", 3, 0,0,GL_FLOAT);
+    p_prog->SetAttrib( "vCord", 2, 0,0,GL_FLOAT);
 
     //glEnableVertexAttribArray(0);
 
