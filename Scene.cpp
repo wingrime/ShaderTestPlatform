@@ -6,7 +6,104 @@
 
 #include "RenderState.h"
 
+/////PROTO//////
+/*serialization*/
+#include <cereal/types/map.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/archives/binary.hpp>
 
+#include <type_traits>
+#include <memory.h>
+#include "r_sprog.h"
+struct RenderPipelinePass {
+    int pass_number; /*data format reference*/
+    int out_buffer_width;
+    int out_buffer_height;
+    int out_buffer_count; /* count of exit buffers*/
+    std::vector<SRBOTexture::RTType> buffer_type; /*out buffer s*/
+    RBO::RBOType in_buffer_type;
+
+    int reference_material_number;
+
+    /*serialize support */
+    template <class Archive>
+    void serialize( Archive & ar )
+    {
+        ar( CEREAL_NVP(pass_number),
+            CEREAL_NVP(out_buffer_width),
+            CEREAL_NVP(out_buffer_height),
+            CEREAL_NVP(out_buffer_count),
+            CEREAL_NVP(in_buffer_type),
+            CEREAL_NVP(buffer_type)
+            );
+    }
+};
+struct RenderPiplineMaterial {
+    int material_number;
+    std::string vertex_file;
+    std::string fragment_file;
+    std::string geom_file;
+    /*serialize support */
+    template <class Archive>
+    void serialize( Archive & ar )
+    {
+        ar( CEREAL_NVP(material_number),
+            CEREAL_NVP(vertex_file),
+            CEREAL_NVP(fragment_file),
+            CEREAL_NVP(geom_file)
+            );
+    }
+};
+
+class RenderPipeline {
+public:
+    RenderPipeline(std::vector<RenderPipelinePass> passes ,std::vector<RenderPiplineMaterial> materials )  :d_passes(passes), d_materials(materials) {}
+    int InitMaterials();
+    int InitPasses();
+    int BindPass(int pass_id);
+private:
+    /*serializable data*/
+    std::vector<RenderPipelinePass> d_passes;
+    std::vector<RenderPiplineMaterial> d_materials;
+    std::vector<std::shared_ptr<SShader> > d_shaders;
+    std::vector<std::shared_ptr<RBO> > d_RBOs;
+};
+int RenderPipeline::InitPasses() {
+    for (auto &pass : d_passes) {
+        switch (pass.out_buffer_count)
+        {
+        case 1:
+            d_RBOs.push_back(std::shared_ptr<RBO> (new RBO(pass.out_buffer_width, pass.out_buffer_height,pass.in_buffer_type,
+                                                      pass.buffer_type[0],1,
+                                                      SRBOTexture::RT_NONE,1,
+                                                      SRBOTexture::RT_NONE,1)));
+            break;
+        case 2:
+            d_RBOs.push_back(std::shared_ptr<RBO> (new RBO(pass.out_buffer_width, pass.out_buffer_height,pass.in_buffer_type,
+                                                      pass.buffer_type[0],1,
+                                                      pass.buffer_type[1],1,
+                                                      SRBOTexture::RT_NONE,1)));
+            break;
+        case 3:
+            d_RBOs.push_back(std::shared_ptr<RBO> (new RBO(pass.out_buffer_width, pass.out_buffer_height,pass.in_buffer_type,
+                                                      pass.buffer_type[0],1,
+                                                      pass.buffer_type[1],1,
+                                                      pass.buffer_type[2],1)));
+            break;
+        default:
+            MASSERT(true);
+        }
+    }
+
+}
+
+int RenderPipeline::InitMaterials() {
+
+    for (auto &material : d_materials) {
+        d_shaders.push_back(std::shared_ptr<SShader> (new SShader(material.vertex_file, material.fragment_file,material.geom_file)));
+    }
+    return 0;
+}
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
 
@@ -223,24 +320,17 @@ int SScene::Render() {
     glClearColor(0.0,0.0,0.0,1.0);
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-    glDepthFunc  ( GL_LEQUAL );
-
     UpdateScene(0.01); /*add real ms*/
     if (d_toggle_MSAA)
        msaa_pass.Bind();
     else
        normal_pass.Bind();
-    //glEnable(GL_DEPTH_TEST);
-    //glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-    //glCullFace(GL_FRONT);
     if (!d_first_render ) {
         d_first_render = true;
         RenderCubemap();
     }
     rtime.Begin();
-    if (dbg_ui.d_v_sel_current == DebugUI::V_DIRECT) {
-        //RenderShadowMap( *rtSCREEN);
-        
+    if (dbg_ui.d_v_sel_current == DebugUI::V_DIRECT) {        
         RenderDirect( *rtSCREEN);
 
     } else {
