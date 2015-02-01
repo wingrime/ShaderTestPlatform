@@ -42,7 +42,12 @@ int SShader::SetAttrib(const std::string& name, int numComponents, GLsizei strid
 
 unsigned int SShader::getUniformLocation(const std::string &name)
 {
-   return prog->LookupUniformLocation(name);
+    return prog->LookupUniformLocation(name);
+}
+
+SShader::~SShader()
+{
+    //TODO
 }
 
 int SShader::Bind()
