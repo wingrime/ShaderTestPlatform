@@ -216,8 +216,10 @@ SScene::SScene(RBO *v)
 int SScene::Reshape(int w, int h) {
 
         rtSCREEN->Resize(SVec2(w,h));
-        /*ToDo remake*/
+        /* there should be internal buffer recreation code but ?? */
         glViewport ( 0, 0, (GLsizei)w, (GLsizei)h );
+        /*fix aspect ratio*/
+        cam.setProjMatrix( SPerspectiveProjectionMatrix(100.0f, 10000.0f,(float)h / (float)w,toRad(26.0)) );
 
         return ESUCCESS;
 }
