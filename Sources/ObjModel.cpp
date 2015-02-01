@@ -252,7 +252,20 @@ void SObjModel::Render(RenderContext& r) {
         int locPositions = s->LookupAttribLocation("position");
         int locNormals = s->LookupAttribLocation("normal");
         int locUV = s->LookupAttribLocation("UV");
-
+        /*ARB_vertex_attrib_binding*/
+     /*   if (locPositions != EFAIL) {
+        glVertexAttribFormat ( locPositions, 3 ,GL_FLOAT,  GL_FALSE,   offsetof(CObjVertexN,p) );
+        glVertexAttribBinding(0, 0);
+        }
+        if (locNormals != EFAIL) {
+        glVertexAttribFormat ( locNormals, 3 ,GL_FLOAT,  GL_FALSE,   offsetof(CObjVertexN,n) );
+        glVertexAttribBinding(1, 0);
+        }
+        if (locUV != EFAIL) {
+        glVertexAttribFormat ( locUV, 2 ,GL_FLOAT,  GL_FALSE, offsetof(CObjVertexN,tc) );
+        glVertexAttribBinding(2, 0);
+        }
+    */
         s->SetUniform(r.d_modelMatrixLoc,model);
         s->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
         s->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
@@ -289,6 +302,7 @@ void SObjModel::Render(RenderContext& r) {
             glBindBuffer(GL_ARRAY_BUFFER, idx.vbo);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx.ibo);
             /*direct approach*/
+
             if (locPositions != EFAIL) {
             glVertexAttribPointer ( locPositions, 3 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,p) );
             glEnableVertexAttribArray ( locPositions );
@@ -302,6 +316,7 @@ void SObjModel::Render(RenderContext& r) {
             glEnableVertexAttribArray ( locUV );
             }
 
+            //glBindVertexBuffer(0,idx.vbo,0, sizeof(CObjVertexN));
 
             int idx_c = submesh->indexes.size();
             glDrawElements(GL_TRIANGLES, idx_c, GL_UNSIGNED_INT, (GLvoid *)0);
