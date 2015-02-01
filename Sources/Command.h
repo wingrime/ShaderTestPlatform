@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include "ErrorCodes.h"
+#include "Log.h"
 
 class AbstractCommandHandler {
 public:
@@ -89,8 +90,8 @@ int BaseCommandHandler::ExecuteCommand(const std::string& cmd_n, ArgTypes... arg
             (*c)(args...);
         }// else
             //EMSGS("Invalid cmd type!\n");
-    }// else
-        //EMSGS("No cmd: " + cmd_n + " \n");
+    } else
+         LOGE("No cmd: " + cmd_n);
     return 0;
 }
 template <class T> 
