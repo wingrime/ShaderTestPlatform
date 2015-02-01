@@ -13,22 +13,22 @@ in vec3 normal;
 in vec3 position;
 in vec2 UV;
 
-out vec3 lightPos;
+flat out vec3 lightPos;
 out vec3 vPos;
 out vec2 uv;
 
 out vec3 o_normal;
 out vec3 o_pos_v;
 out vec3 t_normal;
-out vec3 t_tangent;
-out vec3 t_binormal;
+//out vec3 t_tangent;
+//out vec3 t_binormal;
 
-out mat4 sm_proj;
-out mat4 sm_view;
-out mat4 o_view;
-out mat4 o_proj;
-out vec4 o_light;
-out mat4 sm_mat;
+flat out mat4 sm_proj;
+flat out mat4 sm_view;
+flat out mat4 o_view;
+flat out mat4 o_proj;
+flat out vec4 o_light;
+flat out mat4 sm_mat;
 
 //out vec4 sm_pos;
 

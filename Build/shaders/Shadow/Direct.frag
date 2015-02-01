@@ -7,10 +7,10 @@ layout(location = 2) out vec4 worldPos; /*normal + z */
 
 const float pi = 3.14159;
 
-in mat4 sm_proj;
-in mat4 sm_view;
+flat in mat4 sm_proj;
+flat in mat4 sm_view;
 
-in vec3 lightPos;
+flat in vec3 lightPos;
 in vec3 vPos;
 in vec2 uv;
 
@@ -24,15 +24,15 @@ uniform sampler2D sm_depth_sampler;
 
 
 in vec3 t_normal;
-in vec3 t_tangent;
-in vec3 t_binormal;
+//in vec3 t_tangent;
+//in vec3 t_binormal;
 
 in vec3 o_normal;
 in vec3 o_pos_v;
-in mat4 o_view;
-in mat4 o_proj;
-in mat4 MV_n;
-in vec4 o_light;
+flat in mat4 o_view;
+flat in mat4 o_proj;
+flat in mat4 MV_n;
+flat in vec4 o_light;
 
 
 void main() 
