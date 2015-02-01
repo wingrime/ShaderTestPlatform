@@ -334,8 +334,13 @@ int main ( int argc, char * argv [] )
     Singltone<sel::State>  g_script_state(&state);
 
 
+    sc->dbg_ui.d_toggle_cfg_view = config["scene.toggle_debug_viewport_cfg"].GetInt();
+    sc->dbg_ui.d_toggle_fps_view = config["scene.toggle_debug_viewport_fps"].GetInt();
+
     /* main loop */
     LOGV("Entering main loop");
+    sc->dbg_ui.con->Msg("git revision: " GIT_SHA1 "\n");
+    sc->dbg_ui.con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
     glutMainLoop ();
     LOGV("Leave main loop");
 

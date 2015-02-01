@@ -49,14 +49,10 @@ SScene::SScene(RBO *v)
     
 {
 
-    dbg_ui.con->Msg("git revision: " GIT_SHA1 "\n");
-    dbg_ui.con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
-
     MainConfig *cfg = MainConfig::GetInstance();
     /*load configuration*/
     d_toggle_MSAA = (bool)cfg->operator []("scene.toggle_msaa").GetInt();
-    dbg_ui.d_toggle_cfg_view = (bool)cfg->operator []("scene.toggle_debug_viewport_cfg").GetInt();
-    dbg_ui.d_toggle_fps_view = (bool)cfg->operator []("scene.toggle_debug_viewport_fps").GetInt();
+
     d_toggle_brightpass = (bool)cfg->operator []("scene.toggle_brightpass").GetInt();
 
 
@@ -117,13 +113,9 @@ SScene::SScene(RBO *v)
 
 
     model->ConfigureProgram( *r_prog);
-   
-    model->ConfigureProgram( *cam_prog);
-
-    model->ConfigureProgram( *cubemap_prog_generator);
 
     test_sphere_model->ConfigureProgram( *r_prog);
-    //model->ConfigureProgram( *sky_dome_prog);
+
 
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
@@ -170,18 +162,11 @@ int SScene::RenderCubemap()
     glClearColor(1.0,1.0,1.0,1.0);
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-
-    glDepthMask(true);
-    glDepthFunc  ( GL_LEQUAL );
     if (d_toggle_MSAA)
        msaa_pass.Bind();
     else
        normal_pass.Bind();
 
-    //glCullFace(GL_FRONT);
-
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthFunc  ( GL_LEQUAL );
     static int step = 0;
     step ++;
     rtCubemap->Bind();
@@ -226,7 +211,6 @@ int inline SScene::RenderDirect(const RBO& v) {
         test_sphere_model->Render(r_ctx);
         RenderContext r_ctx2(&v, sky_dome_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
         sky_dome_model->Render(r_ctx2);
-
     }
 
     d_debugDrawMgr.Render(cam.getProjMatrix()*cam.getViewMatrix());
@@ -353,8 +337,6 @@ int SScene::Render() {
     }
     else if (dbg_ui.d_v_sel_current == DebugUI::V_CUBEMAPTEST ) {
 
-        //glEnable(GL_DEPTH_TEST);
-        //glDepthFunc  ( GL_LEQUAL );
         //RenderContext r_ctx(rtSCREEN.get(), cubemap_prog_generator ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtShadowMap->texIMG2(), rtShadowMap->texIMG());
         //model->Render(r_ctx);
         rtSCREEN->Bind(true);
