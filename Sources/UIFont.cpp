@@ -14,11 +14,15 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
         LOGE("Font not loaded!");
 
     FT_Set_Pixel_Sizes(face, sz, 0);
-    float size = sz, scale = 100.0;
+    float size = sz, scale = 1000.0;
     FT_Matrix matrix = { ( int)((1.0/scale) * 0x10000L), (int)((0.0)* 0x10000L),(int)((0.0) *0x10000L),( int)((1.0) * 0x10000L) };
-    FT_Set_Char_Size( face, (int)(size  *64), 0, 72 * scale, 72 );
+    FT_Set_Char_Size( face, (int)(size  *64), 0, 150 * scale, 150 );
     FT_Set_Transform( face, &matrix, NULL );
 	/*init ui shaders*/
+
+    //FT_Set_Char_Size( face, (int)(sz *64.0), 0, 150 , 150 );
+    //FT_Set_Pixel_Sizes(face, 0, sz);
+
 
     ui_prog = new  SProg("UI/UIText.vert","UI/UIText.frag");
 
@@ -86,8 +90,8 @@ unsigned int UIFont::BitMapTexture(int w, int r, unsigned char* buffer) {
     return texID;
 }
 int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp_sx, float vp_sy) {
-    float sx = 2.0 / vp_sx;
-    float sy = 2.0 / vp_sy;
+    float sx = 1.0 / vp_sx;
+    float sy = 1.0 / vp_sy;
 
     float x = sx + (x_uv-0.5)*2 ;
     float y = sy - (y_uv-0.5)*2;
@@ -101,7 +105,8 @@ int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp
     glBindBuffer ( GL_ARRAY_BUFFER, vbo );
     ui_prog->Bind();
     /*problematic*/
-    int line_gap = (face->size->metrics.height - (face->size->metrics.ascender + face->size->metrics.descender))*3.0;
+    //int line_gap = (face->size->metrics.height - (face->size->metrics.ascender + face->size->metrics.descender));
+    int line_gap = (face->size->metrics.height );//
     const char *p;
 
     FT_GlyphSlot g;
