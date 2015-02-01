@@ -107,7 +107,6 @@ int RenderPipeline::InitMaterials() {
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
 
-
     ,d_shadowmap_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,sky_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
@@ -116,8 +115,6 @@ SScene::SScene(RBO *v)
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
     
-
-
     ,rtShadowMap(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_RGBA,SRBOTexture::RT_TEXTURE_RGBA,1,
                                                     SRBOTexture::RT_NONE,1,
                                                     SRBOTexture::RT_NONE,1 ))
@@ -127,11 +124,9 @@ SScene::SScene(RBO *v)
     ,rtHDRScene(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_NONE, 1 ))
-
     ,rtHDRBloomResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_FLOAT_RED)) /* is it better HDR */
     ,rtHDRHorBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_FLOAT_RED))
     ,rtHDRVertBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_FLOAT_RED))
-
     ,rtSSAOVertBlurResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
     ,rtSSAOHorBlurResult(new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
     ,rtVolumetric(new RBO(v->getSize().w,v->getSize().h, RBO::RBO_RGBA))
@@ -143,12 +138,7 @@ SScene::SScene(RBO *v)
     ,dbg_ui(this,v)
     
 {
-
-    MainConfig *cfg = MainConfig::GetInstance();
     /*load configuration*/
-
-
-
     int w = rtHDRScene->getSize().w;
     int h = rtHDRScene->getSize().h;
     /*bloom shaders */
@@ -218,9 +208,7 @@ SScene::SScene(RBO *v)
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
 
-    dbg_ui.UpdateCfgLabel();
-    dbg_ui.UpdateViewSelLabel();
-    dbg_ui.InitDebugCommands();
+    dbg_ui.Init();
     d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,6000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
     d_first_render = false;
 }
@@ -285,7 +273,6 @@ int SScene::RenderCubemap()
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
     }
-    // Convolve it !!
     SCProg cs("Cubemap/cubemap_convolve.comp");
     cs.Barrier();
     cs.Use();
@@ -355,9 +342,8 @@ int SScene::Render() {
     }
     rtime.End();
     pp_time.Begin();
-
     ui_pass.Bind();
-    
+
     /*Bloom + SSAO + RenderShadowMap*/
     if (dbg_ui.d_v_sel_current == DebugUI::V_NORMAL) {
         /*LumKEY*/
@@ -391,8 +377,6 @@ int SScene::Render() {
         pp_stage_ssao->Draw();
         pp_stage_ssao_blur_hor->DrawRBO(false);
         pp_stage_ssao_blur_vert->DrawRBO(false);
-
-
         pp_stage_hdr_tonemap->DrawRBO(false);
 
     } else if (dbg_ui.d_v_sel_current == DebugUI::V_BLOOM) {
@@ -438,20 +422,14 @@ int SScene::Render() {
         pp_stage_volumetric->Draw();
     }
     else if (dbg_ui.d_v_sel_current == DebugUI::V_CUBEMAPTEST ) {
-
-        //RenderContext r_ctx(rtSCREEN.get(), cubemap_prog_generator ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtShadowMap->texIMG2(), rtShadowMap->texIMG());
-        //model->Render(r_ctx);
         rtSCREEN->Bind(true);
         pp_stage_hdr_lum_log->Draw();
-
-        //pp_stage_hdr_lum_key->Draw();
     }
     pp_time.End();
     ui_time.Begin();
-
     dbg_ui.Draw();
-
     ui_time.End();
+
     char buf [90];
     auto end = std::chrono::steady_clock::now();
 
