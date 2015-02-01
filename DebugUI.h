@@ -22,6 +22,7 @@ public:
     /*on screen UI shold be rid from there*/
     int UpdateCfgLabel();
     int UpdateViewSelLabel();
+    inline int Init() { UpdateCfgLabel();UpdateViewSelLabel();InitDebugCommands();}
     int upCfgItem();
     int downCfgItem();
     int incCfgItem();
