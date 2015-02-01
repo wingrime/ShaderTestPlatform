@@ -148,9 +148,7 @@ SScene::SScene(RBO *v)
 
     MainConfig *cfg = MainConfig::GetInstance();
     /*load configuration*/
-    d_toggle_MSAA = (bool)cfg->operator []("scene.toggle_msaa").GetInt();
 
-    d_toggle_brightpass = (bool)cfg->operator []("scene.toggle_brightpass").GetInt();
 
 
     int w = rtHDRScene->getSize().w;
@@ -234,7 +232,17 @@ int SScene::Reshape(int w, int h) {
         /*ToDo remake*/
         glViewport ( 0, 0, (GLsizei)w, (GLsizei)h );
 
-    return ESUCCESS;
+        return ESUCCESS;
+}
+
+int SScene::toggleBrightPass(bool b)
+{
+    d_toggle_brightpass = b;
+}
+
+int SScene::toggleMSAA(bool b)
+{
+    d_toggle_MSAA = b;
 }
 int SScene::UpdateScene(float dt) {
    sky_cam.SyncFromCamera(cam);

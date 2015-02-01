@@ -92,6 +92,9 @@ public:
     bool rSSAO  = false;
 
 
+    int toggleBrightPass(bool b);
+    int toggleMSAA(bool b);
+
 
 private:
     float step;

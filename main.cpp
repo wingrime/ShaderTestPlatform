@@ -337,6 +337,10 @@ int main ( int argc, char * argv [] )
     sc->dbg_ui.d_toggle_cfg_view = config["scene.toggle_debug_viewport_cfg"].GetInt();
     sc->dbg_ui.d_toggle_fps_view = config["scene.toggle_debug_viewport_fps"].GetInt();
 
+
+    sc->toggleMSAA((bool)config["scene.toggle_msaa"].GetInt());
+    sc->toggleBrightPass((bool)config["scene.toggle_brightpass"].GetInt());
+
     /* main loop */
     LOGV("Entering main loop");
     sc->dbg_ui.con->Msg("git revision: " GIT_SHA1 "\n");
