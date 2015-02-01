@@ -47,6 +47,7 @@ unsigned int SShader::getUniformLocation(const std::string &name)
 
 SShader::~SShader()
 {
+    delete prog;
     //TODO
 }
 
