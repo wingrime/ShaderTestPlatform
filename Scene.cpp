@@ -136,8 +136,6 @@ SScene::SScene(RBO *v)
     ,rtSSAOHorBlurResult(new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
     ,rtVolumetric(new RBO(v->getSize().w,v->getSize().h, RBO::RBO_RGBA))
     ,sky_dome_model(new SObjModel("sky_dome.obj"))
-    ,model(new SObjModel("sponza.obj"))
-    ,test_sphere_model(new SObjModel("sky_dome.obj"))
     ,rtCubemap(new RBO(128, 128, RBO::RBO_CUBEMAP))
    ,rtConvoledCubemap(new SRBOTexture(10,4,SRBOTexture::RT_TEXTURE_FLOAT_RED))
     ,rtHDRLogLum(new RBO(16,16,RBO::RBO_FLOAT)) /*Downsampled source for lumeneace*/
@@ -207,24 +205,25 @@ SScene::SScene(RBO *v)
     cubemap_prog_generator = new SShader("Cubemap/cubemap_gen.vert","Cubemap/cubemap_gen.frag","Cubemap/cubemap_gen.geom");
 
 
-    model->ConfigureProgram( *r_prog);
+    d_render_list.push_back(std::shared_ptr<SObjModel> (new SObjModel("sponza.obj")) );
+    d_render_list.push_back(std::shared_ptr<SObjModel> (new SObjModel("sky_dome.obj")) );
+    d_render_list[1]->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
 
-    test_sphere_model->ConfigureProgram( *r_prog);
+    for (auto& r : d_render_list ) {
+        r->ConfigureProgram(*r_prog);
+    }
+
 
 
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
-    test_sphere_model->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
-
 
     dbg_ui.UpdateCfgLabel();
     dbg_ui.UpdateViewSelLabel();
     dbg_ui.InitDebugCommands();
     d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,6000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
-
     d_first_render = false;
 }
-
 
 int SScene::Reshape(int w, int h) {
 
@@ -257,8 +256,9 @@ int SScene::UpdateScene(float dt) {
 int inline SScene::RenderShadowMap(const RBO& v) {
     v.Bind(true);
     RenderContext r_ctx(&v, cam_prog ,&d_shadowmap_cam);
-    model->Render(r_ctx);
-    test_sphere_model->Render(r_ctx);
+    for (auto& r : d_render_list ) {
+        r->Render(r_ctx);
+    }
     return ESUCCESS;
 }
 
@@ -282,8 +282,9 @@ int SScene::RenderCubemap()
     RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator ,&cubemap_cam);
     RenderContext r_ctx2(rtCubemap.get() , r_prog ,&cubemap_cam);
 
-    //sky_dome_model->Render(r_ctx);
-    model->Render(r_ctx);
+    for (auto& r : d_render_list ) {
+        r->Render(r_ctx);
+    }
     // Convolve it !!
     SCProg cs("Cubemap/cubemap_convolve.comp");
     cs.Barrier();
@@ -306,14 +307,17 @@ int inline SScene::RenderDirect(const RBO& v) {
     if (rWireframe)
     {
         RenderContext r_ctx(&v, cam_prog ,&d_shadowmap_cam);
-        model->Render(r_ctx);
+        for (auto& r : d_render_list ) {
+            r->Render(r_ctx);
+        }
     }
     else
     {
         RenderContext r_ctx(&v, r_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtCubemap->texIMG(), rtShadowMap->texIMG());
         r_ctx.sh_bands = rtConvoledCubemap;
-        model->Render(r_ctx);
-        test_sphere_model->Render(r_ctx);
+        for (auto& r : d_render_list ) {
+            r->Render(r_ctx);
+        }
         RenderContext r_ctx2(&v, sky_dome_prog ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
         sky_dome_model->Render(r_ctx2);
     }

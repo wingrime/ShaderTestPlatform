@@ -30,14 +30,9 @@ public:
 
     int Reshape(int w, int h);
 
+    std::vector< std::shared_ptr <SObjModel> > d_render_list;
 
-
-
-
-    
-    std::shared_ptr<SObjModel> model;
     std::shared_ptr<SObjModel> sky_dome_model;
-    std::shared_ptr<SObjModel> test_sphere_model;
 
     SCamera cam;
     SCamera sky_cam;
@@ -83,14 +78,12 @@ public:
     std::shared_ptr<SRBOTexture> rtConvoledCubemap;
 
     SPerfMan rtime;
-
     SPerfMan ui_time;
     SPerfMan pp_time;
 
     /* flags*/
     bool rWireframe = false;
     bool rSSAO  = false;
-
 
     int toggleBrightPass(bool b);
     int toggleMSAA(bool b);
@@ -99,7 +92,6 @@ public:
 private:
     float step;
     bool d_first_render;
-
 
     /* main prog*/
     SShader *r_prog;
@@ -114,19 +106,12 @@ private:
 
     SShader *cubemap_prog_generator;
 
-
-
-
     /*main scene render*/
     int RenderDirect(const RBO& v);
     /*render shadow map*/
     int RenderShadowMap(const RBO& v);
-
     int RenderCubemap();
 
-
-
-public:
 
 private:
 

@@ -186,10 +186,10 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("load", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
-        sc->model.reset(new SObjModel(args[1]));
-        sc->model->ConfigureProgram( *(sc->r_prog));
-        sc->model->ConfigureProgram( *(sc->cam_prog));
-        sc->model->ConfigureProgram( *(sc->cubemap_prog_generator));
+        sc->d_render_list[0].reset(new SObjModel(args[1]));
+        sc->d_render_list[0]->ConfigureProgram( *(sc->r_prog));
+        sc->d_render_list[0]->ConfigureProgram( *(sc->cam_prog));
+        sc->d_render_list[0]->ConfigureProgram( *(sc->cubemap_prog_generator));
 
     }));
     d_console_cmd_handler->AddCommand("script", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
