@@ -57,6 +57,7 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("sm_cam_set", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         sc->d_shadowmap_cam = sc->cam;
+        sc->d_first_render = true;
 
     }));
     d_console_cmd_handler->AddCommand("dump_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
