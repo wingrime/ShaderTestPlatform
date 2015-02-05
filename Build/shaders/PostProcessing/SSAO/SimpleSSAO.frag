@@ -55,7 +55,7 @@ vec3  normal_from_depth( vec2 c) {
 }
 
 uniform float ssaoSize  =0.01;
-const int Samples = 16;
+const int Samples = 10;
 void main ()
 {
 
@@ -64,7 +64,7 @@ void main ()
 	//vec3 n = normal_from_depth(c);
 	vec3 n =  normalize(texture(texFB,c).xyz*2.0-1.0);
         //seed = hash(hash(1u+hash(1u+ hash(1u+floatBitsToUint(n.x)))+hash(1u+hash(1u+floatBitsToUint(n.y+c.y))) +hash(1u+hash(1u+floatBitsToUint(n.z+c.x)) )));
-        seed = hash(hash(floatBitsToUint(n.x*n.y+n.z+c.x*c.y)));
+        seed = hash(floatBitsToUint(n.x*n.y+n.z+c.x*c.y));
 	float depth = texture(texDEPTH,c).r;
 	
 	float R = ssaoSize/depth;
