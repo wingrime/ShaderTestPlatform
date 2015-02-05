@@ -210,10 +210,10 @@ int SProg::SetUniform(int loc, int i)
 
 int SProg::SetUniform(int loc, const SMat4x4 &mat)
 {
-
-
-    /*gl use row-major notation*/
-    glUniformMatrix4fv(loc, 1, GL_TRUE, (float *) mat.raw);
+    /*callback can slow program when gl report error repitily*/
+    if (loc != EFAIL)
+        /*gl use row-major notation*/
+        glUniformMatrix4fv(loc, 1, GL_TRUE, (float *) mat.raw);
     return ESUCCESS;
 }
 int SProg::SetUniform(const std::string& name, const SVec4& vec)
