@@ -16,5 +16,5 @@ void main ()
 	if (lum < hdrBloomClamp)
     	color = vec4(vec3(0.0),1.0);
    	else
-		color = vec4(lum*vec3(hdrBloomMul),1.0);
+		color = vec4(vec3(lum*hdrBloomMul),1.0);
 }
