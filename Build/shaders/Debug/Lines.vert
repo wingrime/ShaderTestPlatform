@@ -1,5 +1,5 @@
-/* Debug output shader for output lines */
 #version 330
+/* Debug output shader for output lines */
 in vec3 pos;
 uniform mat4 MVP;
 void main(void)
