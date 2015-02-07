@@ -1,5 +1,5 @@
-/* Base Lighting Shader */
 #version 330
+/* Base Lighting Shader */
 layout(location = 0) out vec4 dstColor;
 layout(location = 1) out vec4 worldNormal; /*SSAO*/ 
 const float pi = 3.14159;
@@ -22,7 +22,7 @@ flat in mat4 o_view;
 flat in mat4 o_proj;
 in mat4 MV_n;
 flat in vec4 o_light;
-flat in mat4 sm_mat;
+//flat in mat4 sm_mat;
 //in vec4 sm_pos;
 uniform int mesh_flags;
 /* Source texture */
@@ -32,7 +32,7 @@ uniform sampler2D texBUMP;
 uniform sampler2D texture_alpha_sampler;
 uniform sampler2D sh_bands_sampler;
 /* Shadow map depth buffer*/
-uniform sampler2D sm_depth_sampler;
+uniform sampler2DShadow sm_depth_sampler;
 
 uniform sampler2D rsm_normal_sampler;
 uniform samplerCube rsm_vector_sampler;
@@ -40,8 +40,9 @@ uniform sampler2D rsm_albedo_sampler;
 
 uniform float lightIntensity = 1.0;
 uniform float shadowPenumbra = 200.0;
+uniform float shadowEps =   0.0001;
 uniform float ambientIntensity = 0.1;
-uniform float sh_int = 10.2;
+uniform float sh_int = 5.2;
 uniform float ggx_alpha = 0.4;
 uniform float ggx_f0 = 0.04 ;/*fressnel*/
 #define DBG_OUT_FULL 0
@@ -58,7 +59,7 @@ uniform float ggx_f0 = 0.04 ;/*fressnel*/
 #define DBG_OUT_REFLECT 11
 #define DBG_OUT_SH 12
 uniform int dbg_out = 0;
-
+uniform mat4 shadowMVPB;
 
 /*fressnel aprox*/
 vec3 F_schlick(vec3 l, vec3 n,vec3 c_spec) {
@@ -203,28 +204,35 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 	const int sm_samples = 64;
 
 	float shadow;
+    //vec4 sm_pos = shadowMVPB*vec4(o_pos_v+o_pos_v*(normalize(o_normal)*shadowEps) ,1.0);
+    vec4 sm_pos = shadowMVPB*vec4(o_pos_v ,1.0);
+    
+    sm_pos.xyz /= sm_pos.w;
+    sm_pos.z -= shadowEps;
+// HARD shadows
+//shadow  =  texture(sm_depth_sampler,sm_pos.xyz);
 
-        //sm_mat = bias*sm_proj*sm_view;
-        vec4 sm_pos = sm_mat*vec4(o_pos_v ,1.0);
-        sm_pos.xyz /= sm_pos.w;
+// PCF
 
-	//if (length(sm_pos.xyz) < 1.0 && dot(sm_pos.xyz, vec3())  ) {
-	if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w > 0.0) {
+
+if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w > 0.0) {
+		vec4 s;
 		for (int i=0;i<sm_samples;i+=4)
 		{
-			vec4 s;
-			s.x = texture(sm_depth_sampler,sm_pos.xy+poissonDisk[i]/shadowPenumbra).r;
-			s.y = texture(sm_depth_sampler,sm_pos.xy+poissonDisk[i+1]/shadowPenumbra).r;
-			s.z = texture(sm_depth_sampler,sm_pos.xy+poissonDisk[i+2]/shadowPenumbra).r;
-			s.w = texture(sm_depth_sampler,sm_pos.xy+poissonDisk[i+3]/shadowPenumbra).r;
-			shadow += dot (step (s,vec4(sm_pos.z - 0.000005) ),vec4(1.0));	
+		
+			s.x = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i]/shadowPenumbra,0.0));
+			s.y = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i+1]/shadowPenumbra,0.0));
+			s.z = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i+2]/shadowPenumbra,0.0));
+			s.w = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i+3]/shadowPenumbra,0.0));
+			shadow += dot (s,vec4(1.0));	
 
 		}
-		shadow = shadow / sm_samples;
+		shadow = (1.0 / sm_samples) * shadow;
 	}
 	else
-		shadow = 1.0;
-	//shadow -=ambientIntensity ;
+		shadow = 0.0;
+
+	shadow =  clamp(shadow,0.0,1.0);//bug check
 
 
 	/* diffuse color texture*/
@@ -241,7 +249,7 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 	
 
 	/* tangant basis matrix*/
-	mat3 TBN =  cotangent_frame(t_normal,vPos,uv);
+	mat3 TBN =  cotangent_frame(normalize(t_normal),vPos,uv);
 
 	//normal mapping
 	vec3 d_normal  = TBN * texBump;
@@ -281,7 +289,8 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 		SH[c].g = texelFetch(sh_bands_sampler, ivec2(c,2u),0).r;
 		SH[c].b = texelFetch(sh_bands_sampler, ivec2(c,3u),0).r;
         }
-        vec3 ambient_spectral_harmonics = appplySHamonics(SH,d_normal);
+        //vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(MV_n)*vec4(normalize(d_normal),1.0)).xyz);
+		vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(MV_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz);
 
 
 
@@ -291,7 +300,7 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 	vec3 reflection = fressnel*cubemap_sample;
 
 	if (dbg_out == DBG_OUT_FULL)
-		dstColor = vec4((1.0-shadow)*(spec)+(ambient_spectral_harmonics)*sh_int*diffColor,texture_alpha);
+		dstColor = vec4((shadow)*(spec)+(ambient_spectral_harmonics)*sh_int*diffColor,texture_alpha);
 	else if (dbg_out ==  DBG_OUT_ALBEDO)
 		dstColor = dstColor = vec4(vec3(diff),1.0);
 	else if (dbg_out ==  DBG_OUT_DIFFUSE)
@@ -309,7 +318,7 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 	else if (dbg_out ==  DBG_OUT_NORMAL_MAPED)
 		dstColor = vec4(0.5*normalize(d_normal)+0.5,1.0);
 	else if (dbg_out ==  DBG_OUT_SHADOW)
-		dstColor = vec4(vec3(ambient_spectral_harmonics),1.0);
+		dstColor = vec4(vec3(shadow),1.0);
 	else if (dbg_out ==  DBG_OUT_REFLECT)
 		dstColor = vec4(vec3(texture(rsm_vector_sampler,(transpose(MV_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz),1.0);
 	else if (dbg_out ==  DBG_OUT_SH)
@@ -325,5 +334,5 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 	if (any(isnan(dstColor)))
 		dstColor=  vec4(vec3(0.0),1.0);
 
-	worldNormal = vec4(0.5*t_normal+0.5,1.0);
+	worldNormal = vec4(0.5*normalize(t_normal)+0.5,1.0);
 }
