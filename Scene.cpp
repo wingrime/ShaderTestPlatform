@@ -107,17 +107,15 @@ int RenderPipeline::InitMaterials() {
 SScene::SScene(RBO *v) 
     :rtSCREEN(v)
 
-    ,d_shadowmap_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
-    ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
+    ,d_shadowmap_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
+    ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
     ,sky_cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 10000.0f,1.0f,toRad(26.0)))
     ,step(0.0f)
     ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
     
-    ,rtShadowMap(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_RGBA,SRBOTexture::RT_TEXTURE_RGBA,1,
-                                                    SRBOTexture::RT_NONE,1,
-                                                    SRBOTexture::RT_NONE,1 ))
+    ,rtShadowMap(new RBO(v->getSize().w,v->getSize().h, RBO::RBO_DEPTH_ONLY))
     ,rtHDRScene_MSAA(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_NONE, 1 ))
@@ -236,6 +234,13 @@ int SScene::UpdateScene(float dt) {
     r_prog->Bind();
     r_prog->SetUniform("sm_projection_mat",d_shadowmap_cam.getProjMatrix());
     r_prog->SetUniform("sm_view_mat",d_shadowmap_cam.getViewMatrix());
+    /*shadowmap*/
+    SMat4x4 Bias(0.5,0.0,0.0,0.0,
+                 0.0,0.5,0.0,0.0,
+                 0.0,0.0,0.5,0.0,
+                 0.5,0.5,0.5,1.0); //small todo
+    r_prog->SetUniform("shadowMVPB",Bias.Transpose()*d_shadowmap_cam.getProjMatrix()*d_shadowmap_cam.getViewMatrix());
+
     return 0;
 
 }
@@ -260,11 +265,11 @@ int SScene::RenderCubemap()
     else
        normal_pass.Bind();
 
-    static int step = 0;
-    step ++;
+    //static int step = 0;
+    //step ++;
     rtCubemap->Bind();
-    SMat4x4 pos = SMat4x4().Move(0.0+step*100,-200.0,0.0);
-    d_debugDrawMgr.AddCross({(float)(0.0-step*100.0),200,1.0},50);
+    SMat4x4 pos = SMat4x4().Move(100,-200.0,0.0);
+    //d_debugDrawMgr.AddCross({(float)(0.0-step*100.0),200,1.0},50);
     d_debugDrawMgr.Update();
     SCamera cubemap_cam(pos,SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0)));
     RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator ,&cubemap_cam);
@@ -327,13 +332,17 @@ int SScene::Render() {
     if (!d_first_render ) {
         d_first_render = true;
         RenderCubemap();
+       //  RenderShadowMap( *rtShadowMap);
     }
     rtime.Begin();
     if (dbg_ui.d_v_sel_current == DebugUI::V_DIRECT) {        
         RenderDirect( *rtSCREEN);
 
-    } else {
+    } else {\
+        /*On request mode*/
+        glCullFace(GL_FRONT);
         RenderShadowMap( *rtShadowMap);
+        glCullFace(GL_BACK);
         if (d_toggle_MSAA) {
             RenderDirect( *rtHDRScene_MSAA);
            rtHDRScene_MSAA->ResolveMSAA(*rtHDRScene);

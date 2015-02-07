@@ -57,7 +57,7 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("sm_cam_set", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         sc->d_shadowmap_cam = sc->cam;
-        sc->d_first_render = true;
+        sc->d_first_render = false;
 
     }));
     d_console_cmd_handler->AddCommand("dump_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -191,7 +191,7 @@ int DebugUI::InitDebugCommands()
         sc->d_render_list[0]->ConfigureProgram( *(sc->r_prog));
         sc->d_render_list[0]->ConfigureProgram( *(sc->cam_prog));
         sc->d_render_list[0]->ConfigureProgram( *(sc->cubemap_prog_generator));
-        sc->d_first_render = true;
+        sc->d_first_render = false;
 
     }));
     d_console_cmd_handler->AddCommand("script", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {

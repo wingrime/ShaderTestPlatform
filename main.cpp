@@ -185,7 +185,7 @@ void APIENTRY openglCallbackFunction(GLenum source,
     {
         gl_log.LogW(message);
         // nice feature;
-       //D_TRAP();
+       D_TRAP();
     }
 
 

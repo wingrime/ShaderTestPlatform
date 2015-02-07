@@ -122,16 +122,19 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
     :type(t) , x(_x) ,y (_y)
  {
     glGenTextures(1, &tex);
-
     if (t  ==  RT_TEXTURE_DEPTH ||
         t == RT_TEXTURE_FLOAT ||
         t == RT_TEXTURE_RGBA ||
         t == RT_TEXTURE_RED  ||
         t == RT_TEXTURE_FLOAT_RED) {
-
         glBindTexture(GL_TEXTURE_2D,tex);
         glTexStorage2D(GL_TEXTURE_2D, miplevel, SRBOTexture::getRelatedGLType(t), x, y);
         ConfigureTexture(TEX_CLAMP);
+        /* enable comparea mode for glsl sampler2Shadow*/
+        if (t == RT_TEXTURE_DEPTH) {
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        }
         glBindTexture(GL_TEXTURE_2D,0);
         d_isMSAA  = false;
     } else if (t == RT_TEXTURE_MSAA || t  ==  RT_TEXTURE_DEPTH_MSAA) {
@@ -177,8 +180,6 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
 
     } else
         MASSERT(true); /* You should forget define new type there*/
-
-
     IsReady = true;
 }
 SRBOTexture::~SRBOTexture() {

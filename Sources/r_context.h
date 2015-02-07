@@ -24,10 +24,7 @@ class RenderContext {
          	camera(c),
          	sm_map(false)
          {
-            /*speedup test*/
-            d_viewMatrixLoc = s->getUniformLocation("view");
-            d_projMatrixLoc = s->getUniformLocation("cam_proj");
-            d_modelMatrixLoc = s->getUniformLocation("model");
+            initUniforms();
         }
         RenderContext(const RBO* v,SShader* s, SCamera *c, std::shared_ptr<SRBOTexture> sm_tex)
         	:sm_texture(sm_tex),
@@ -36,10 +33,7 @@ class RenderContext {
          	camera(c),
          	sm_map(true)
         {
-            /*speedup test*/
-            d_viewMatrixLoc = s->getUniformLocation("view");
-            d_projMatrixLoc = s->getUniformLocation("cam_proj");
-            d_modelMatrixLoc = s->getUniformLocation("model");
+            initUniforms();
         }
         RenderContext(const RBO* v,SShader* s, SCamera *c, 
                     std::shared_ptr<SRBOTexture> sm_tex,
@@ -55,10 +49,8 @@ class RenderContext {
          	rsm_vector_texture(rsm_vector_tex),
          	rsm_albedo_texture(rsm_albedo_tex)
         {
-            /*speedup test*/
-            d_viewMatrixLoc = s->getUniformLocation("view");
-            d_projMatrixLoc = s->getUniformLocation("cam_proj");
-            d_modelMatrixLoc = s->getUniformLocation("model");
+            initUniforms();
+
         }
         RenderContext(const RenderContext&) = delete;
     	SShader *shader;
@@ -69,9 +61,20 @@ class RenderContext {
         std::shared_ptr<SRBOTexture> rsm_vector_texture;
         std::shared_ptr<SRBOTexture> rsm_albedo_texture;
         std::shared_ptr<SRBOTexture> sh_bands;
+        /**/
+        inline int initUniforms() {
+            d_viewMatrixLoc = shader->getUniformLocation("view");
+            d_projMatrixLoc = shader->getUniformLocation("cam_proj");
+            d_modelMatrixLoc = shader->getUniformLocation("model");
+            d_MVP = shader->getUniformLocation("MVP");
+            d_MV = shader->getUniformLocation("MV");
+        }
         /*speedup test*/
         int d_viewMatrixLoc;
         int d_projMatrixLoc;
         int d_modelMatrixLoc;
+        /*optimize*/
+        int d_MVP;
+        int d_MV;
     	bool sm_map;
 };
