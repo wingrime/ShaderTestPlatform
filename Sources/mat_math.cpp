@@ -196,6 +196,17 @@ SMat4x4::SMat4x4( const SMat4x4& o){
         raw[i] = o.raw[i];
     }
 }
+/*https://www.opengl.org/discussion_boards/showthread.php/178484-Extracting-camera-position-from-a-ModelView-Matrix*/
+SVec4 SMat4x4::ExtractPositionNoScale() const
+{
+    SVec4 d(-this->a14,-this->a24,-this->a34,1.0);
+    SMat4x4 rot((*this).Transpose());
+    rot.a14 = 0;
+    rot.a24 = 0;
+    rot.a34 = 0;
+    SVec4 res((rot)*(d));
+    return res;
+}
 // TODO make delta standart
 bool SMat4x4::Eq(const SMat4x4& a,const SMat4x4& b){
     for ( int i = 0 ; i < 16 ; i++ ) {
@@ -221,6 +232,15 @@ SMat4x4 SMat4x4::Translate(const SVec4& vec) const{
     a.a44 = vec.w;
 
     return (* this)+(a);
+}
+
+SMat4x4 SMat4x4::Scale(const float sz) const
+{
+    SMat4x4 a =  SMat4x4();
+    a.a11 = sz;
+    a.a22 = sz;
+    a.a33 = sz;
+    return (a)*(* this);
 }
 
 SMat4x4 SMat4x4::Scale(float x,float y,float z) const {
@@ -410,3 +430,22 @@ return (SVec2(v1.x + v2.x,
 }
 
 
+
+
+SMat4x4 SMat4x4::LookAt(const SVec4 &at, const SVec4 &eye, const SVec4 &up)
+{
+        SVec4 zaxis = SVec4::Normalize( eye -at); /*direction to view point*/
+        SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(up,zaxis)); /* left vector*/
+        SVec4 yaxis(SVec4::Cross3(zaxis,xaxis)); /* new up vector */
+        SVec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
+        SVec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
+        SVec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
+        SVec4 v4(-SVec4::Dot(xaxis,eye),-SVec4::Dot(yaxis,eye),-SVec4::Dot(zaxis,eye),1.0);
+        return SMat4x4(v1,v2,v3,v4);
+}
+
+
+SVec4 operator*(const SVec4 &v1, float v2)
+{
+    return SVec4(v1.x*v2,v1.y*v2,v1.z*v2,v1.w*v2);
+}

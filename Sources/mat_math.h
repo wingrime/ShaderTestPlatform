@@ -11,6 +11,9 @@
 #include <cereal/archives/binary.hpp>
 
 #include <type_traits>
+
+
+
 //TODO
 // && operator
 // == operator
@@ -74,7 +77,12 @@ public:
     float Length() const;
 };
 /*free from operator*/
+class SMat4x4;
+SVec4 operator* (const SMat4x4& m, const SVec4& v);
 SVec4 operator-(const SVec4& v1,const SVec4& v2);
+SVec4 operator*(const SVec4& v1,float v2);
+
+
 
 class SMat4x4 {
 public:
@@ -94,6 +102,9 @@ public:
     
 	SMat4x4(float a);
     SMat4x4( const SMat4x4& i);
+
+    /*extract transform only for uniform matrix*/
+    SVec4 ExtractPositionNoScale() const;
 
     //reflect to stdout
     void Reflect() const;
@@ -121,7 +132,9 @@ public:
     // Move/Scale
     SMat4x4 Move(const float x,const float y,const float z) const;
     SMat4x4 Translate(const SVec4& vec) const;
+    //Not Rigid;
     SMat4x4 Scale(const float x,const float y,const float z) const;
+    SMat4x4 Scale(const float sz) const;
     //rotation
     SMat4x4 RotX(const float ang) const;
 	SMat4x4 RotY(const float ang) const;
@@ -136,6 +149,7 @@ public:
     //check
 
     static bool Eq(const SMat4x4& a,const SMat4x4& b);
+    static SMat4x4 LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up);
     
     virtual ~SMat4x4();
 
@@ -194,7 +208,20 @@ public:
     constexpr static float CheckDelta = 1e-6;
 };
 
-
+/*Raw GL primitives*/
+struct Point  {
+    Point(float _x,float _y,float _z) :x(_x),y(_y),z(_z) {}
+    Point (SVec4 a) :x(a.x),y(a.y),z(a.z) {}
+    float x,y,z;
+};
+struct Line {
+    Point p1;
+    Point p2;
+};
+struct AABB {
+    Point p1;
+    Point p2;
+};
 class SVec2 {
 public:
     SVec2(float x,float y);
@@ -226,3 +253,4 @@ public:
 /*free from operators*/
 SVec2 operator-(const SVec2& v1,const SVec2& v2);
 SVec2 operator+(const SVec2& v1,const SVec2& v2);
+
