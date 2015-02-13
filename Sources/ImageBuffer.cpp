@@ -1,5 +1,6 @@
 #include <string>
 #include "ImageBuffer.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 ImageBuffer::ImageBuffer(const std::string& fname) {
