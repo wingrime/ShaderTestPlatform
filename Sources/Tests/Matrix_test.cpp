@@ -44,6 +44,14 @@ TEST(Matrix,Translate) {
                                   9,10,11,12+30,\
                                   13,14,15,16+1.0)),true);
 }
+TEST(Matrix, LookAtIndent) {
+
+    SMat4x4 m = SMat4x4::LookAt(SVec4(0.0,0.0,-1.0,0.0),SVec4(0.0,0.0,0.0,0.0),SVec4(0.0,1.0,0.0,0.0));
+    EXPECT_EQ( SMat4x4::Eq(SMat4x4(1.0,0.0,0.0,0.0, \
+                                   0.0,1.0,0.0,0.0, \
+                                   0.0,0.0,1.0,0.0, \
+                                   0.0,0.0,0.0,1.0),m ),true );
+}
 
 TEST(Matrix,Move) {
     EXPECT_EQ(SMat4x4::Eq(SMat4x4(1,2,3,4, \
@@ -56,4 +64,9 @@ TEST(Matrix,Move) {
                                   13,14,15,16)),true);
 }
 
+/*
+TODO:
+Rotation Tests
+Scale test
 
+*/
