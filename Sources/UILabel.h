@@ -9,7 +9,7 @@
 
 class UILabel {
 public:
-    UILabel(RBO *v) :UILabel(v, 0.0, 0.5) {};
+    UILabel(RBO *v) :UILabel(v, 0.0, 0.5) {}
     UILabel(RBO *v, float x, float y) ;
     /*Draw console*/
     void Draw();
