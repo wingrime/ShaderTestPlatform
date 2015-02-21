@@ -100,14 +100,9 @@ SObjModel::SObjModel(const std::string&  fname)
 
     {
         auto mtlrefs = parser.getMTLs();
-        if (mtlrefs.empty())
+        if (!mtlrefs.empty())
         {
-            MTLParser mtl_p("default.mtl");
-            d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
-        }
-        else
-        {
-             MTLParser mtl_p(mtlrefs[0]);
+            MTLParser mtl_p(mtlrefs[0]);
             d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
         }
     }
@@ -270,7 +265,7 @@ void SObjModel::Render(RenderContext& r) {
         s->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
         s->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
         /*optimize*/
-         s->SetUniform(r.d_MVP,r.camera->getProjMatrix()*r.camera->getViewMatrix()*model);
+         s->SetUniform(r.d_MVP,r.camera->getViewProjectMatrix());
          s->SetUniform(r.d_MV,r.camera->getViewMatrix()*model);//small todo
 
         std::size_t last_hash = -1;
