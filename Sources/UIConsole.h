@@ -47,8 +47,8 @@ private:
 
 class UIConsoleErrorHandler :public AbstractErrorHandler {
 public:
-    UIConsoleErrorHandler(UIConsole *con) :c(con) {};
-    ~UIConsoleErrorHandler(){};
+    UIConsoleErrorHandler(UIConsole *con) :c(con) {}
+    ~UIConsoleErrorHandler(){}
     void inline MessageOut(const std::string& msg) {
         if (c) c->Msg(msg+std::string("\n"));  
     
