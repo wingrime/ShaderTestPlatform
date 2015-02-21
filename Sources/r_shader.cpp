@@ -77,6 +77,7 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
         f_pname(fprog) ,
         g_pname(gprog)
     {
+    LOGV(string_format("Load shader: %s,%s,%s",vprog.c_str(),fprog.c_str(),gprog.c_str()));
 
     //shaders source
     GLint   linked;
