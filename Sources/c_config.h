@@ -13,7 +13,7 @@ class FileBuffer;
 class Config : public rapidjson::Document {
 public:
     Config(const std::string& fname);
-    Config() : Config("config.json") {};
+    Config() : Config("config.json") {}
 
     ~Config();
     bool IsReady = false;
