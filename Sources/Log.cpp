@@ -8,7 +8,8 @@ Log::~Log()
 }
 
 Log::Log(Log::Verbosity _v, const std::string &s)
-    :d_logfile_stream(s)
+    :d_logfile_stream(s),
+    v(_v)
 {
 
 }
