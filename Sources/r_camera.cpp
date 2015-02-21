@@ -32,38 +32,13 @@ int SCamera::rotEuler(const SVec4& v)
 
 int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
 {
-    SVec4 zaxis = ( eye -at).Normalize(); /*direction to view point*/
-    SVec4 xaxis = (SVec4::Cross3(up,zaxis)).Normalize(); /* left vector*/
-    SVec4 yaxis(SVec4::Cross3(zaxis,xaxis)); /* new up vector */
-    SVec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
-    SVec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
-    SVec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
-    SVec4 v4(-SVec4::Dot(xaxis,eye),-SVec4::Dot(yaxis,eye),-SVec4::Dot(zaxis,eye),1.0);
-    //SVec4 v4(eye.vec.x,eye.vec.y,eye.vec.z,1.0);
-    /*clean */
-    xPos = 0.0;
-    yPos = 0.0;
-    zPos = 0.0;
-    xRot = 0.0;
-    yRot = 0.0;
-    zRot = 0.0;
-    view = SMat4x4(v1,v2,v3,v4);
+    view = SMat4x4::LookAt(at,eye,up);
     return 0;
 }
 
 int SCamera::SyncFromCamera(const SCamera &s)
 {
-    //xRot = s.xRot;
-    //yRot = s.yRot;
-    //zRot = s.zRot;
-
-
-    //xPos = s.xPos;
-    //yPos = s.yPos;
-    //zPos = s.zPos;
     view = s.view;
-    //buildViewMatrix();
-
     return 0;
 }
 
@@ -109,10 +84,15 @@ SMat4x4 SCamera::buildViewMatrix(){
     return a;
 }
 
+SMat4x4 SCamera::getViewProjectMatrix()
+{
+    return SMat4x4(proj*view);
+}
+
 
 
 SVec4 SCamera::getPosition() const {
-    return SVec4(xPos,zPos,yPos,1.0);
+    return view.ExtractPositionNoScale();
 }
 
 int SCamera::setViewMatrix(const SMat4x4 &m)

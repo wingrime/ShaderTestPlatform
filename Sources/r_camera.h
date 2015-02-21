@@ -1,64 +1,34 @@
 #pragma once
-
+//TODO
+//new class cascade camera!
 /*serialization*/
 #include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/binary.hpp>
-#include <fstream>
 /*inhertance, can't avoid*/
 #include "r_projmat.h"
 
 class SCamera {
 public:
-    
-    SCamera(float x, float y, float z)
-    :proj(  SPerspectiveProjectionMatrix(10.0f, 5000.0f,1.0f,toRad(26.0)))
-    ,xPos(x)
-    ,yPos(y)
-    ,zPos(z)
-     { buildViewMatrix();};
-    SCamera(float x, float y, float z,float rx, float ry, float rz)
-    :proj(  SPerspectiveProjectionMatrix(10.0f, 5000.0f,1.0f,toRad(26.0)))
-    ,xPos(x)
-    ,yPos(y)
-    ,zPos(z)
-    ,xRot(x)
-    ,yRot(y)
-    ,zRot(z)
-     { buildViewMatrix();};
-     SCamera(float x, float y, float z,float rx, float ry, float rz, SMat4x4 proj)
-    :proj(proj)
-    ,xPos(x)
-    ,yPos(y)
-    ,zPos(z)
-    ,xRot(x)
-    ,yRot(y)
-    ,zRot(z)
-     { buildViewMatrix();};
-          SCamera(const SMat4x4& view,const SMat4x4& proj)
-    :proj(proj)
-    ,view(view)
-     {};
-    SCamera()
-    :SCamera(0,0,0)
-     {};
+
+    SCamera(const SMat4x4& view,const SMat4x4& proj) :proj(proj) ,view(view) {}
+    SCamera() :SCamera(SMat4x4(), SMat4x4()) {}
+    SCamera(const SCamera& sc) :view(sc.view), proj(sc.proj) {}
 
 
-    SMat4x4 buildViewMatrix();
-
-
-    inline __attribute__((always_inline)) SMat4x4  getViewMatrix() {return view;}
-    inline __attribute__((always_inline)) SMat4x4  getProjMatrix() {return proj;}
-    SVec4 getPosition() const;
-
+    inline __attribute__((always_inline)) SMat4x4  getViewMatrix() const {return view;}
+    inline __attribute__((always_inline)) SMat4x4  getProjMatrix() const {return proj;}
+    SMat4x4 getViewProjectMatrix() ;
 
     int setViewMatrix( const SMat4x4& m);
     int setProjMatrix( const SMat4x4& m);
 
+    SVec4 getPosition() const;
     int goForward(float s);
     int rotEulerX(float x);
     int rotEulerY(float y);
     int rotEulerZ(float z);
+
     int goPosition(float x, float y ,float z);
     int goPosition(const SVec4& v);
     int rotEuler(const SVec4& v);
@@ -68,12 +38,30 @@ public:
 
     int Reflect() const;
 
+private:
+    SMat4x4 buildViewMatrix();
+
+
+    SMat4x4 view;
+    SMat4x4 proj;
+  
+
+
+    float xRot = 0.0;
+    float yRot = 0.0;
+    float zRot = 0.0;
+
+    float xPos = 0.0;
+    float yPos = 0.0;
+    float zPos = 0.0;
+
+
     /*serialize support */
     friend class cereal::access;
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar( 
+        ar(
 
             CEREAL_NVP(xPos),
             CEREAL_NVP(yPos),
@@ -87,22 +75,6 @@ public:
             CEREAL_NVP(proj)
             );
     }
-
-
-
-private:
-    SMat4x4 view;
-    SMat4x4 proj;
-  
-
-
-    float xRot = 0.0;
-    float yRot = 0.0;
-    float zRot = 0.0;
-
-    float xPos = 0.0;
-    float yPos = 0.0;
-    float zPos = 0.0;
 
 
 };
