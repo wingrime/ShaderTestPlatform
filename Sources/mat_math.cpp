@@ -90,6 +90,16 @@ void SVec4::Reflect() const{
     printf("%f %f %f %f\n",x,y,z,w);
 }
 
+void SVec4::DivW()
+{
+    MASSERT(w == 0.0);//LOGE("Attempt SVec4::DivW when w is zero, nothing done");
+    x /= w;
+    y /= w;
+    z /= w;
+    w = 1.0;
+
+}
+
 
 
 SMat4x4::~SMat4x4(){

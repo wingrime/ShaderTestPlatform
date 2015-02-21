@@ -61,6 +61,8 @@ public:
     static bool Eq(const SVec4& a,const SVec4& b);
 
     void Reflect() const;
+    /*divide by w after projection*/
+    void DivW();
 
     /*serialize support */
     template <class Archive>
@@ -144,7 +146,7 @@ public:
 	//det
 	float Det() const;
 	//inverse
-	SMat4x4 Inverse() const;
+    SMat4x4 Inverse() const;
 
     //check
 
