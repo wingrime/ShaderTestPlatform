@@ -6,7 +6,7 @@
 
 #include "string_format.h"
 
-std::string string_format(const std::string fmt_str, ...) {
+std::string string_format(const std::string& fmt_str, ...) {
     int final_n, n = ((int)fmt_str.size()) * 2; /* reserve 2 times as much as the length of the fmt_str */
     std::unique_ptr<char[]> formatted;
     va_list ap;
