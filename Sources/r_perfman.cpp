@@ -25,7 +25,11 @@ int SPerfMan::End(){
 
 
 	glEndQuery(GL_TIME_ELAPSED );
+    //Don't stall GPU
     glGetQueryObjectuiv(q, GL_QUERY_RESULT_NO_WAIT, &res);
+    // stall GPU
+    //glFlush();
+    //glGetQueryObjectuiv(q, GL_QUERY_RESULT, &res);
 	return ESUCCESS;
 }
 unsigned int SPerfMan::getTime(){
