@@ -3,7 +3,8 @@ uniform vec4 vp; /* viewport conf*/
 layout(location = 0) out vec4 color;
 uniform sampler2D texSRC1;
 uniform sampler2D texSRC2;
-
+uniform mat4 m_P;
+uniform float ssaoLevelClamp;
 #define texDEPTH texSRC2
 #define texFB texSRC1
 in vec2 uv;
@@ -53,9 +54,15 @@ vec3  normal_from_depth( vec2 c) {
 	//n.z = -n.z;
 	return normalize(n);
 }
-
+float LinearizeDepth(vec2 _uv)
+{
+  float n = 100.0; // camera z near
+  float f = 7000.0; // camera z far
+  float z = texture2D(texDEPTH, _uv).x;
+  return (2.0 * n) / (f + n - z * (f - n));	
+}
 uniform float ssaoSize  =0.01;
-const int Samples = 10;
+const int Samples = 32;
 void main ()
 {
 
@@ -63,36 +70,41 @@ void main ()
 	vec2 c = uv;
 	//vec3 n = normal_from_depth(c);
 	vec3 n =  normalize(texture(texFB,c).xyz*2.0-1.0);
-        //seed = hash(hash(1u+hash(1u+ hash(1u+floatBitsToUint(n.x)))+hash(1u+hash(1u+floatBitsToUint(n.y+c.y))) +hash(1u+hash(1u+floatBitsToUint(n.z+c.x)) )));
-        seed = hash(floatBitsToUint(n.x*n.y+n.z+c.x*c.y));
-	float depth = texture(texDEPTH,c).r;
-	
-	float R = ssaoSize/depth;
+        seed = hash(hash(1u+hash(1u+ hash(1u+floatBitsToUint(n.x)))+hash(1u+hash(1u+floatBitsToUint(n.y+c.y))) +hash(1u+hash(1u+floatBitsToUint(n.z+c.x)) )));
+        //..seed = hash(floatBitsToUint(n.x*n.y+n.z+c.x*c.y)));
+	//float depth = texture(texDEPTH,c).r;
+	// WHY NOT WORKS??
+	//mat4 invP = inverse(m_P);
+	//vec4 NDC = invP*vec4(2.0*uv-1.0,depth,1.0);
+
+	//NDC.xyz /= NDC.w;
+
+	float depth = LinearizeDepth(uv);//pow(NDC.z,64);;
+
+	float R = (ssaoSize/50.0)/depth;
 	
 
 	float occ_depthf = 0;
 	for (int i = 0; i< Samples; i++) {
-		vec3 v_rnd = vec3(rnd()*2.0-1.0,rnd()*2.0-1.0,rnd()*2.0-1.0);
+		vec3 v_rnd = normalize(vec3(rnd()*2.0-1.0,rnd()*2.0-1.0,rnd()));
+		v_rnd *= rnd();
 		vec3 hemi = sign(dot(v_rnd,n))*v_rnd;	
 		//if (dot (hemi, n) < 0.65 ) // clamp HI angles
 		{
-		float occ_depth = texture(texDEPTH,c+(R*hemi.xy)).r;
+		float occ_depth = LinearizeDepth(uv+R*hemi.xy);
 		float diff = depth  - occ_depth;
-		if (diff > 0.00001 && diff < 0.02 )
-			occ_depthf +=1;
+		if (diff > 0.001 )
+
+			occ_depthf += min(1.0,R / abs(diff));
 		}
 	}
 
 	
-	occ_depthf = clamp((occ_depthf / Samples) - 0.5,0,1);	
+	occ_depthf = clamp((occ_depthf / Samples) - ssaoLevelClamp,0,1.0);	
 
 	
-	//TURN ON SSAO
-	//color = texture(texFB,c)*(1-occ_depthf);
-	//IMAGE ONLY
-	//color = texture(texFB,c);
-	//SSAO ONLY
 	color = vec4 (vec3(1-occ_depthf),1.0);
 	//DEPTH TO NORMAL TEST
 	//color = vec4(n,1.0);
+	//color = vec4(vec3(depth),1.0);
 }
