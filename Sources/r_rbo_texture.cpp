@@ -8,6 +8,7 @@
 #include "r_texture.h"
 #include "string_format.h"
 #include "MAssert.h"
+#include "Log.h"
 unsigned int SRBOTexture::getGLId() const {
     return tex;
 }
@@ -22,9 +23,6 @@ SRBOTexture::RTType SRBOTexture::getRelatedDepthType(SRBOTexture::RTType t)
     switch (t) {
         case SRBOTexture::RT_SCREEN:
             return RT_SCREEN_DEPTH;
-        case SRBOTexture::RT_TEXTURE_ARRAY:
-            MASSERT(true); /*NOT IMPL*/
-            return RT_NONE;
         case SRBOTexture::RT_TEXTURE_CUBEMAP:
             return RT_TEXTURE_DEPTH_CUBEMAP;
         case SRBOTexture::RT_TEXTURE_MSAA:
@@ -45,7 +43,8 @@ bool SRBOTexture::isDepthType(SRBOTexture::RTType t)
     if ( t == SRBOTexture::RT_TEXTURE_DEPTH || \
          t == SRBOTexture::RT_SCREEN_DEPTH ||  \
          t == SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP  || \
-         t == SRBOTexture::RT_TEXTURE_DEPTH_MSAA )
+         t == SRBOTexture::RT_TEXTURE_DEPTH_MSAA || \
+         t == SRBOTexture::RT_TEXTURE_DEPTH_ARRAY)
         return true;
     return false;
 }
@@ -54,8 +53,6 @@ unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
 {
     switch (t) {
         case SRBOTexture::RT_SCREEN:
-            return GL_RGBA8;
-        case SRBOTexture::RT_TEXTURE_ARRAY:
             return GL_RGBA8;
         case SRBOTexture::RT_TEXTURE_CUBEMAP:
             return GL_RGBA16F;
@@ -75,6 +72,8 @@ unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
             return GL_DEPTH_COMPONENT32;
         case SRBOTexture::RT_TEXTURE_DEPTH_MSAA:
             return GL_DEPTH_COMPONENT32;
+        case SRBOTexture::RT_TEXTURE_DEPTH_ARRAY:
+            return GL_DEPTH_COMPONENT32;
     }
     MASSERT (true) /* Unknown types should halt*/
 }
@@ -87,13 +86,17 @@ int SRBOTexture::Bind(unsigned int sampler) const {
         } else {
             if (type ==  RT_TEXTURE_CUBEMAP )
                     glBindTexture( GL_TEXTURE_CUBE_MAP,tex);
-                else
+            else if (type == RT_TEXTURE_DEPTH_ARRAY) {
+                    //glBindTexture(GL_TEXTURE_2D,tex);
+                    glBindTexture(GL_TEXTURE_2D_ARRAY,tex);
+            }
+            else
                     glBindTexture( GL_TEXTURE_2D,tex);
         }
         return ESUCCESS;
 	}
     else {
-        printf("unable bind non-exists texture\n");
+        LOGE("unable bind non-exists texture\n");
         return EFAIL;
         }
 
@@ -131,10 +134,10 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
         glTexStorage2D(GL_TEXTURE_2D, miplevel, SRBOTexture::getRelatedGLType(t), x, y);
         ConfigureTexture(TEX_CLAMP);
         /* enable comparea mode for glsl sampler2Shadow*/
-        if (t == RT_TEXTURE_DEPTH) {
-         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        }
+        //if (t == RT_TEXTURE_DEPTH) {
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        //}
         glBindTexture(GL_TEXTURE_2D,0);
         d_isMSAA  = false;
     } else if (t == RT_TEXTURE_MSAA || t  ==  RT_TEXTURE_DEPTH_MSAA) {
@@ -145,39 +148,51 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
     }else if (t == RT_TEXTURE_CUBEMAP ) {
         glBindTexture(GL_TEXTURE_CUBE_MAP , tex);
         /*configure */
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         for (unsigned int face = 0; face < 6; face++) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, SRBOTexture::getRelatedGLType(t),
                 x, y, 0, GL_RGBA, GL_FLOAT, NULL);
         }
+        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
     } else if (t == RT_TEXTURE_DEPTH_CUBEMAP ) {
         glBindTexture(GL_TEXTURE_CUBE_MAP , tex);
         /*configure */
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         for (unsigned int face = 0; face < 6; face++) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, SRBOTexture::getRelatedGLType(t),
                 x, y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         }
+        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
-    }else if (t == RT_TEXTURE_ARRAY ) {
+    }else if (t == RT_TEXTURE_DEPTH_ARRAY ) {
         glBindTexture(GL_TEXTURE_2D_ARRAY , tex);
         /*configure */
-        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, SRBOTexture::getRelatedGLType(t), x, y, 6);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+       // glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+        //glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, SRBOTexture::getRelatedGLType(t), x, y, 4);
+        //glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32,x,y, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
+
+        //for shadowmap
+
+        glBindTexture(GL_TEXTURE_2D_ARRAY,0);
     } else
         MASSERT(true); /* You should forget define new type there*/
     IsReady = true;

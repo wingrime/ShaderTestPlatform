@@ -25,7 +25,7 @@ public:
         RT_TEXTURE_DEPTH_MSAA,
         RT_TEXTURE_CUBEMAP,
         RT_TEXTURE_DEPTH_CUBEMAP,
-        RT_TEXTURE_ARRAY
+        RT_TEXTURE_DEPTH_ARRAY
     };
     enum BorderType {
         TEX_CLAMP = 0,
@@ -33,8 +33,7 @@ public:
     };
     /* simple empty texture */
     SRBOTexture(int _x, int _y)
-    :SRBOTexture(_x,_y,RT_TEXTURE_FLOAT)
-    {};
+    :SRBOTexture(_x,_y,RT_TEXTURE_FLOAT) {}
     SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel);
     SRBOTexture(int _x, int _y, RTType t) :SRBOTexture(_x,_y,t,1) {}
     SRBOTexture(const SRBOTexture&) = delete;
