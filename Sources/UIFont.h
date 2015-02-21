@@ -24,6 +24,7 @@ class UIFont {
 
 		int RenderText(const std::string& text, float x_uv, float y_uv, float vp_sx, float vp_sy);
 
+        bool IsReady = false;
   private:
 	FT_Library ft;
 

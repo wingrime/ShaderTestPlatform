@@ -11,7 +11,10 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
 
 	/*TODO use filebuffer*/
     if(FT_New_Face(UIFont::ft, fnt_name.c_str(), 0, &face))
+    {
         LOGE("Font not loaded!");
+        return;
+    }
 
     FT_Set_Pixel_Sizes(face, sz, 0);
     float size = sz, scale = 1000.0;
@@ -62,6 +65,8 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
 
     glBindVertexArray ( 0 );
 
+    IsReady = true;
+
 }
 
 unsigned int UIFont::BitMapTexture(int w, int r, unsigned char* buffer) {
@@ -90,6 +95,9 @@ unsigned int UIFont::BitMapTexture(int w, int r, unsigned char* buffer) {
     return texID;
 }
 int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp_sx, float vp_sy) {
+
+    if (!IsReady)
+        return -1L;
     float sx = 1.0 / vp_sx;
     float sy = 1.0 / vp_sy;
 
