@@ -2,6 +2,8 @@
 #include "ErrorCodes.h"
 #include "MAssert.h"
 #include "mat_math.h"
+#include "string_format.h"
+#include "Log.h"
 int RBO::Bind(bool clear) const {
     if (!IsReady)
         return EFAIL;
@@ -80,6 +82,13 @@ int RBO::attachRBOTextures()
         glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,    d_texIMG2->getGLId(), 0);
         buffers++;
     }
+    int rcode = glCheckFramebufferStatus(GL_FRAMEBUFFER) ;
+    if(rcode != GL_FRAMEBUFFER_COMPLETE) {
+        LOGE(string_format("FBO error(!GL_FRAMEBUFFER_COMPLETE) %d\n",rcode));
+        MASSERT(true);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return EFAIL;
+    }
     GLenum  buffers1 [] = { GL_COLOR_ATTACHMENT0 };
     GLenum  buffers2 [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1 };
     GLenum  buffers3 [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
@@ -98,16 +107,12 @@ int RBO::attachRBOTextures()
     }
 
     d_buffers =  buffers;
-    if (d_type == RBO::RBO_DEPTH_ONLY )
+
+    if (isDepthOnlyType(d_type))
         glClear( GL_DEPTH_BUFFER_BIT);
     else
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    int rcode = glCheckFramebufferStatus(GL_FRAMEBUFFER) ;
-    if(rcode != GL_FRAMEBUFFER_COMPLETE) {
-        //EMSGS(string_format("FBO incomplite error %d\n",rcode));
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        return EFAIL;
-    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return ESUCCESS;
 }
@@ -132,6 +137,8 @@ SRBOTexture::RTType RBO::getRelatedRBOTextueTypeFromRBOType(RBO::RBOType t)
     case RBOType::RBO_FLOAT_RED:
         return SRBOTexture::RTType::RT_TEXTURE_FLOAT_RED;
     case RBOType::RBO_DEPTH_ONLY:
+        return SRBOTexture::RTType::RT_NONE;
+    case RBOType::RBO_DEPTH_ARRAY_ONLY:
         return SRBOTexture::RTType::RT_NONE;
     }
     MASSERT(true); /*Unknown types should halt*/
@@ -159,9 +166,16 @@ SRBOTexture::RTType RBO::getRelatedDepthRBOTextueTypeFromRBOType(RBO::RBOType t)
         return SRBOTexture::RTType::RT_TEXTURE_DEPTH;
     case RBOType::RBO_DEPTH_ONLY:
         return SRBOTexture::RTType::RT_TEXTURE_DEPTH;
+    case RBOType::RBO_DEPTH_ARRAY_ONLY:
+        return SRBOTexture::RTType::RT_TEXTURE_DEPTH_ARRAY;
     }
     MASSERT(true); /*Unknown types should halt*/
     return SRBOTexture::RTType::RT_NONE;
+}
+
+bool RBO::isDepthOnlyType(RBO::RBOType t)
+{
+    return (t == RBO::RBO_DEPTH_ARRAY_ONLY || t == RBO::RBO_DEPTH_ONLY);
 }
 /* Constructor from ptr's*/
 RBO::RBO(int _w, int _h,RBOType _type,
@@ -216,11 +230,11 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type)
         MASSERT(d_w != d_h);/*cubemap are should be cube*/
         MASSERT( d_w % 2 != 0); /*should be power of two*/
     }
-    if (type != RBO::RBO_DEPTH_ONLY) {
+    if (!isDepthOnlyType(type)) {
         d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
     }
     d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type),mip));
-    if (type != RBO::RBO_DEPTH_ONLY) {
+    if (!isDepthOnlyType(type)) {
         d_isMSAA = d_texIMG->IsMSAA() ;
     }
     else
@@ -248,7 +262,7 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, i
     MASSERT(SRBOTexture::isDepthType(t1_type));
     MASSERT(SRBOTexture::isDepthType(t2_type));
     MASSERT(t0_s <= 0);
-    if (type != RBO::RBO_DEPTH_ONLY)
+    if (!isDepthOnlyType(type))
         d_texIMG.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s,t0_type,mip));
     /*depth*/
     d_texDEPTH.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s, SRBOTexture::getRelatedDepthType(t0_type) ,mip));
@@ -262,7 +276,7 @@ RBO::RBO(int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, i
         MASSERT(t2_s <= 0);
         d_texIMG2.reset(new SRBOTexture(d_w/t2_s,d_h/t2_s,t2_type,mip));
     }
-    if (type != RBO::RBO_DEPTH_ONLY)
+    if (!isDepthOnlyType(type))
         d_isMSAA = d_texIMG->IsMSAA() ; /*TODO: make external*/
     else
         d_isMSAA = false;

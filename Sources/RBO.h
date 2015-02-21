@@ -20,7 +20,8 @@ public:
     RBO_MIXED, /* by texture type*/
     RBO_MSAA,
     RBO_FLOAT_RED, /*single 32 bit float */
-    RBO_DEPTH_ONLY
+    RBO_DEPTH_ONLY,
+    RBO_DEPTH_ARRAY_ONLY
     };
 
 	/*base constructor*/
@@ -31,12 +32,12 @@ public:
 
     RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
                                                std::shared_ptr<SRBOTexture> texDEPTH)
-		:RBO(w, h , type , texIMG,nullptr,nullptr, texDEPTH ){};
-    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(w, h , type , texIMG, nullptr ){};
+        :RBO(w, h , type , texIMG,nullptr,nullptr, texDEPTH ){}
+    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(w, h , type , texIMG, nullptr ){}
 
     RBO(int def_w, int def_h,RBOType type);
 
-    RBO(int w, int h) :RBO(w,h,RBO_SCREEN) {};
+    RBO(int w, int h) :RBO(w,h,RBO_SCREEN) {}
     ~RBO();
 
     /*new interface*/
@@ -88,4 +89,5 @@ private:
 
     static SRBOTexture::RTType  getRelatedRBOTextueTypeFromRBOType( RBOType t);
     static SRBOTexture::RTType  getRelatedDepthRBOTextueTypeFromRBOType( RBOType t);
+    static bool isDepthOnlyType(RBOType t);
 };
