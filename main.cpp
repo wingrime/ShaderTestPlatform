@@ -24,6 +24,8 @@ Global TODOs:
 #include <chrono>
 #include "selene.h"
 
+#include "oglGlutInit.h"
+
 /*Singletons */
 /*
  * Must be moved to Singltone interface as be ready
@@ -181,11 +183,11 @@ void APIENTRY openglCallbackFunction(GLenum source,
  
  /* todo find  where it was called */
     static Log gl_log("gl_log.log");
-    if (severity  == GL_DEBUG_SEVERITY_HIGH)
-    {
+    if (severity  != GL_DEBUG_SEVERITY_NOTIFICATION)
+   {
         gl_log.LogW(message);
         // nice feature;
-       D_TRAP();
+       //D_TRAP();
     }
 
 
@@ -220,12 +222,23 @@ int initLuaBindings(sel::State& state)
     return 0;
 }
 
+int initHooks() {
+
+    /*glut callbacks*/
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutIdleFunc(refresh);
+    glutMouseFunc(mouse);
+    glutMotionFunc(mouse_move);
+    glutKeyboardFunc(key);
+    glutSpecialFunc(special);
+}
+
 int main ( int argc, char * argv [] )
 {
     std::ios::sync_with_stdio(false);
     MainLog log;
     MainConfig config;
-
     Log gl_log("gl_log.log");
 
     LOGV("GIT REVISION:"  GIT_SHA1 );
@@ -233,30 +246,17 @@ int main ( int argc, char * argv [] )
     LoadLibraryA("backtrace.dll");
     LOGV("Backtrace dll loaded");
 
-    LOGV("Init gl context");
 
     int h = config["launch.h"].GetInt();
     int w = config["launch.w"].GetInt();
     int ogl_major = config["launch.ogl_major"].GetInt();
     int ogl_minor = config["launch.ogl_minor"].GetInt();
-    //printf("create window: %d , %d\n", h,w);
-    RBO  v(w,h);
-    // initialize glut
-    glutInit            ( &argc, argv );
-    glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutInitWindowSize  ( v.getSize().w,v.getSize().h);
-    // init modern opengl
-    glutInitContextVersion ( ogl_major, ogl_minor );
-    glutInitContextFlags   ( GLUT_FORWARD_COMPATIBLE| GLUT_DEBUG);
-    glutInitContextProfile ( GLUT_CORE_PROFILE  );
 
-    glutCreateWindow ("m_proj Shestacov Alexsey 2014-2015(c)" );
-    glewExperimental = GL_TRUE; /*Required for some new glFunctions otherwice will crash*/
-    GLenum err= glewInit ();
-    if (err != GLEW_OK) {
-        LOGE("error create OpenGL context, exiting");
-        return -1;
-    }
+    LOGV("Init gl context");
+    oglInit(argc,argv,w,h,ogl_major,ogl_minor);
+    initHooks();
+
+
 
    if(glDebugMessageCallback){
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -276,26 +276,12 @@ int main ( int argc, char * argv [] )
 
 
     LOGV("Create Scene");
-
+    RBO  v(w,h);
     MainScene msc(&v);
 
     //sc.reset(new SScene(&v));
     SScene * sc = MainScene::GetInstance();
     s_input.reset(new InputCommandHandler());
-
-
-
-
-    /*glut callbacks*/
-    glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
-    glutIdleFunc(refresh);
-    glutMouseFunc(mouse);
-    glutMotionFunc(mouse_move);
-    glutKeyboardFunc(key);
-    glutSpecialFunc(special);
-
-
 
     /*input key handlers*/
     s_input->AddCommand("forward", InputCommandHandler::InputCommand([=] (void) -> void {
@@ -351,6 +337,7 @@ int main ( int argc, char * argv [] )
     LOGV("Entering main loop");
     sc->dbg_ui.con->Msg("git revision: " GIT_SHA1 "\n");
     sc->dbg_ui.con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
+
     glutMainLoop ();
     LOGV("Leave main loop");
 

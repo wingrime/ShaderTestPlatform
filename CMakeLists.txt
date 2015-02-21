@@ -135,7 +135,7 @@ add_custom_command(TARGET main
           COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
           COMMAND ${CMAKE_COMMAND} -E copy "${LUA_LIBRARIES}/liblua.dll" "${PROJECT_SOURCE_DIR}/Build/"
           )
-add_executable("tests"  "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
+add_executable("tests" Scene.cpp DebugUI.cpp "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
 target_link_libraries(tests "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(tests "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
 target_link_libraries(tests OpenGL32)
