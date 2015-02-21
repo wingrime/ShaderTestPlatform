@@ -136,7 +136,7 @@ public:
 
     bool IsReady = false;
 
-    long int getVertexCount() const {return d_vertex_count;};
+    long int getVertexCount() const {return d_vertex_count;}
 
 private:
     std::vector<std::shared_ptr<CObjSubmesh> > d_sm; /*set of submeshes*/
