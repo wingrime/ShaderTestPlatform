@@ -1,7 +1,6 @@
 #version 330
 /* Base Lighting Shader */
 layout(location = 0) out vec4 dstColor;
-layout(location = 1) out vec4 worldNormal; /*SSAO*/ 
 const float pi = 3.14159;
 
 
@@ -32,8 +31,9 @@ uniform sampler2D texBUMP;
 uniform sampler2D texture_alpha_sampler;
 uniform sampler2D sh_bands_sampler;
 /* Shadow map depth buffer*/
-uniform sampler2DShadow sm_depth_sampler;
-
+uniform sampler2DArray sm_depth_sampler;
+/*test*/
+uniform float slice= 0.0;
 uniform sampler2D rsm_normal_sampler;
 uniform samplerCube rsm_vector_sampler;
 uniform sampler2D rsm_albedo_sampler;
@@ -41,6 +41,10 @@ uniform sampler2D rsm_albedo_sampler;
 uniform float lightIntensity = 1.0;
 uniform float shadowPenumbra = 200.0;
 uniform float shadowEps =   0.0001;
+uniform	float s0 = 290.0;
+uniform	float s1 = 840.0;
+uniform	float s2 = 2420.0;
+uniform	float s3 = 7000.0;
 uniform float ambientIntensity = 0.1;
 uniform float sh_int = 5.2;
 uniform float ggx_alpha = 0.4;
@@ -59,7 +63,10 @@ uniform float ggx_f0 = 0.04 ;/*fressnel*/
 #define DBG_OUT_REFLECT 11
 #define DBG_OUT_SH 12
 uniform int dbg_out = 0;
-uniform mat4 shadowMVPB;
+uniform mat4 shadowMVPB0;
+uniform mat4 shadowMVPB1;
+uniform mat4 shadowMVPB2;
+uniform mat4 shadowMVPB3;
 
 /*fressnel aprox*/
 vec3 F_schlick(vec3 l, vec3 n,vec3 c_spec) {
@@ -160,6 +167,9 @@ vec3 appplySHamonics(vec3 L[9],vec3 n) {
 		 vec3(0.772744)*n.z*n.x*L[7] +
 		 vec3(0.386372)*(n.x*n.x-n.y*n.y)*L[8];
 }
+float svs(float s) {
+	return ((s-100.0) / (7000.0-100.0)); 
+}
 void main() 
 {
 
@@ -197,43 +207,96 @@ poissonDisk[58] = vec2(0.155736, 0.065157); poissonDisk[59] = vec2(0.391522, 0.8
 poissonDisk[60] = vec2(-0.620106, -0.328104); poissonDisk[61] = vec2(0.789239, -0.419965);
 poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -0.596057);
 
-
 	float texture_alpha = texture(texture_alpha_sampler,uv).r;
 	//fix me (get viewport sizes)
-
+	vec3 tesc;
 	const int sm_samples = 64;
-
+	float slice_sel = 0;
+	float far = 7000;
+	float near = 100;
 	float shadow;
+	vec4 sm_pos;
+	//not general way for light with dir 0,1,0
+	//normal way length(light_dir - o_pos_v)
+	/*slowest sol*/
+	vec4 view_space = inverse(o_proj)*gl_FragCoord;
+	view_space.xyz /= view_space.w; // ?
+
+	float d =  1.0-view_space.z;//((2*far*near) /((2.0*gl_FragCoord.z-1.0)*(far-near)-(far+near)));// far-near;
+	//float d = gl_FragCoord
+	if (d < svs(s0) )
+	{
+		slice_sel = 0;
+		 tesc = vec3(1.0,0.0,0.0);
+		  sm_pos = shadowMVPB0*vec4(o_pos_v ,1.0);
+	} else if (d < svs(s1)) {
+		slice_sel = 1;
+		tesc = vec3(1.0,1.0,0.0);
+		sm_pos = shadowMVPB1*vec4(o_pos_v ,1.0);
+	} else if (d < svs(s2)) {
+		slice_sel = 2;
+		tesc = vec3(0.0,1.0,0.0);
+		sm_pos = shadowMVPB2*vec4(o_pos_v ,1.0);
+	}
+	else if (d < svs(s3)) {
+		slice_sel = 3;
+		tesc = vec3(0.0,0.0,1.0);
+		sm_pos = shadowMVPB3*vec4(o_pos_v ,1.0);
+	} else {
+		tesc = vec3(1.0,1.0,1.0);
+		slice_sel = 3;
+		sm_pos = shadowMVPB3*vec4(o_pos_v ,1.0);
+
+	}
     //vec4 sm_pos = shadowMVPB*vec4(o_pos_v+o_pos_v*(normalize(o_normal)*shadowEps) ,1.0);
-    vec4 sm_pos = shadowMVPB*vec4(o_pos_v ,1.0);
+
+
+
+   
     
     sm_pos.xyz /= sm_pos.w;
     sm_pos.z -= shadowEps;
-// HARD shadows
-//shadow  =  texture(sm_depth_sampler,sm_pos.xyz);
-
-// PCF
-
+	shadow = 0.0;
 
 if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w > 0.0) {
 		vec4 s;
-		for (int i=0;i<sm_samples;i+=4)
+		for (int i=0;i<sm_samples-1;i+=4)
 		{
-		
-			s.x = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i]/shadowPenumbra,0.0));
-			s.y = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i+1]/shadowPenumbra,0.0));
-			s.z = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i+2]/shadowPenumbra,0.0));
-			s.w = texture(sm_depth_sampler,sm_pos.xyz+vec3(poissonDisk[i+3]/shadowPenumbra,0.0));
+			s.x = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[i]/shadowPenumbra),slice)).r,sm_pos.z);
+			s.y = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[1+i]/shadowPenumbra),slice)).r,sm_pos.z);
+			s.z = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[2+i]/shadowPenumbra),slice)).r,sm_pos.z);
+			s.w = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[3+i]/shadowPenumbra),slice)).r,sm_pos.z);
 			shadow += dot (s,vec4(1.0));	
 
 		}
-		shadow = (1.0 / sm_samples) * shadow;
+		shadow = 1.0-((1.0 / sm_samples) * shadow);
 	}
 	else
 		shadow = 0.0;
-
 	shadow =  clamp(shadow,0.0,1.0);//bug check
+// HARD shadows
+//shadow  =  1.0-step(texture(sm_depth_sampler,vec3(sm_pos.xy,float(1))).r,sm_pos.z);
+//shadow  =texture(sm_depth_sampler,vec4(sm_pos.xyz,float(1)));
+// PCF
 
+//float slice = 0;
+//must be workable but not;
+//if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w > 0.0) {
+//		vec4 s;
+//		for (int i=0;i<sm_samples;i+=4)
+//		{
+//		
+//			s.x = texture(sm_depth_sampler,vec4(sm_pos.xyz,slice)+vec4(poissonDisk[i]/shadowPenumbra,0.0,0.0));
+//			s.y = texture(sm_depth_sampler,vec4(sm_pos.xyz,slice)+vec4(poissonDisk[i+1]/shadowPenumbra,0.0,0.0));
+//			s.z = texture(sm_depth_sampler,vec4(sm_pos.xyz,slice)+vec4(poissonDisk[i+2]/shadowPenumbra,0.0,0.0));
+//			s.w = texture(sm_depth_sampler,vec4(sm_pos.xyz,slice)+vec4(poissonDisk[i+3]/shadowPenumbra,0.0,0.0));
+//			shadow += dot (s,vec4(1.0));	
+//
+//		}
+//		shadow = (1.0 / sm_samples) * shadow;
+//	}
+//	else
+//	
 
 	/* diffuse color texture*/
 	
@@ -318,7 +381,7 @@ if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w
 	else if (dbg_out ==  DBG_OUT_NORMAL_MAPED)
 		dstColor = vec4(0.5*normalize(d_normal)+0.5,1.0);
 	else if (dbg_out ==  DBG_OUT_SHADOW)
-		dstColor = vec4(vec3(shadow),1.0);
+		dstColor = vec4(vec3(tesc),1.0);
 	else if (dbg_out ==  DBG_OUT_REFLECT)
 		dstColor = vec4(vec3(texture(rsm_vector_sampler,(transpose(MV_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz),1.0);
 	else if (dbg_out ==  DBG_OUT_SH)
@@ -333,6 +396,4 @@ if (sm_pos.x > 0 && sm_pos.x < 1.0 && sm_pos.y > 0 && sm_pos.y < 1.0 && sm_pos.w
 		/*nan protetion*/
 	if (any(isnan(dstColor)))
 		dstColor=  vec4(vec3(0.0),1.0);
-
-	worldNormal = vec4(0.5*normalize(t_normal)+0.5,1.0);
 }

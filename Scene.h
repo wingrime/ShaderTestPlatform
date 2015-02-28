@@ -26,6 +26,7 @@ class SScene {
 public:
     friend class DebugUI;
     SScene(RBO *v);
+    ~SScene();
     int Render();
 
     int Reshape(int w, int h);
@@ -39,28 +40,33 @@ public:
 
     SCamera cam;
     SCamera sky_cam;
-    SCamera d_shadowmap_cam;
-    SPostProcess *pp_stage_ssao;
-    SPostProcess *pp_stage_ssao_blur_hor;
-    SPostProcess *pp_stage_ssao_blur_vert;
+    SCamera d_shadowmap_cam0;
+    SCamera d_shadowmap_cam1;
+    SCamera d_shadowmap_cam2;
+    SCamera d_shadowmap_cam3;
+    std::shared_ptr<SPostProcess> pp_stage_ssao;
+    std::shared_ptr<SPostProcess> pp_stage_ssao_blur_hor;
+    std::shared_ptr<SPostProcess> pp_stage_ssao_blur_vert;
 
-    SPostProcess *pp_stage_hdr_bloom;
-    SPostProcess *pp_stage_hdr_blur_hor;
-    SPostProcess *pp_stage_hdr_blur_vert;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_bloom;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_hor;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_vert;
 
     /*for ping pong bloor*/
-    SPostProcess *pp_stage_hdr_blur_hor2; 
-    SPostProcess *pp_stage_hdr_blur_vert2;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_hor2;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_vert2;
 
-    SPostProcess *pp_stage_hdr_tonemap;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_tonemap;
 
     /*lumenance key*/
-    SPostProcess *pp_stage_hdr_lum_key;
-    SPostProcess *pp_stage_hdr_lum_log;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_lum_key;
+    std::shared_ptr<SPostProcess> pp_stage_hdr_lum_log;
 
 
-    SPostProcess *pp_stage_volumetric;
+    std::shared_ptr<SPostProcess> pp_stage_volumetric;
     std::shared_ptr<RBO> rtSCREEN;
+    std::shared_ptr<RBO> rtPrepass;
+
     std::shared_ptr<RBO> rtHDRScene;
     std::shared_ptr<RBO> rtHDRScene_MSAA;
     std::shared_ptr<RBO> rtSSAOHorBlurResult;
@@ -96,24 +102,29 @@ private:
     float step;
     bool d_first_render;
 
+    /* prepass prog*/
+    std::shared_ptr<SShader> prepass_prog;
+
     /* main prog*/
-    SShader *r_prog;
+    std::shared_ptr<SShader> r_prog;
     /*shadow prog*/
-    SShader *cam_prog;
+    std::shared_ptr<SShader> cam_prog;
     /*Sky*/
-    SShader *sky_dome_prog;
+    std::shared_ptr<SShader> sky_dome_prog;
 
-    SShader *pp_prog_hdr_blur_kawase;
+    std::shared_ptr<SShader> pp_prog_hdr_blur_kawase;
 
-    SShader *pp_prog_hdr_tonemap; /* final tonemap*/
+    std::shared_ptr<SShader> pp_prog_hdr_tonemap; /* final tonemap*/
 
-    SShader *cubemap_prog_generator;
+    std::shared_ptr<SShader> cubemap_prog_generator;
 
     /*main scene render*/
     int RenderDirect(const RBO& v);
     /*render shadow map*/
     int RenderShadowMap(const RBO& v);
     int RenderCubemap();
+
+    int RenderPrepass(const RBO& v);
 
 
 private:

@@ -63,6 +63,8 @@ public:
     void Reflect() const;
     /*divide by w after projection*/
     void DivW();
+    /*Modulo*/
+    void Abs();
 
     /*serialize support */
     template <class Archive>
@@ -214,13 +216,16 @@ public:
 struct Point  {
     Point(float _x,float _y,float _z) :x(_x),y(_y),z(_z) {}
     Point (SVec4 a) :x(a.x),y(a.y),z(a.z) {}
+    Point () :x(0.0),y(0.0),z(0.0) {}
     float x,y,z;
 };
 struct Line {
     Point p1;
     Point p2;
 };
-struct AABB {
+class AABB {
+public:
+    AABB() :p1(),p2() {}
     Point p1;
     Point p2;
 };

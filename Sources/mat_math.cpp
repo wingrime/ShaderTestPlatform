@@ -100,6 +100,15 @@ void SVec4::DivW()
 
 }
 
+void SVec4::Abs()
+{
+    x = fabs(x);
+    y = fabs(y);
+    z = fabs(z);
+    w = fabs(w);
+
+}
+
 
 
 SMat4x4::~SMat4x4(){

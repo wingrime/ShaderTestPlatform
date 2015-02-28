@@ -64,7 +64,7 @@ MV_n = MV;
 vec3 t_tangent;
 /*realUV*/
 uv = vec2(1.0,-1.0)*UV;
-t_normal = (MV_n*vec4(normal,0.0)).xyz;
+t_normal = ((MV_n*vec4(normal,0.0)).xyz);
 vPos = (MV*vec4(position,1.0)).xyz;
 
 

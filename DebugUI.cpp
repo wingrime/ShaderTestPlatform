@@ -56,7 +56,10 @@ int DebugUI::InitDebugCommands()
 
     d_console_cmd_handler->AddCommand("sm_cam_set", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        sc->d_shadowmap_cam = sc->cam;
+        sc->d_shadowmap_cam0 = sc->cam;
+        sc->d_shadowmap_cam1 = sc->cam;
+        sc->d_shadowmap_cam2 = sc->cam;
+        sc->d_shadowmap_cam3 = sc->cam;
         sc->d_first_render = false;
 
     }));
@@ -108,7 +111,7 @@ int DebugUI::InitDebugCommands()
 
         d_console_cmd_handler->AddCommand("sm_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        sc->d_shadowmap_cam.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,4000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
+        sc->d_shadowmap_cam0.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,4000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
 
     }));
         d_console_cmd_handler->AddCommand("dump_smcam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -118,7 +121,7 @@ int DebugUI::InitDebugCommands()
         {
             /*use raii */
             cereal::JSONOutputArchive archive( os);
-            archive( CEREAL_NVP( sc->d_shadowmap_cam));
+            archive( CEREAL_NVP( sc->d_shadowmap_cam0));
         }
         con->Msg(os.str());
     }));
@@ -171,6 +174,23 @@ int DebugUI::InitDebugCommands()
 
     }));
 
+    d_console_cmd_handler->AddCommand("vis_frustrum", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        sc->d_debugDrawMgr.AddCameraFrustrum(sc->cam.getViewProjectMatrix());
+        sc->d_debugDrawMgr.Update();
+
+    }));
+    d_console_cmd_handler->AddCommand("vis_cascades", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam0.getViewProjectMatrix());
+        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam1.getViewProjectMatrix());
+        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam2.getViewProjectMatrix());
+        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam3.getViewProjectMatrix());
+        sc->d_debugDrawMgr.Update();
+
+    }));
+
+
 
     d_console_cmd_handler->AddCommand("rec", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
@@ -180,7 +200,7 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("updc", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         SMat4x4 m = sc->cam.getViewMatrix();
-        sc->d_debugDrawMgr.AddCross({m.a14,m.a24,m.a34},1000);
+        sc->d_debugDrawMgr.AddCross(m.ExtractPositionNoScale(),1000);
         sc->d_debugDrawMgr.Update();
     }));
 
