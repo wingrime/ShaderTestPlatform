@@ -150,6 +150,12 @@ public:
 	//inverse
     SMat4x4 Inverse() const;
 
+    /*Extract vector routines*/
+    SVec4 ExtractAtVector() const;
+    SVec4 ExtractLeftVector() const;
+    SVec4 ExtractUpVector() const;
+
+
     //check
 
     static bool Eq(const SMat4x4& a,const SMat4x4& b);

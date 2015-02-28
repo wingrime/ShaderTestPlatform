@@ -224,6 +224,7 @@ SVec4 SMat4x4::ExtractPositionNoScale() const
     rot.a24 = 0;
     rot.a34 = 0;
     SVec4 res((rot)*(d));
+    res.w = 1.0; //??
     return res;
 }
 // TODO make delta standart
@@ -446,6 +447,21 @@ SMat4x4 SMat4x4::Inverse() const
     SMat4x4 inv_res;
     MESA_gluInvertMatrix(this->raw,inv_res.raw);
     return inv_res;
+}
+
+SVec4 SMat4x4::ExtractAtVector() const
+{
+    return SVec4(a11,a12,a13,1.0);
+}
+
+SVec4 SMat4x4::ExtractLeftVector() const
+{
+    return SVec4(a21,a22,a23,1.0);
+}
+
+SVec4 SMat4x4::ExtractUpVector() const
+{
+    return SVec4(a31,a32,a33,1.0);
 }
 
 
