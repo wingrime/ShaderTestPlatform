@@ -343,48 +343,43 @@ int SScene::UpdateScene(float dt) {
 
     SVec4 light_dir =  SVec4(0.0,1.0,0.0,1.0);
 
-
     /*fit AABB*/
     AABB r = FrustrumSize(cam.getViewProjectMatrix());
 
-    //update shadow cascade
-    //d_shadowmap_cam0.setProjMatrix(SOrtoProjectionMatrix(100,7000,fabs(r.p1.x-r.p2.x)/2.0,fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.z-r.p2.z)/2.0));
-    //d_shadowmap_cam1.setProjMatrix(SOrtoProjectionMatrix(100,7000,fabs(r.p1.x-r.p2.x)/2.0,fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.z-r.p2.z)/2.0));
-    //d_shadowmap_cam2.setProjMatrix(SOrtoProjectionMatrix(100,7000,fabs(r.p1.x-r.p2.x)/2.0,fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.z-r.p2.z)/2.0));
-    //d_shadowmap_cam3.setProjMatrix(SOrtoProjectionMatrix(100,7000,fabs(r.p1.x-r.p2.x)/2.0,fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.y-r.p2.y)/2.0,-fabs(r.p1.z-r.p2.z)/2.0));
-
-    SMat4x4 p =SOrtoProjectionMatrix(-1,1,1,1,-1,-1);
+    //SMat4x4 p =SOrtoProjectionMatrix(-1,1,1,1,-1,-1);
+    SMat4x4 p =SOrtoProjectionMatrix(0,1,1,1,-1,-1);
     d_shadowmap_cam0.setProjMatrix(p);
     d_shadowmap_cam1.setProjMatrix(p);
     d_shadowmap_cam2.setProjMatrix(p);
     d_shadowmap_cam3.setProjMatrix(p);
 
     SVec4 pos = cam.getViewMatrix().ExtractPositionNoScale();
-    //SVec4 pos = SVec4((r.p1.x - r.p2.x)/2.0,(r.p1.y - r.p2.y)/2.0,(r.p1.z - r.p2.z)/2.0,1.0 );
-    SMat4x4 c;
+    SVec4 cam_up = SVec4::Normalize(cam.getViewMatrix().ExtractUpVector());
 
-    c = SMat4x4().Scale(2.0/fabs(r.p1.x - r.p2.x),2.0/fabs(r.p1.y - r.p2.y),2.0/fabs(r.p1.z - r.p2.z));
+    SMat4x4 c = SMat4x4().Scale(2.0/fabs(r.p1.x - r.p2.x),2.0/fabs(r.p1.y - r.p2.y),2.0/fabs(r.p1.z - r.p2.z));
 
-    //SMat4x4 l =  SMat4x4().Move(-pos.x,-pos.y,-pos.z);
-    //pos = pos - SVec4(fabs(r.p1.x - r.p2.x)/2.0,fabs(r.p1.y - r.p2.y)/2.0,fabs(r.p1.z - r.p2.z)/2.0,0.0 );
-    SMat4x4 l = SMat4x4::LookAt(pos,pos+light_dir,SVec4(1.0,0,0,1));
-  //  pos  = pos + SVec4(,0.0)
-    c = c*l;
-    //c.Reflect();
+    SMat4x4 m =  SMat4x4().Move(-pos.x,-pos.y,-pos.z);
+
+    SVec4 zaxis = SVec4::Normalize(light_dir); /*direction to view point*/
+    SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(cam_up,zaxis)); /* left vector*/
+    SVec4 yaxis(SVec4::Cross3(zaxis,xaxis)); /* new up vector */
+    SVec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
+    SVec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
+    SVec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
+    SVec4 v4 (0.0,0.0,0.0,1.0);
+    SMat4x4 l = SMat4x4(v1,v2,v3,v4);
+
+    c = l*c*m;
+
     d_shadowmap_cam0.setViewMatrix(c);
     d_shadowmap_cam1.setViewMatrix(c);
     d_shadowmap_cam2.setViewMatrix(c);
     d_shadowmap_cam3.setViewMatrix(c);
 
-
-
-
     r_prog->SetUniform("shadowMVPB0",Bias*d_shadowmap_cam0.getViewProjectMatrix());
     r_prog->SetUniform("shadowMVPB1",Bias*d_shadowmap_cam1.getViewProjectMatrix());
     r_prog->SetUniform("shadowMVPB2",Bias*d_shadowmap_cam2.getViewProjectMatrix());
     r_prog->SetUniform("shadowMVPB3",Bias*d_shadowmap_cam3.getViewProjectMatrix());
-
-
 
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
