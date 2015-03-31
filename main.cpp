@@ -79,6 +79,7 @@ void key ( unsigned char key, int x, int y )
         if (key == 27)
         {
             console_mode = 0;
+            sc->dbg_ui.con->Msg("Console close\n");
             sc->dbg_ui.con->HandleExitConsole();
             return;
         } else  if (key == 43) {
@@ -112,7 +113,8 @@ void key ( unsigned char key, int x, int y )
 
 else if (key == '9' ) sc->dbg_ui.upViewItem();
 else if (key == '0' ) sc->dbg_ui.downViewItem();
-else if (key == 8 ) {console_mode = 1; sc->dbg_ui.con->Cls(); sc->dbg_ui.con->Msg("Debug console, [ESC] for exit\n"); }
+    /*backspace or plus goes to console*/
+else if (key == 8 || key == 43) {console_mode = 1; sc->dbg_ui.con->Cls(); sc->dbg_ui.con->Msg("Debug console, [ESC] for exit\n"); }
 else
     s_input->HandleInputKey(key);
 
