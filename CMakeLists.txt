@@ -97,6 +97,9 @@ include_directories(${PROJECT_SOURCE_DIR}/External/gtest/)
 include_directories(${PROJECT_SOURCE_DIR}/Sources)
 include_directories(${PROJECT_SOURCE_DIR}/Sources/Tests)
 
+# imGui
+include_directories(${PROJECT_SOURCE_DIR}/External/imgui)
+
 #add to deps
 AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources RENDER_HEADERS) 
 
@@ -117,7 +120,7 @@ add_definitions( -DGIT_SHA1="${VERSION}" )
 message ("${VERSION}")
 message ("GIT OUTPUT")
 
-add_executable("main" main.cpp Scene.cpp DebugUI.cpp ${RENDER_HEADERS})
+add_executable("main" main.cpp Scene.cpp DebugUI.cpp  External/imgui/imgui.cpp ${RENDER_HEADERS})
 
 target_link_libraries(main "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
