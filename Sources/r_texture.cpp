@@ -28,7 +28,9 @@ int STexture::Bind(unsigned int sampler) const {
         */
         /*EXT_direct_state_access*/
         glBindMultiTextureEXT( GL_TEXTURE0 + sampler,GL_TEXTURE_2D,tex);
+
         return ESUCCESS;
+
 	}
     else {
         LOGE("Texture not ready for bind");
@@ -53,6 +55,10 @@ int STexture::ConfigureTexture(const BorderType t) const {
         /* interpolation settings */
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);//GL_NEAREST
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        float aniso = 0.0f;
+        /*anisotropic test*/
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
    return 0;
 }
 int STexture::CreateTexture(GLsizei num_mipmaps,GLenum internalformat) {
