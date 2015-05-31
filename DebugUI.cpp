@@ -3,6 +3,7 @@
 #include "UILabel.h"
 #include "UIConsole.h"
 #include "r_sprog.h"
+#include <imgui.h>
 DebugUI::DebugUI(SScene *_s, RBO *_v)
     :v(_v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
@@ -28,6 +29,89 @@ int DebugUI::Draw()
     }
     con->Draw();
 
+}
+AABB FrustrumSize2(const SMat4x4& r) {
+
+    SMat4x4 invPV = r.Inverse();
+    SVec4 f1 = invPV*SVec4(1.0,-1.0,-1.0,1.0);
+    f1.DivW();
+    SVec4 f2 = invPV*SVec4(-1.0,1.0,-1.0,1.0);
+    f2.DivW();
+    SVec4 f3 = invPV*SVec4(1.0,1.0,-1.0,1.0);
+    f3.DivW();
+    SVec4 f4 = invPV*SVec4(-1.0,-1.0,-1.0,1.0);
+    f4.DivW();
+
+    SVec4 b1 = invPV*SVec4(1.0,-1.0,1.0,1.0);
+    b1.DivW();
+    SVec4 b2 = invPV*SVec4(-1.0,1.0,1.0,1.0);
+    b2.DivW();
+    SVec4 b3 = invPV*SVec4(1.0,1.0,1.0,1.0);
+    b3.DivW();
+    SVec4 b4 = invPV*SVec4(-1.0,-1.0,1.0,1.0);
+    b4.DivW();
+
+    float x_m;
+    x_m = fmax(f1.x,f2.x);
+    x_m = fmax(x_m,f3.x);
+    x_m = fmax(x_m,f4.x);
+    x_m = fmax(x_m,b1.x);
+    x_m = fmax(x_m,b2.x);
+    x_m = fmax(x_m,b3.x);
+    x_m = fmax(x_m,b4.x);
+
+    float x_mi;
+    x_mi = fmin(f1.x,f2.x);
+    x_mi = fmin(x_mi,f3.x);
+    x_mi = fmin(x_mi,f4.x);
+    x_mi = fmin(x_mi,b1.x);
+    x_mi = fmin(x_mi,b2.x);
+    x_mi = fmin(x_mi,b3.x);
+    x_mi = fmin(x_mi,b4.x);
+
+    float y_m;
+    y_m = fmax(f1.y,f2.y);
+    y_m = fmax(y_m,f3.y);
+    y_m = fmax(y_m,f4.y);
+    y_m = fmax(y_m,b1.y);
+    y_m = fmax(y_m,b2.y);
+    y_m = fmax(y_m,b3.y);
+    y_m = fmax(y_m,b4.y);
+
+    float y_mi;
+    y_mi = fmin(f1.y,f2.y);
+    y_mi = fmin(y_mi,f3.y);
+    y_mi = fmin(y_mi,f4.y);
+    y_mi = fmin(y_mi,b1.y);
+    y_mi = fmin(y_mi,b2.y);
+    y_mi = fmin(y_mi,b3.y);
+    y_mi = fmin(y_mi,b4.y);
+
+    float z_m;
+    z_m = fmax(f1.z,f2.z);
+    z_m = fmax(z_m,f3.z);
+    z_m = fmax(z_m,f4.z);
+    z_m = fmax(z_m,b1.z);
+    z_m = fmax(z_m,b2.z);
+    z_m = fmax(z_m,b3.z);
+    z_m = fmax(z_m,b4.z);
+
+    float z_mi;
+    z_mi = fmin(f1.z,f2.z);
+    z_mi = fmin(z_mi,f3.z);
+    z_mi = fmin(z_mi,f4.z);
+    z_mi = fmin(z_mi,b1.z);
+    z_mi = fmin(z_mi,b2.z);
+    z_mi = fmin(z_mi,b3.z);
+    z_mi = fmin(z_mi,b4.z);
+
+
+
+    AABB a;
+    a.p1 = Point(x_mi,y_mi,z_mi);
+    a.p2 = Point(x_m,y_m,z_m);
+
+    return a;
 }
 int DebugUI::InitDebugCommands()
 {
@@ -170,7 +254,7 @@ int DebugUI::InitDebugCommands()
         const std::vector < std::string >& args = *arg_list;
         SVec4 vect(args[1]);
         sc->r_prog->SetUniform("main_light_dir", vect);
-        sc->d_debugDrawMgr.AddCross({vect.x,vect.y,vect.z},20);
+        sc->d_prim_light_dir = vect;
 
     }));
 
@@ -186,10 +270,17 @@ int DebugUI::InitDebugCommands()
         sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam1.getViewProjectMatrix());
         sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam2.getViewProjectMatrix());
         sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam3.getViewProjectMatrix());
+
         sc->d_debugDrawMgr.Update();
 
     }));
 
+    d_console_cmd_handler->AddCommand("vis_camaabb", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        sc->d_debugDrawMgr.AddAABB(FrustrumSize2(sc->cam.getViewProjectMatrix()));
+        sc->d_debugDrawMgr.Update();
+
+    }));
 
 
     d_console_cmd_handler->AddCommand("rec", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -268,6 +359,124 @@ int DebugUI::downViewItem() {
         d_v_sel_current++;
     UpdateViewSelLabel();
     return 0;
+}
+
+int DebugUI::DrawGUI()
+{
+    /*imgui new debug interface */
+    bool test;
+    static bool config_wnd = true;
+    ImGui::Begin("MProject config",&config_wnd, ImGuiWindowFlags_AlwaysAutoResize);
+    /*Graphics flags*/
+    static bool cfg_brightpass = false;
+    static bool cfg_msaa = true;
+    if (ImGui::Checkbox("Brightpass", &cfg_brightpass)) {
+        sc->toggleBrightPass(cfg_brightpass);
+    }
+    ImGui::SameLine(150);
+    if (ImGui::Checkbox("MSAA", &cfg_msaa)) {
+        sc->toggleMSAA(cfg_msaa);
+    }
+
+    /*Base post-processing configuration*/
+    static float tmc_A =  0.22;
+    static float tmc_B = 0.30f;
+    static float tmc_C = 0.10f;
+    static float tmc_D = 0.20f;
+    static float tmc_E = 0.01f;
+    static float tmc_F = 0.3f;
+    static float tmc_LW = 1.2f;
+    if (ImGui::CollapsingHeader("Tonemapping"))
+    {
+        ImGui::Text("Tonemapping curve");
+        if (ImGui::SliderFloat("A", &tmc_A, 0.0f, 1.0f)) {
+            sc->pp_prog_hdr_tonemap->SetUniform("A",tmc_A);
+        }
+        if (ImGui::SliderFloat("B", &tmc_B, 0.0f, 1.0f)) {
+            sc->pp_prog_hdr_tonemap->SetUniform("B",tmc_B);
+        }
+        if (ImGui::SliderFloat("C", &tmc_C, 0.0f, 1.0f)) {
+            sc->pp_prog_hdr_tonemap->SetUniform("C",tmc_C);
+        }
+        if (ImGui::SliderFloat("D", &tmc_D, 0.0f, 1.0f)) {
+            sc->pp_prog_hdr_tonemap->SetUniform("D",tmc_D);
+        }
+        if (ImGui::SliderFloat("E", &tmc_E, 0.0f, 1.0f)) {
+            sc->pp_prog_hdr_tonemap->SetUniform("E",tmc_E);
+        }
+        if (ImGui::SliderFloat("F", &tmc_F, 0.0f, 1.0f)) {
+            sc->pp_prog_hdr_tonemap->SetUniform("F",tmc_F);
+        }
+        if (ImGui::SliderFloat("LW", &tmc_LW, 0.0f, 3.0f)) {
+            sc->pp_prog_hdr_tonemap->SetUniform("LW",tmc_LW);
+        }
+
+        if (ImGui::Button("Reset"))
+            {
+                tmc_A = 0.22;
+                tmc_B = 0.30;
+                tmc_C = 0.10;
+                tmc_D = 0.20;
+                tmc_E = 0.01;
+                tmc_F = 0.30;
+                tmc_LW = 1.2;
+                sc->pp_prog_hdr_tonemap->SetUniform("A",tmc_A);
+                sc->pp_prog_hdr_tonemap->SetUniform("B",tmc_B);
+                sc->pp_prog_hdr_tonemap->SetUniform("C",tmc_C);
+                sc->pp_prog_hdr_tonemap->SetUniform("D",tmc_D);
+                sc->pp_prog_hdr_tonemap->SetUniform("E",tmc_E);
+                sc->pp_prog_hdr_tonemap->SetUniform("F",tmc_F);
+                sc->pp_prog_hdr_tonemap->SetUniform("LW",tmc_LW);
+            }
+
+    }
+    static float ssao_Size = 0.3;
+    static float ssaoLevelClamp = 0.21;
+    static float ssaoblurSize = 0.021;
+    if (ImGui::CollapsingHeader("SSAO")) {
+        if (ImGui::SliderFloat("ssaoSize", &ssao_Size, 0.0f, 2.0f)) {
+            sc->pp_stage_ssao->getShader()->SetUniform("ssaoSize",ssao_Size);
+        }
+        if (ImGui::SliderFloat("ssaoLevelClamp", &ssaoLevelClamp, 0.0f, 1.0f)) {
+            sc->pp_stage_ssao->getShader()->SetUniform("ssaoLevelClamp",ssaoLevelClamp);
+        }
+        if (ImGui::SliderFloat("blurSize", &ssaoblurSize, 0.0f, 0.2f)) {
+            sc->pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",ssaoblurSize);
+            sc->pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",ssaoblurSize);
+        }
+        if (ImGui::Button("Reset"))
+        {
+            ssao_Size = 0.3;
+            ssaoLevelClamp = 0.21;
+            ssaoblurSize = 0.021;
+            sc->pp_stage_ssao->getShader()->SetUniform("ssaoSize",ssao_Size);
+            sc->pp_stage_ssao->getShader()->SetUniform("ssaoLevelClamp",ssaoLevelClamp);
+
+            sc->pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",ssaoblurSize);
+            sc->pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",ssaoblurSize);
+         }
+
+    }
+    static float bloomClamp = 0.75;
+    static float bloomMul = 2.0;
+    if (ImGui::CollapsingHeader("Bloom")) {
+        if (ImGui::SliderFloat("hdrBloomClamp", &bloomClamp, 0.0f, 1.2f)) {
+            sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomClamp",bloomClamp);
+        }
+        if (ImGui::SliderFloat("hdrBloomMul", &bloomMul, 0.0f, 5.0f)) {
+            sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",bloomMul);
+        }
+        if (ImGui::Button("Reset"))
+        {
+            bloomClamp = 0.75;
+            bloomMul = 2.0;
+            sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomClamp",bloomClamp);
+            sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",bloomMul);
+         }
+    }
+    ImGui::End();
+
+
 }
 
 

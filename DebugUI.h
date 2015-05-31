@@ -13,6 +13,7 @@ public:
     DebugUI(SScene *_s, RBO* _v);
     int Draw();
     int InitDebugCommands();
+
     bool d_toggle_fps_view = true;
     bool d_toggle_cfg_view = true;
 
@@ -30,6 +31,8 @@ public:
     int upViewItem();
     int downViewItem();
 
+    /* imGUI integration code*/
+    int DrawGUI();
 
     enum {
         V_NORMAL,

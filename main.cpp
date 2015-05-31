@@ -28,9 +28,6 @@ Global TODOs:
 
 #include <imgui.h>
 /*imGUI data*/
-static double       g_Time = 0.0f;
-static bool         g_MousePressed[3] = { false, false, false };
-static float        g_MouseWheel = 0.0f;
 static GLuint       g_FontTexture = 0;
 static int          g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
 static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
@@ -267,15 +264,9 @@ void display ()
     ImGuiIO& io = ImGui::GetIO();
     io.DeltaTime = dt_seconds;
     ImGui::NewFrame();
-    //ImGui::Begin("My window");
-    ImGui::Text("Hello, world!");
-    ImGui::Text("Hello, world!");
-    ImGui::Text("Hello, world!");
-     static float f = 0.0f;
-     ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-     ImGui::SetNextWindowSize(ImVec2(200,100), ImGuiSetCond_FirstUseEver);
-     ///ImGui::End();
 
+     ///ImGui::End();
+    sc->dbg_ui.DrawGUI();
     ImGui::Render();
 
 
@@ -369,7 +360,9 @@ void mouse_move (  int x , int y) {
 
     /*imgui hook*/
     io.MousePos = ImVec2((float)x, (float)y);
-
+    /*don't interact in case we are in window*/
+    if (ImGui::IsMouseHoveringAnyWindow())
+        return;
 
     static int x_base = -10000 ;
     static int y_base = -10000 ;
@@ -413,8 +406,16 @@ void mouse(int button, int state, int x, int y)  {
      io.MouseDown[0] = (state == GLUT_DOWN); // don't know why it's inversed but thats works
     else if (button == GLUT_MIDDLE_BUTTON)
      io.MouseDown[1] = (state == GLUT_DOWN);
-    else if (button == GLUT_RIGHT_BUTTON)
-     io.MouseDown[2] = (state == GLUT_DOWN);
+    // Wheel reports as button 3(scroll up) and button 4(scroll down)
+     else if ((button == 3))
+     {
+         if (state == GLUT_UP) return;
+         io.MouseWheel += 0.5;
+     }else if (button == 4){
+         if (state == GLUT_UP) return;
+         io.MouseWheel -= 0.5;
+     }
+
 }
 int ToggleFullscreen() {
     static bool d_toggle_fullscreen  = false;
