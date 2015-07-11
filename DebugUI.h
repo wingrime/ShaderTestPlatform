@@ -25,10 +25,6 @@ public:
     int UpdateCfgLabel();
     int UpdateViewSelLabel();
     inline int Init() { UpdateViewSelLabel();InitDebugCommands();}
-    int upCfgItem();
-    int downCfgItem();
-    int incCfgItem();
-    int decCfgItem();
     int upViewItem();
     int downViewItem();
 
@@ -58,14 +54,7 @@ public:
     const inline std::string V_I(int n);
 
     std::shared_ptr<UILabel> fps_label;
-    std::shared_ptr<UILabel> cfg_label;
     std::shared_ptr<UILabel> v_sel_label;
-
-    int d_cfg_current = 0;
-    int d_cfg_max = 14;
-    /*default parameter set*/
-
-    float d_cfg_step = 0.001;
 
     SScene *sc;
 

@@ -11,7 +11,6 @@ DebugUI::DebugUI(SScene *_s, RectSizeInt &_v)
     ,err_con(new UIConsoleErrorHandler(con))
     ,d_console_cmd_handler(new ConsoleCommandHandler())
     ,fps_label(new UILabel(v,0.85,0.1))
-    ,cfg_label(new UILabel(v,0.0, 0.6))
     ,v_sel_label(new UILabel(v,0.75, 0.6))
     ,sc(_s)
 {
@@ -25,7 +24,6 @@ int DebugUI::Draw()
     if (d_toggle_fps_view)
         fps_label->Draw();
     if (d_toggle_cfg_view) {
-        cfg_label->Draw();
         v_sel_label->Draw();
     }
     con->Draw();
@@ -243,21 +241,7 @@ int DebugUI::InitDebugCommands()
 
 }
 
-int DebugUI::upCfgItem() {
-    if (d_cfg_current > 0)
-        d_cfg_current --;
-    return 0;
-}
-int DebugUI::downCfgItem() {
-    if (d_cfg_current < d_cfg_max )
-        d_cfg_current++;
-    return 0;
-}
-const inline std::string DebugUI::C_I(int n) {
-    const std::string s("[>]");
-    const std::string ns("[ ]");
-    return (n==d_cfg_current?s:ns);
-}
+
 const inline std::string DebugUI::V_I(int n) {
 
     const std::string s("[+]");
