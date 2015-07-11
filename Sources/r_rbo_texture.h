@@ -9,6 +9,7 @@
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
 
+#include "mat_math.h"
 
 class SRBOTexture {
 public:
@@ -36,10 +37,10 @@ public:
         RTINT_LINERAL
     };
     /* simple empty texture */
-    SRBOTexture(int _x, int _y)
-    :SRBOTexture(_x,_y,RT_TEXTURE_FLOAT) {}
-    SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel);
-    SRBOTexture(int _x, int _y, RTType t) :SRBOTexture(_x,_y,t,1) {}
+    SRBOTexture(RectSizeInt s)
+    :SRBOTexture(s,RT_TEXTURE_FLOAT) {}
+    SRBOTexture(RectSizeInt s, RTType t, unsigned int miplevel);
+    SRBOTexture(RectSizeInt s, RTType t) :SRBOTexture(s,t,1) {}
     SRBOTexture(const SRBOTexture&) = delete;
      ~SRBOTexture();
 
@@ -48,7 +49,7 @@ public:
 
     int setInterpolationMode(InterpolationType t);
     unsigned int getGLId() const;
-    int x,y;
+    RectSizeInt d_s;
 
     bool IsReady = false;
     RTType type;
@@ -57,7 +58,7 @@ public:
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(IsReady),CEREAL_NVP(type));
+        ar(CEREAL_NVP(d_s.w),CEREAL_NVP(d_s.h),CEREAL_NVP(IsReady),CEREAL_NVP(type));
     }
     bool IsMSAA();
 

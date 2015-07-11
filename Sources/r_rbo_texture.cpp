@@ -150,8 +150,8 @@ int SRBOTexture::ConfigureTexture(const BorderType t) const {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     return 0;
 }
-SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
-    :type(t) , x(_x) ,y (_y)
+SRBOTexture::SRBOTexture(RectSizeInt s, RTType t, unsigned int miplevel)
+    :type(t) , d_s(s)
  {
     glGenTextures(1, &tex);
     if (t  ==  RT_TEXTURE_DEPTH ||
@@ -160,7 +160,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
         t == RT_TEXTURE_RED  ||
         t == RT_TEXTURE_FLOAT_RED) {
         glBindTexture(GL_TEXTURE_2D,tex);
-        glTexStorage2D(GL_TEXTURE_2D, miplevel, SRBOTexture::getRelatedGLType(t), x, y);
+        glTexStorage2D(GL_TEXTURE_2D, miplevel, SRBOTexture::getRelatedGLType(t), s.w, s.h);
         ConfigureTexture(TEX_CLAMP);
         /* enable comparea mode for glsl sampler2Shadow*/
         //if (t == RT_TEXTURE_DEPTH) {
@@ -171,7 +171,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
         d_isMSAA  = false;
     } else if (t == RT_TEXTURE_MSAA || t  ==  RT_TEXTURE_DEPTH_MSAA) {
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,tex);
-        glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, SRBOTexture::getRelatedGLType(t), x, y,true);
+        glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, SRBOTexture::getRelatedGLType(t), s.w, s.h,true);
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
         d_isMSAA  = true;
     }else if (t == RT_TEXTURE_CUBEMAP ) {
@@ -184,7 +184,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         for (unsigned int face = 0; face < 6; face++) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, SRBOTexture::getRelatedGLType(t),
-                x, y, 0, GL_RGBA, GL_FLOAT, NULL);
+                s.w, s.h, 0, GL_RGBA, GL_FLOAT, NULL);
         }
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
@@ -198,7 +198,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         for (unsigned int face = 0; face < 6; face++) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, SRBOTexture::getRelatedGLType(t),
-                x, y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+               s.w, s.h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         }
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
 
@@ -215,7 +215,7 @@ SRBOTexture::SRBOTexture(int _x, int _y, RTType t, unsigned int miplevel)
         //glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
 
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, SRBOTexture::getRelatedGLType(t), x, y, 4);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, SRBOTexture::getRelatedGLType(t), s.w, s.h, 4);
         //glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32,x,y, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 

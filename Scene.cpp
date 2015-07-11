@@ -46,7 +46,7 @@ SScene::SScene(RectSizeInt v)
     ,rtVolumetric(new RBO(std::string("rtVolumetric"),v.w,v.h, RBO::RBO_RGBA))
     ,w_sky(new SWeatherSky())
     ,rtCubemap(new RBO(std::string("rtCubemap"),512, 512, RBO::RBO_CUBEMAP))
-   ,rtConvoledCubemap(new SRBOTexture(10,4,SRBOTexture::RT_TEXTURE_FLOAT_RED))
+   ,rtConvoledCubemap(new SRBOTexture(RectSizeInt(10,4),SRBOTexture::RT_TEXTURE_FLOAT_RED))
     ,rtHDRLogLum(new RBO(std::string("rtHDRLogLum"),16,16,RBO::RBO_FLOAT)) /*Downsampled source for lumeneace*/
     ,rtHDRLumKey(new RBO(std::string("rtHDRLumKey"),1,1,RBO::RBO_FLOAT)) /*Lum key out*/
     ,dbg_ui(this,v)

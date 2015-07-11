@@ -212,11 +212,11 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
     }
 
     if (d_texIMG == nullptr) {
-            d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(d_type),mip ));
+            d_texIMG.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(d_type),mip ));
 
     }
     if (d_texDEPTH == nullptr) {
-            d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type),mip ));
+            d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type),mip ));
     }
 
     d_isMSAA = d_texIMG->IsMSAA() ;
@@ -249,9 +249,9 @@ RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
         MASSERT( d_w % 2 != 0); /*should be power of two*/
     }
     if (!isDepthOnlyType(type)) {
-        d_texIMG.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
+        d_texIMG.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
     }
-    d_texDEPTH.reset(new SRBOTexture(d_w,d_h,RBO::getRelatedDepthRBOTextueTypeFromRBOType(type),mip));
+    d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(type),mip));
     if (!isDepthOnlyType(type)) {
         d_isMSAA = d_texIMG->IsMSAA() ;
     }
@@ -284,18 +284,18 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
         mip = 2;
 
     if (!isDepthOnlyType(type))
-        d_texIMG.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s,t0_type,mip));
+        d_texIMG.reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s),t0_type,mip));
     /*depth*/
-    d_texDEPTH.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s, SRBOTexture::getRelatedDepthType(t0_type) ,mip));
+    d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s), SRBOTexture::getRelatedDepthType(t0_type) ,mip));
 
 
     if (t1_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t1_s <= 0);
-        d_texIMG1.reset(new SRBOTexture(d_w/t1_s,d_h/t1_s,t1_type,mip));
+        d_texIMG1.reset(new SRBOTexture(RectSizeInt(d_w/t1_s,d_h/t1_s),t1_type,mip));
     }
     if (t2_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t2_s <= 0);
-        d_texIMG2.reset(new SRBOTexture(d_w/t2_s,d_h/t2_s,t2_type,mip));
+        d_texIMG2.reset(new SRBOTexture(RectSizeInt(d_w/t2_s,d_h/t2_s),t2_type,mip));
     }
     if (!isDepthOnlyType(type))
         d_isMSAA = d_texIMG->IsMSAA() ; /*TODO: make external*/
