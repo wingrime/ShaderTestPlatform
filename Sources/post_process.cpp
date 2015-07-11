@@ -42,13 +42,13 @@ SPostProcess::SPostProcess(SShader *prog,  std::shared_ptr<RBO> resultRBO,
 
     SVec2 sz = resultRBO->getSize();
 
-    d_texSRC1 = srcRBO1->texIMG();
+    d_texSRC1 = srcRBO1->texIMG(0);
     if (srcRBO2)
-        d_texSRC2 = srcRBO2->texIMG();
+        d_texSRC2 = srcRBO2->texIMG(0);
     if (srcRBO3)
-        d_texSRC3 = srcRBO3->texIMG();
+        d_texSRC3 = srcRBO3->texIMG(0);
     if (srcRBO4)
-        d_texSRC4 = srcRBO4->texIMG();
+        d_texSRC4 = srcRBO4->texIMG(0);
 
     InitQuard();
     p_prog->SetUniform("vp",SVec4(sz.w,sz.h,0,0));

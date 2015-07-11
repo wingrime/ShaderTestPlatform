@@ -57,9 +57,7 @@ public:
 
 
 
-    std::shared_ptr<SRBOTexture> texIMG(); /*color attachment 0*/
-    std::shared_ptr<SRBOTexture> texIMG1(); /*color attachment 1*/
-    std::shared_ptr<SRBOTexture> texIMG2(); /*color attachment 2*/
+    std::shared_ptr<SRBOTexture> texIMG(int n); /*color attachment 0*/
     std::shared_ptr<SRBOTexture> texDEPTH();
 
     /*Request size*/
@@ -80,9 +78,8 @@ private:
 
     int d_buffers = 0;
 
-    std::shared_ptr<SRBOTexture> d_texIMG; /*color attachment 0*/
-    std::shared_ptr<SRBOTexture> d_texIMG1; /*color attachment 1*/
-    std::shared_ptr<SRBOTexture> d_texIMG2; /*color attachment 2*/
+    std::shared_ptr<SRBOTexture> d_texIMG[3]; /*color attachments*/
+
     std::shared_ptr<SRBOTexture> d_texDEPTH;
 
     RBOType d_type;

@@ -21,20 +21,14 @@ std::string RBO::getName()
     return d_name;
 }
 
-std::shared_ptr<SRBOTexture> RBO::texIMG()
+std::shared_ptr<SRBOTexture> RBO::texIMG(int n)
 {
-    return d_texIMG;
+    if (n <0 || n > 3)
+        return 0;
+    else
+        return d_texIMG[n];
 }
 
-std::shared_ptr<SRBOTexture> RBO::texIMG1()
-{
-    return d_texIMG1;
-}
-
-std::shared_ptr<SRBOTexture> RBO::texIMG2()
-{
-    return d_texIMG2;
-}
 
 std::shared_ptr<SRBOTexture> RBO::texDEPTH()
 {
@@ -75,16 +69,16 @@ int RBO::attachRBOTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, d_fbo);
     /* attach */
     glFramebufferTexture(GL_FRAMEBUFFER,    GL_DEPTH_ATTACHMENT,   d_texDEPTH->getGLId(), 0);
-    if (d_texIMG != nullptr) {
-        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0,  d_texIMG->getGLId(), 0);
+    if (d_texIMG[0] != nullptr) {
+        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0,  d_texIMG[0]->getGLId(), 0);
     }
-    if (d_texIMG1 != nullptr) {
-        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT1,   d_texIMG1->getGLId(), 0);
+    if (d_texIMG[1] != nullptr) {
+        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT1,   d_texIMG[1]->getGLId(), 0);
         buffers++;
     }
 
-    if (d_texIMG2 != nullptr) {
-        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,    d_texIMG2->getGLId(), 0);
+    if (d_texIMG[2] != nullptr) {
+        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,    d_texIMG[2]->getGLId(), 0);
         buffers++;
     }
     int rcode = glCheckFramebufferStatus(GL_FRAMEBUFFER) ;
@@ -199,8 +193,11 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
         std::shared_ptr<SRBOTexture> _texIMG1,
         std::shared_ptr<SRBOTexture> _texIMG2,
         std::shared_ptr<SRBOTexture> _texDEPTH)
-:d_name(name),d_w(w),d_h(h), d_type(_type) ,d_texIMG(_texIMG),d_texIMG1(_texIMG1),d_texIMG2(_texIMG2),d_texDEPTH(_texDEPTH)
+:d_name(name),d_w(w),d_h(h), d_type(_type) ,d_texDEPTH(_texDEPTH)
  {
+    d_texIMG[0] = _texIMG;
+    d_texIMG[1] = _texIMG1;
+    d_texIMG[2] = _texIMG2;
     unsigned int mip = 1;
 
     if (d_w > 128, d_h > 128 )
@@ -211,15 +208,15 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
         return;
     }
 
-    if (d_texIMG == nullptr) {
-            d_texIMG.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(d_type),mip ));
+    if (d_texIMG[0] == nullptr) {
+            d_texIMG[0].reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(d_type),mip ));
 
     }
     if (d_texDEPTH == nullptr) {
             d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type),mip ));
     }
 
-    d_isMSAA = d_texIMG->IsMSAA() ;
+    d_isMSAA = d_texIMG[0]->IsMSAA() ;
 
 
     if (attachRBOTextures() == ESUCCESS)
@@ -227,12 +224,8 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
 }
 /*single buffer*/
 RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
-    :d_name(name)
+    :d_name(name),d_w(def_w),d_h(def_h),d_type(type)
 {
-
-    d_w = def_w;
-    d_h = def_h;
-    d_type = type;
     debugRegisterSelf();
     /*automatic mip level detection TODO*/
     unsigned int mip = 1;
@@ -249,11 +242,11 @@ RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
         MASSERT( d_w % 2 != 0); /*should be power of two*/
     }
     if (!isDepthOnlyType(type)) {
-        d_texIMG.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
+        d_texIMG[0].reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
     }
     d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(type),mip));
     if (!isDepthOnlyType(type)) {
-        d_isMSAA = d_texIMG->IsMSAA() ;
+        d_isMSAA = d_texIMG[0]->IsMSAA() ;
     }
     else
         d_isMSAA= false;
@@ -267,11 +260,8 @@ RBO::~RBO()
 }
 /* new constructor*/
 RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, int t0_s, SRBOTexture::RTType t1_type, int t1_s, SRBOTexture::RTType t2_type, int t2_s)
-        :d_name(name)
+        :d_name(name),d_w(def_w),d_h(def_h),d_type(type)
 {
-    d_w = def_w;
-    d_h = def_h;
-    d_type = type;
     MASSERT(t0_type == SRBOTexture::RTType::RT_NONE);
     MASSERT(SRBOTexture::isDepthType(t0_type));
     MASSERT(SRBOTexture::isDepthType(t1_type));
@@ -284,21 +274,21 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
         mip = 2;
 
     if (!isDepthOnlyType(type))
-        d_texIMG.reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s),t0_type,mip));
+        d_texIMG[0].reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s),t0_type,mip));
     /*depth*/
     d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s), SRBOTexture::getRelatedDepthType(t0_type) ,mip));
 
 
     if (t1_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t1_s <= 0);
-        d_texIMG1.reset(new SRBOTexture(RectSizeInt(d_w/t1_s,d_h/t1_s),t1_type,mip));
+        d_texIMG[1].reset(new SRBOTexture(RectSizeInt(d_w/t1_s,d_h/t1_s),t1_type,mip));
     }
     if (t2_type != SRBOTexture::RTType::RT_NONE) {
         MASSERT(t2_s <= 0);
-        d_texIMG2.reset(new SRBOTexture(RectSizeInt(d_w/t2_s,d_h/t2_s),t2_type,mip));
+        d_texIMG[2].reset(new SRBOTexture(RectSizeInt(d_w/t2_s,d_h/t2_s),t2_type,mip));
     }
     if (!isDepthOnlyType(type))
-        d_isMSAA = d_texIMG->IsMSAA() ; /*TODO: make external*/
+        d_isMSAA = d_texIMG[0]->IsMSAA() ; /*TODO: make external*/
     else
         d_isMSAA = false;
 

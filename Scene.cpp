@@ -64,7 +64,7 @@ SScene::SScene(RectSizeInt v)
 
     pp_stage_ssao.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
                                                   "PostProcessing/SSAO/SimpleSSAO.frag") \
-                                      ,w/2,h/2,rtPrepass->texIMG(),rtPrepass->texDEPTH()));
+                                      ,w/2,h/2,rtPrepass->texIMG(0),rtPrepass->texDEPTH()));
 
     pp_stage_ssao_blur_hor.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
                                                           "PostProcessing/Bloor/GaussHorizontal.frag"),\
@@ -96,7 +96,7 @@ SScene::SScene(RectSizeInt v)
     /* img depth | shadow depth | shadow world pos*/
     pp_stage_volumetric.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", \
                                                         "PostProcessing/Volumetric/Test.frag") \
-                                            ,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG2()));
+                                            ,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(2)));
 
     /*main prog*/
     main_pass_shader.reset(new SShader("Main/Main.vert","Main/Main.frag"));
@@ -475,7 +475,7 @@ int SScene::RenderCubemap()
     SCProg cs("Cubemap/cubemap_convolve.comp");
     cs.Barrier();
     cs.Use();
-    rtCubemap->texIMG()->Bind(1);
+    rtCubemap->texIMG(0)->Bind(1);
     cs.SetUniform("srcCube",1);
     cs.Use();
     rtConvoledCubemap->BindImage(2);
@@ -531,14 +531,14 @@ int inline SScene::RenderDirect(const RBO& v) {
     }
     else
     {
-        RenderContext r_ctx(&v, main_pass_shader.get() ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtCubemap->texIMG(), rtShadowMap->texIMG());
+        RenderContext r_ctx(&v, main_pass_shader.get() ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1), rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
         r_ctx.sh_bands = rtConvoledCubemap;
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
         //TODO: Move to weathersky
         SCamera s(cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix());
-        RenderContext r_ctx2(&v, w_sky->GetSkyShader() ,&s,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
+        RenderContext r_ctx2(&v, w_sky->GetSkyShader() ,&s,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1) ,rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
         w_sky->GetSkyModel()->Render(r_ctx2);
     }
 
@@ -605,7 +605,7 @@ int SScene::Render() {
         /*normaly do tonemap and, if debug enabled set required buffer*/
         if (debugRenderOutputFlag) {
             rtSCREEN->Bind(true);
-            postProcessDebugOutput->setTexSrc1(debugFinalRenderOutput->texIMG());
+            postProcessDebugOutput->setTexSrc1(debugFinalRenderOutput->texIMG(0));
             postProcessDebugOutput->Draw();
             }
         else
