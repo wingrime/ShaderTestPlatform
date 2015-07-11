@@ -32,7 +32,7 @@ int SCamera::rotEuler(const SVec4& v)
 
 int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
 {
-    view = SMat4x4::LookAt(at,eye,up);
+    view = LookAt(at,eye,up);
     return 0;
 }
 
@@ -68,8 +68,6 @@ int SCamera::goForward(float s) {
     zPos += view.a33*s2;
     buildViewMatrix();
 
-   
-    //view.Reflect();
     return 0;
 }
 

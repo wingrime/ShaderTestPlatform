@@ -16,9 +16,6 @@ DebugDraw::DebugDraw()
      glBindVertexArray ( 0 );
      d_last_update_vbo_size = -1;
 
-
-
-
 }
 
 
@@ -128,4 +125,32 @@ int DebugDraw::AddCameraFrustrum(const SMat4x4 &PV)
     AddLine(Point(f3),Point(b3));
     AddLine(Point(f4),Point(b4));
 
+}
+
+int DebugDraw::AddAABB(const AABB &a)
+{
+
+    Point min_p = a.min_point;
+    Point max_p = a.max_point;
+
+
+    AddLine(a.max_point,Point(a.max_point.x,a.min_point.y,a.max_point.z));
+    AddLine(a.max_point,Point(a.max_point.x,a.max_point.y,a.min_point.z));
+    AddLine(a.max_point,Point(a.min_point.x,a.max_point.y,a.max_point.z));
+
+
+    AddLine(a.min_point,Point(a.max_point.x,a.min_point.y,a.min_point.z));
+    AddLine(a.min_point,Point(a.min_point.x,a.max_point.y,a.min_point.z));
+    AddLine(a.min_point,Point(a.min_point.x,a.min_point.y,a.max_point.z));
+
+    AddLine(Point(a.max_point.x,a.min_point.y,a.min_point.z),Point(a.max_point.x,a.min_point.y,a.max_point.z));
+    AddLine(Point(a.max_point.x,a.min_point.y,a.max_point.z),Point(a.min_point.x,a.min_point.y,a.max_point.z));
+
+    AddLine(Point(a.min_point.x,a.max_point.y,a.max_point.z),Point(a.min_point.x,a.max_point.y,a.min_point.z));
+
+    AddLine(Point(a.min_point.x,a.max_point.y,a.min_point.z),Point(a.max_point.x,a.max_point.y,a.min_point.z));
+
+    AddLine(Point(a.min_point.x,a.max_point.y,a.max_point.z),Point(a.min_point.x,a.min_point.y,a.max_point.z));
+
+    AddLine(Point(a.max_point.x,a.min_point.y,a.min_point.z),Point(a.max_point.x,a.max_point.y,a.min_point.z));
 }

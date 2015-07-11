@@ -16,6 +16,11 @@ int RBO::Bind(bool clear) const {
     return ESUCCESS;
 }
 
+std::string RBO::getName()
+{
+    return d_name;
+}
+
 std::shared_ptr<SRBOTexture> RBO::texIMG()
 {
     return d_texIMG;
@@ -177,19 +182,30 @@ bool RBO::isDepthOnlyType(RBO::RBOType t)
 {
     return (t == RBO::RBO_DEPTH_ARRAY_ONLY || t == RBO::RBO_DEPTH_ONLY);
 }
+
+std::vector<std::shared_ptr<RBO> >  RBO::debugGetRenderOutputList()
+{
+    return RBO::debugRenderOutputList;
+}
+
+int RBO::debugRegisterSelf()
+{
+    RBO::debugRenderOutputList.push_back(std::shared_ptr<RBO>(this));
+    return 0;
+}
 /* Constructor from ptr's*/
-RBO::RBO(int _w, int _h,RBOType _type,
+RBO::RBO(std::string name, int w, int h, RBOType _type,
         std::shared_ptr<SRBOTexture> _texIMG,
         std::shared_ptr<SRBOTexture> _texIMG1,
         std::shared_ptr<SRBOTexture> _texIMG2,
         std::shared_ptr<SRBOTexture> _texDEPTH)
-:d_w(_w),d_h(_h), d_type(_type) ,d_texIMG(_texIMG),d_texIMG1(_texIMG1),d_texIMG2(_texIMG2),d_texDEPTH(_texDEPTH)
+:d_name(name),d_w(w),d_h(h), d_type(_type) ,d_texIMG(_texIMG),d_texIMG1(_texIMG1),d_texIMG2(_texIMG2),d_texDEPTH(_texDEPTH)
  {
     unsigned int mip = 1;
 
     if (d_w > 128, d_h > 128 )
         mip = 4;
-
+    debugRegisterSelf();
     if (d_type == RBO_SCREEN) {
         IsReady = true;
         return;
@@ -210,12 +226,14 @@ RBO::RBO(int _w, int _h,RBOType _type,
         IsReady = true;
 }
 /*single buffer*/
-RBO::RBO(int def_w, int def_h, RBO::RBOType type)
+RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
+    :d_name(name)
 {
 
     d_w = def_w;
     d_h = def_h;
     d_type = type;
+    debugRegisterSelf();
     /*automatic mip level detection TODO*/
     unsigned int mip = 1;
     if (d_w > 256, d_h > 256 )
@@ -248,20 +266,23 @@ RBO::~RBO()
     glDeleteFramebuffers(1,&d_fbo);
 }
 /* new constructor*/
-RBO::RBO(int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, int t0_s, SRBOTexture::RTType t1_type, int t1_s, SRBOTexture::RTType t2_type, int t2_s)
+RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, int t0_s, SRBOTexture::RTType t1_type, int t1_s, SRBOTexture::RTType t2_type, int t2_s)
+        :d_name(name)
 {
     d_w = def_w;
     d_h = def_h;
     d_type = type;
-    //TODO: add type check
-    unsigned int mip = 1;
-    if (d_w > 128, d_h > 128 )
-        mip = 2;
     MASSERT(t0_type == SRBOTexture::RTType::RT_NONE);
     MASSERT(SRBOTexture::isDepthType(t0_type));
     MASSERT(SRBOTexture::isDepthType(t1_type));
     MASSERT(SRBOTexture::isDepthType(t2_type));
     MASSERT(t0_s <= 0);
+    debugRegisterSelf();
+    //TODO: add type check
+    unsigned int mip = 1;
+    if (d_w > 128, d_h > 128 )
+        mip = 2;
+
     if (!isDepthOnlyType(type))
         d_texIMG.reset(new SRBOTexture(d_w/t0_s,d_h/t0_s,t0_type,mip));
     /*depth*/
@@ -330,3 +351,5 @@ int RBO::ResolveMSAA(const RBO &dst)
       }
       return 0;
 }
+/*shared list for debug */
+std::vector< std::shared_ptr <RBO> > RBO::debugRenderOutputList = std::vector< std::shared_ptr <RBO> >();

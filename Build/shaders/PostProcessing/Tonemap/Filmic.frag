@@ -17,7 +17,7 @@ uniform float C = 0.10;
 uniform float D = 0.20;
 uniform float E = 0.01;
 uniform float F = 0.30;
-uniform float LW = 11.2;
+uniform float LW = 1.2;
 vec3 filmic(vec3 x) {
   return ((x*(A*x+C*B)+D*E)/ (x*(A*x+B)+D*F))-E/F;
 }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <unordered_map>
 
 #include <GL/glew.h>
@@ -10,7 +11,7 @@
 #include <GL/wglew.h>
 
 
-class SProg;
+#include "r_shader.h"
 class SMat4x4;
 class SVec4;
 
@@ -50,12 +51,27 @@ public:
     int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type);
 
 
+    /*Request Information*/
+    inline std::string GetVertexShaderFileName() {return prog->GetVertexShaderFileName(); };
+    inline std::string GetFragmentShaderFileName() {return prog->GetFragmentShaderFileName(); };
+    inline std::string GetGeometryShaderFileName() {return prog->GetVertexShaderFileName(); };
+
     bool IsReady = false;
 
     inline SProg * getDirect() {return prog;}
+
+    static std::list<SShader *> getShaderSharedList();
+
+
+
+
 private:
+    /*Shared Information */
+static std::list<SShader *> s_d_shaders_enum;
+    int RegisterEnum();
     /* Link to low level interface*/
     SProg * prog;
+
 
     std::vector< std::pair<int, const SMat4x4> > d_matrix_update_list;
     std::vector< std::pair<int, int> >     d_int_update_list;

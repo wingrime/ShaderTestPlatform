@@ -394,8 +394,6 @@ void special(int key, int x, int y){
     else if (key == GLUT_KEY_LEFT) sc->dbg_ui.decCfgItem();
     else if (key == GLUT_KEY_RIGHT) sc->dbg_ui.incCfgItem();
    // FIXME else s_input->HandleInputKey(key); FIXME
-
-sc->dbg_ui.UpdateCfgLabel();
 }
 
 void mouse(int button, int state, int x, int y)  {
@@ -538,8 +536,8 @@ int main ( int argc, char * argv [] )
 
 
     LOGV("Create Scene");
-    RBO  v(w,h);
-    MainScene msc(&v);
+
+    MainScene msc(RectSize(h,w));
 
     imGuiSetup();
 
@@ -593,9 +591,9 @@ int main ( int argc, char * argv [] )
 
     /*load models*/
     sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sponza.obj")) );
-    sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sky_dome.obj")) );
+    //sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sky_dome.obj")) );
     /*remove me please*/
-    sc->d_render_list[1]->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
+    //sc->d_render_list[1]->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
 
     /* main loop */
     LOGV("Entering main loop");

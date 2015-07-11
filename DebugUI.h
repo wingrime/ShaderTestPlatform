@@ -1,16 +1,17 @@
 #pragma once
 #include "UILabel.h"
 #include "UIConsole.h"
+#include "mat_math.h"
 class SScene;
 class DebugUI {
 public:
 
-        RBO *v;
+        RectSize v;
         std::shared_ptr<ConsoleCommandHandler> d_console_cmd_handler;
         UIConsole *con;
 
 
-    DebugUI(SScene *_s, RBO* _v);
+    DebugUI(SScene *_s, RectSize &v);
     int Draw();
     int InitDebugCommands();
 
@@ -33,6 +34,7 @@ public:
 
     /* imGUI integration code*/
     int DrawGUI();
+    int DrawIntrospectionGUI(bool *opened);
 
     enum {
         V_NORMAL,

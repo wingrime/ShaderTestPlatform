@@ -85,9 +85,9 @@ class SMat4x4;
 SVec4 operator* (const SMat4x4& m, const SVec4& v);
 SVec4 operator-(const SVec4& v1,const SVec4& v2);
 SVec4 operator*(const SVec4& v1,float v2);
+SVec4 operator/(const SVec4& v1,float v2);
 
-
-
+class Point;
 class SMat4x4 {
 public:
     SMat4x4(float _a11, float _a12, float _a13, float _a14,
@@ -135,6 +135,7 @@ public:
     SMat4x4 operator-(const SMat4x4& i) const;
     // Move/Scale
     SMat4x4 Move(const float x,const float y,const float z) const;
+    SMat4x4 Move(const Point &p) const;
     SMat4x4 Translate(const SVec4& vec) const;
     //Not Rigid;
     SMat4x4 Scale(const float x,const float y,const float z) const;
@@ -159,7 +160,7 @@ public:
     //check
 
     static bool Eq(const SMat4x4& a,const SMat4x4& b);
-    static SMat4x4 LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up);
+
     
     virtual ~SMat4x4();
 
@@ -174,6 +175,7 @@ public:
     }
 
 };
+SMat4x4 LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up);
 class UnitQuaterion {
 public:
     UnitQuaterion();
@@ -219,6 +221,27 @@ public:
 };
 
 /*Raw GL primitives*/
+
+/* point in D2 */
+struct Point2d  {
+    Point2d(float _x,float _y) :x(_x),y(_y) {}
+    Point2d () :x(0.0),y(0.0) {}
+    float x,y;
+};
+/* rectangle size in D2*/
+struct RectSize  {
+    RectSize(float _h,float _w) :h(_h),w(_h) {}
+    RectSize () :h(0.0),w(0.0) {}
+    float h,w;
+};
+/* AABB in 2d */
+class BBox {
+public:
+    BBox() :min_point(),max_point() {}
+    BBox(Point2d min_p,Point2d max_p) :min_point(min_p),max_point(max_p) {}
+    Point2d min_point;
+    Point2d max_point;
+};
 struct Point  {
     Point(float _x,float _y,float _z) :x(_x),y(_y),z(_z) {}
     Point (SVec4 a) :x(a.x),y(a.y),z(a.z) {}
@@ -226,14 +249,19 @@ struct Point  {
     float x,y,z;
 };
 struct Line {
+    Line() :p1(),p2() {}
+    Line(Point _p1,Point _p2) :p1(_p1),p2(_p2) {}
     Point p1;
     Point p2;
 };
 class AABB {
 public:
-    AABB() :p1(),p2() {}
-    Point p1;
-    Point p2;
+    AABB() :min_point(),max_point() {}
+    AABB(Point min_p,Point max_p) :min_point(min_p),max_point(max_p) {}
+    Point Center();
+    /*data*/
+    Point min_point;
+    Point max_point;
 };
 class SVec2 {
 public:
@@ -266,4 +294,6 @@ public:
 /*free from operators*/
 SVec2 operator-(const SVec2& v1,const SVec2& v2);
 SVec2 operator+(const SVec2& v1,const SVec2& v2);
-
+Point operator-(const Point& v1,const Point& v2);
+Point operator-(const Point& v1);
+Point operator+(const Point& v1,const Point& v2);

@@ -21,11 +21,12 @@
 #include "MAssert.h"
 #include "RenderState.h"
 #include "DebugUI.h"
+#include "WeatherSky.h"
 
 class SScene {
 public:
     friend class DebugUI;
-    SScene(RBO *v);
+    SScene(RectSize v);
     ~SScene();
     int Render();
 
@@ -36,14 +37,10 @@ public:
     int AddObjectToRender(std::shared_ptr <SObjModel> obj);
 
 
-    std::shared_ptr<SObjModel> sky_dome_model;
+    std::shared_ptr<SWeatherSky> w_sky;
 
     SCamera cam;
-    SCamera sky_cam;
-    SCamera d_shadowmap_cam0;
-    SCamera d_shadowmap_cam1;
-    SCamera d_shadowmap_cam2;
-    SCamera d_shadowmap_cam3;
+    SCamera d_shadowmap_cam[4];
     std::shared_ptr<SPostProcess> pp_stage_ssao;
     std::shared_ptr<SPostProcess> pp_stage_ssao_blur_hor;
     std::shared_ptr<SPostProcess> pp_stage_ssao_blur_vert;
@@ -61,12 +58,13 @@ public:
     /*lumenance key*/
     std::shared_ptr<SPostProcess> pp_stage_hdr_lum_key;
     std::shared_ptr<SPostProcess> pp_stage_hdr_lum_log;
+    /*debug output*/
+    std::shared_ptr<SPostProcess> postProcessDebugOutput;
 
 
     std::shared_ptr<SPostProcess> pp_stage_volumetric;
     std::shared_ptr<RBO> rtSCREEN;
     std::shared_ptr<RBO> rtPrepass;
-
     std::shared_ptr<RBO> rtHDRScene;
     std::shared_ptr<RBO> rtHDRScene_MSAA;
     std::shared_ptr<RBO> rtSSAOHorBlurResult;
@@ -75,7 +73,6 @@ public:
     std::shared_ptr<RBO> rtHDRBloomResult;
     std::shared_ptr<RBO> rtHDRHorBlurResult;
     std::shared_ptr<RBO> rtHDRVertBlurResult;
-
     std::shared_ptr<RBO> rtHDRLogLum; /*Downsample input for total lum calculation*/
     std::shared_ptr<RBO> rtHDRLumKey; /* Out 1x1 texture with lum*/
 
@@ -104,13 +101,10 @@ private:
 
     /* prepass prog*/
     std::shared_ptr<SShader> prepass_prog;
-
     /* main prog*/
-    std::shared_ptr<SShader> r_prog;
+    std::shared_ptr<SShader> main_pass_shader;
     /*shadow prog*/
     std::shared_ptr<SShader> cam_prog;
-    /*Sky*/
-    std::shared_ptr<SShader> sky_dome_prog;
 
     std::shared_ptr<SShader> pp_prog_hdr_blur_kawase;
 
@@ -118,22 +112,19 @@ private:
 
     std::shared_ptr<SShader> cubemap_prog_generator;
 
-    /*main scene render*/
+    std::shared_ptr<SShader> shaderViewAsIs;
+
     int RenderDirect(const RBO& v);
-    /*render shadow map*/
     int RenderShadowMap(const RBO& v);
     int RenderCubemap();
-
     int RenderPrepass(const RBO& v);
-
+    int BlurKawase();
 
 private:
 
    RenderPass normal_pass;
    RenderPass msaa_pass;
    RenderPass ui_pass;
-
-
 
    bool d_toggle_fullscreen = false;
    bool d_toggle_MSAA = true;
@@ -146,9 +137,19 @@ private:
 
 public:
     DebugUI dbg_ui;
+    /* shadow map debug*/
+    AABB cameraFrustrumAABB[4];
+    AABB cameraTransformFrustrumAABB[4];
+
+    int debugSetFinalRenderOutput(std::shared_ptr<RBO> r);
+    int debugSetDebugRenderOutputFlag(bool flag);
+
+    std::shared_ptr<RBO> debugFinalRenderOutput;
+    bool debugRenderOutputFlag = false;
+
 
 };
 class MainScene :public Singltone<SScene>  ,public SScene{
 public:
-    MainScene(RBO *t) :SScene (t), Singltone(this){}
+    MainScene(RectSize t) :SScene (t), Singltone(this){}
 };

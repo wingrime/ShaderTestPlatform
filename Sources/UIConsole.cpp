@@ -6,7 +6,7 @@ int UIConsole::HandleExitConsole() {
     RebuildOut();
     return 0;
 }
-UIConsole::UIConsole(RBO *v, std::shared_ptr<AbstractCommandHandler> cmd_h)
+UIConsole::UIConsole(RectSize &v, std::shared_ptr<AbstractCommandHandler> cmd_h)
     :d_cmd_handler(cmd_h)
 {
 
@@ -19,8 +19,7 @@ UIConsole::~UIConsole()
     ft.Release(fnt);
 }
 void UIConsole::Draw() {
-    SVec2 sz = v_port->getSize();
-    fnt->RenderText(d_output_cache,0.0,0.05,    sz.x, sz.y);
+    fnt->RenderText(d_output_cache,0.0,0.05,    v_port.w, v_port.h);
 }
 int UIConsole::HandlePrevHistoryCommand() {
     if ( !console_history.empty() ) 

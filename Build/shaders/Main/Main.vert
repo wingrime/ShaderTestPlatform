@@ -5,81 +5,40 @@ uniform mat4 view;
 
 uniform mat4 MVP;
 uniform mat4 MV;
-//uniform mat4 shadowMVPB;
-
-uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,0.0);
+uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,1.0);
 
 uniform mat4 sm_projection_mat;
 uniform mat4 sm_view_mat;
 
-
+/*input vertex format*/
 in vec3 normal;
 in vec3 position;
 in vec2 UV;
 
-flat out vec3 lightPos;
-out vec3 vPos;
-out vec2 uv;
+/*Camera Space position*/
+out vec3 PositionCS;
+/*Model Space texture coordinates*/
+out vec2 UvMS;
 
-out vec3 o_normal;
-out vec3 o_pos_v;
-out vec3 t_normal;
-//out vec3 t_tangent;
-//out vec3 t_binormal;
-
-flat out mat4 sm_proj;
-flat out mat4 sm_view;
-flat out mat4 o_view;
-flat out mat4 o_proj;
-flat out vec4 o_light;
-//flat out mat4 sm_mat;
-
-//out vec4 sm_pos;
+out vec3 NormalMS;
+out vec3 PositionMS;
+out vec3 NormalCS;
+flat out vec3 LightCS;
 
 
-out mat4 MV_n;
-/*TODO: offline */
 void main(void)
 {
-o_pos_v =  position;
-sm_proj = sm_projection_mat;
-sm_view = sm_view_mat;
+    /*perform lerp for vertex position*/
+    PositionMS =  position;
+    /*perform lerp for vertex normal*/
+    NormalMS = normal;
+    /*perform lerp for vertex normal*/
+    /*fixup UV coordinates ?*/
+    UvMS = vec2(1.0,-1.0)*UV;
 
-//const mat4 bias = (mat4(0.5 , 0.0 , 0.0, 0.0 ,
-//					  0.0 , 0.5 , 0.0, 0.0 ,
-//					  0.0 , 0.0 , 0.5, 0.0 ,
-//					  0.5 , 0.5 , 0.5, 1.0 ));
-//
-// back to fragment shader due
-//sm_mat = bias*sm_proj*sm_view;
-//sm_map = shadowMVPB;
-//sm_pos = sm_mat*vec4(o_pos_v ,1.0);
-//sm_pos.xyz /= sm_pos.w;
+    NormalCS = ((MV*vec4(normal,0.0)).xyz);
+    PositionCS = (MV*vec4(position,1.0)).xyz;
+    LightCS  =( MV*main_light_dir).xyz;
 
-mat4 M = model;
-//mat4 MV = view*model;
-//MV_n = transpose(inverse(MV));
-// rigid transform only
-MV_n = MV;
-vec3 t_tangent;
-/*realUV*/
-uv = vec2(1.0,-1.0)*UV;
-t_normal = ((MV_n*vec4(normal,0.0)).xyz);
-vPos = (MV*vec4(position,1.0)).xyz;
-
-
-
-o_normal = normal;
-
-
-o_view = MV;
-o_proj = cam_proj;
-
-
-/*BRDF Required vectors  */
-
-lightPos =( MV*main_light_dir).xyz;
-o_light = main_light_dir;
-
-gl_Position  = MVP*vec4(position,1.0);
+    gl_Position  = MVP*vec4(position,1.0);
 }

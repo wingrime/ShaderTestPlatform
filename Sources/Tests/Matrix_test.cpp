@@ -46,7 +46,7 @@ TEST(Matrix,Translate) {
 }
 TEST(Matrix, LookAtIndent) {
 
-    SMat4x4 m = SMat4x4::LookAt(SVec4(0.0,0.0,-1.0,0.0),SVec4(0.0,0.0,0.0,0.0),SVec4(0.0,1.0,0.0,0.0));
+    SMat4x4 m = LookAt(SVec4(0.0,0.0,-1.0,0.0),SVec4(0.0,0.0,0.0,0.0),SVec4(0.0,1.0,0.0,0.0));
     EXPECT_EQ( SMat4x4::Eq(SMat4x4(1.0,0.0,0.0,0.0, \
                                    0.0,1.0,0.0,0.0, \
                                    0.0,0.0,1.0,0.0, \

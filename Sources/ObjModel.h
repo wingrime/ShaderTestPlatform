@@ -19,16 +19,16 @@ class SShader;
 class STexture;
 
 struct Material {
-STexture * diffuse;
-STexture *bump;
-STexture *alpha;
-std::size_t name_hash;
+    STexture * diffuse;
+    STexture *bump;
+    STexture *alpha;
+    std::size_t name_hash;
 
 };
 struct SubMeshIDs {
-unsigned int vao;
-unsigned int vbo;
-unsigned int ibo;
+    unsigned int vao;
+    unsigned int vbo;
+    unsigned int ibo;
 };
 
 class MeshIndexer {

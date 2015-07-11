@@ -115,7 +115,7 @@ CObjV3 CObjMeshParser::CalcNormal(const CObjV3& v1, const CObjV3& v2, const CObj
     SVec4 vec1(v1.x,v1.y,v1.z,0.0);
     SVec4 vec2(v2.x,v2.y,v2.z,0.0);
     SVec4 vec3(v3.x,v3.y,v3.z,0.0);
-
+    /*normal direction depends on R L coordinate system*/
     SVec4 n_n = SVec4::Cross3((vec1 - vec2) ,(vec1 - vec3));
 
     if (n_n.Length() == 0 ) {

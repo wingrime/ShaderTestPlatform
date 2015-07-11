@@ -21,6 +21,8 @@ public:
     int Update(); /*update VBOs*/
     /*Camera debug*/
     int AddCameraFrustrum(const SMat4x4& PV);
+    /*AABB debug*/
+    int AddAABB(const AABB &a);
 private:
     std::vector<Line> d_lines;
     unsigned int d_lines_vao;

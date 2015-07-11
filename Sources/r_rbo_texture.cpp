@@ -107,6 +107,35 @@ int SRBOTexture::BindImage(unsigned int unit)
     glBindImageTexture(unit, tex, 0,GL_TRUE, 0, GL_READ_WRITE, SRBOTexture::getRelatedGLType(type));
 
 }
+
+int SRBOTexture::setInterpolationMode(SRBOTexture::InterpolationType t)
+{
+    /*Bind*/
+    if (d_isMSAA) {
+        glBindTexture( GL_TEXTURE_2D_MULTISAMPLE,tex);
+    } else {
+        if (type ==  RT_TEXTURE_CUBEMAP )
+                glBindTexture( GL_TEXTURE_CUBE_MAP,tex);
+        else if (type == RT_TEXTURE_DEPTH_ARRAY) {
+                glBindTexture(GL_TEXTURE_2D_ARRAY,tex);
+        }
+        else
+                glBindTexture( GL_TEXTURE_2D,tex);
+    }
+
+    if (t == InterpolationType::RTINT_LINERAL) {
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    } else if (t == InterpolationType::RTINT_NEAREST) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    }
+
+    return ESUCCESS;
+
+}
 int SRBOTexture::ConfigureTexture(const BorderType t) const {
         if (t == TEX_REPEAT) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

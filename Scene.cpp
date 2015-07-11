@@ -4,7 +4,9 @@
 #include "c_config.h"
 #include "r_context.h"
 #include "math.h"
+#include "mat_math.h"
 #include "RenderState.h"
+
 
 /////PROTO//////
 /*serialization*/
@@ -14,131 +16,39 @@
 
 #include <type_traits>
 #include <memory.h>
+#include <limits>
 #include "r_sprog.h"
-struct RenderPipelinePass {
-    int pass_number; /*data format reference*/
-    int out_buffer_width;
-    int out_buffer_height;
-    int out_buffer_count; /* count of exit buffers*/
-    std::vector<SRBOTexture::RTType> buffer_type; /*out buffer s*/
-    RBO::RBOType in_buffer_type;
 
-    int reference_material_number;
 
-    /*serialize support */
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar( CEREAL_NVP(pass_number),
-            CEREAL_NVP(out_buffer_width),
-            CEREAL_NVP(out_buffer_height),
-            CEREAL_NVP(out_buffer_count),
-            CEREAL_NVP(in_buffer_type),
-            CEREAL_NVP(buffer_type)
-            );
-    }
-};
-struct RenderPiplineMaterial {
-    int material_number;
-    std::string vertex_file;
-    std::string fragment_file;
-    std::string geom_file;
-    /*serialize support */
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar( CEREAL_NVP(material_number),
-            CEREAL_NVP(vertex_file),
-            CEREAL_NVP(fragment_file),
-            CEREAL_NVP(geom_file)
-            );
-    }
-};
-
-class RenderPipeline {
-public:
-    RenderPipeline(std::vector<RenderPipelinePass> passes ,std::vector<RenderPiplineMaterial> materials )  :d_passes(passes), d_materials(materials) {}
-    int InitMaterials();
-    int InitPasses();
-    int BindPass(int pass_id);
-private:
-    /*serializable data*/
-    std::vector<RenderPipelinePass> d_passes;
-    std::vector<RenderPiplineMaterial> d_materials;
-    std::vector<std::shared_ptr<SShader> > d_shaders;
-    std::vector<std::shared_ptr<RBO> > d_RBOs;
-};
-int RenderPipeline::InitPasses() {
-    for (auto &pass : d_passes) {
-        switch (pass.out_buffer_count)
-        {
-        case 1:
-            d_RBOs.push_back(std::shared_ptr<RBO> (new RBO(pass.out_buffer_width, pass.out_buffer_height,pass.in_buffer_type,
-                                                      pass.buffer_type[0],1,
-                                                      SRBOTexture::RT_NONE,1,
-                                                      SRBOTexture::RT_NONE,1)));
-            break;
-        case 2:
-            d_RBOs.push_back(std::shared_ptr<RBO> (new RBO(pass.out_buffer_width, pass.out_buffer_height,pass.in_buffer_type,
-                                                      pass.buffer_type[0],1,
-                                                      pass.buffer_type[1],1,
-                                                      SRBOTexture::RT_NONE,1)));
-            break;
-        case 3:
-            d_RBOs.push_back(std::shared_ptr<RBO> (new RBO(pass.out_buffer_width, pass.out_buffer_height,pass.in_buffer_type,
-                                                      pass.buffer_type[0],1,
-                                                      pass.buffer_type[1],1,
-                                                      pass.buffer_type[2],1)));
-            break;
-        default:
-            MASSERT(true);
-        }
-    }
-
-}
-
-int RenderPipeline::InitMaterials() {
-
-    for (auto &material : d_materials) {
-        d_shaders.push_back(std::shared_ptr<SShader> (new SShader(material.vertex_file, material.fragment_file,material.geom_file)));
-    }
-    return 0;
-}
-SScene::SScene(RBO *v) 
-    :rtSCREEN(v)
-
-    ,d_shadowmap_cam0(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1000.0f,1000.0,-1000.0,-1000.0))
-    ,d_shadowmap_cam1(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1000.0f,1000.0,-1000.0,-1000.0))
-    ,d_shadowmap_cam2(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1000.0f,1000.0,-1000.0,-1000.0))
-    ,d_shadowmap_cam3(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1000.0f,1000.0,-1000.0,-1000.0))
+SScene::SScene(RectSize v)
+    :rtSCREEN(new RBO(std::string("rtSCREEN"), v.w,v.h,RBO::RBO_SCREEN))
     ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
     //,cam(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1.0f,100.0,-100.0,-100.0))
 
-    ,sky_cam(SMat4x4(),SInfinityFarProjectionMatrix(100.0f,1.0f,toRad(26.0)))
     ,step(0.0f)
     ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
     
-    ,rtShadowMap(new RBO(v->getSize().w,v->getSize().h, RBO::RBO_DEPTH_ARRAY_ONLY))
-    ,rtPrepass(new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RGBA))
-    ,rtHDRScene_MSAA(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
+    ,rtShadowMap(new RBO(std::string("ShadowMap"),v.w*4,(v.h)*4, RBO::RBO_DEPTH_ARRAY_ONLY))
+    ,rtPrepass(new RBO(std::string("DepthPrePass"),v.w/2,v.h/2, RBO::RBO_RGBA))
+    ,rtHDRScene_MSAA(new RBO(std::string("HDR Mainpass MSAA"),v.w,v.h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_NONE,1,
                                                    SRBOTexture::RT_NONE, 1 ))
-    ,rtHDRScene(new RBO(v->getSize().w,v->getSize().h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
+    ,rtHDRScene(new RBO(std::string("HDR Mainpass"),v.w,v.h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_NONE,1,
                                                    SRBOTexture::RT_NONE, 1 ))
-    ,rtHDRBloomResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_FLOAT_RED)) /* is it better HDR */
-    ,rtHDRHorBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_FLOAT_RED))
-    ,rtHDRVertBlurResult(new RBO(v->getSize().w/4,v->getSize().h/4, RBO::RBO_FLOAT_RED))
-    ,rtSSAOVertBlurResult( new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
-    ,rtSSAOHorBlurResult(new RBO(v->getSize().w/2,v->getSize().h/2, RBO::RBO_RED))
-    ,rtVolumetric(new RBO(v->getSize().w,v->getSize().h, RBO::RBO_RGBA))
-    ,sky_dome_model(new SObjModel("sky_dome.obj"))
-    ,rtCubemap(new RBO(128, 128, RBO::RBO_CUBEMAP))
+    ,rtHDRBloomResult( new RBO(std::string("rtHDRBloomResult"),v.w/2,v.h/2, RBO::RBO_FLOAT_RED)) /* is it better HDR */
+    ,rtHDRHorBlurResult(new RBO(std::string("rtHDRHorBlurResult"),v.w/4,v.h/4, RBO::RBO_FLOAT_RED))
+    ,rtHDRVertBlurResult(new RBO(std::string("rtHDRVertBlurResult"),v.w/4,v.h/4, RBO::RBO_FLOAT_RED))
+    ,rtSSAOVertBlurResult( new RBO(std::string("rtSSAOVertBlurResult"),v.w/2,v.h/2, RBO::RBO_RED))
+    ,rtSSAOHorBlurResult(new RBO(std::string("rtSSAOHorBlurResult"),v.w/2,v.h/2, RBO::RBO_RED))
+    ,rtVolumetric(new RBO(std::string("rtVolumetric"),v.w,v.h, RBO::RBO_RGBA))
+    ,w_sky(new SWeatherSky())
+    ,rtCubemap(new RBO(std::string("rtCubemap"),512, 512, RBO::RBO_CUBEMAP))
    ,rtConvoledCubemap(new SRBOTexture(10,4,SRBOTexture::RT_TEXTURE_FLOAT_RED))
-    ,rtHDRLogLum(new RBO(16,16,RBO::RBO_FLOAT)) /*Downsampled source for lumeneace*/
-    ,rtHDRLumKey(new RBO(1,1,RBO::RBO_FLOAT)) /*Lum key out*/
+    ,rtHDRLogLum(new RBO(std::string("rtHDRLogLum"),16,16,RBO::RBO_FLOAT)) /*Downsampled source for lumeneace*/
+    ,rtHDRLumKey(new RBO(std::string("rtHDRLumKey"),1,1,RBO::RBO_FLOAT)) /*Lum key out*/
     ,dbg_ui(this,v)
     
 {
@@ -189,26 +99,24 @@ SScene::SScene(RBO *v)
                                             ,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG2()));
 
     /*main prog*/
-    r_prog.reset(new SShader("Main/Main.vert","Main/Main.frag"));
+    main_pass_shader.reset(new SShader("Main/Main.vert","Main/Main.frag"));
 
     prepass_prog.reset(new SShader("DepthNormalPrepass/DepthNormalPrepass.vert","DepthNormalPrepass/DepthNormalPrepass.frag"));
 
     cam_prog.reset(new SShader("Shadow/Cascade.vert","Shadow/Cascade.frag","Shadow/Cascade.geom"));
 
-    /*sky dome prog*/
-    sky_dome_prog.reset(new SShader("Sky/PerezSky.vert","Sky/PerezSky.frag"));
 
     cubemap_prog_generator.reset(new SShader("Cubemap/cubemap_gen.vert","Cubemap/cubemap_gen.frag","Cubemap/cubemap_gen.geom"));
 
+    shaderViewAsIs.reset(new SShader("PostProcessing/PostProccessQuard.vert","PostProcessing/View/AsIs.frag"));
 
-    sky_dome_model->ConfigureProgram( *sky_dome_prog);
-    sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
+    postProcessDebugOutput.reset(new SPostProcess(shaderViewAsIs.get(),w,h));
+
+
+    rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::RTINT_NEAREST);
 
     dbg_ui.Init();
-    d_shadowmap_cam0.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,290,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
-    d_shadowmap_cam1.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,836,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
-    d_shadowmap_cam2.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,2420,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
-    d_shadowmap_cam3.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,6000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
+
 }
 
 SScene::~SScene()
@@ -229,7 +137,7 @@ int SScene::Reshape(int w, int h) {
 
 int SScene::AddObjectToRender(std::shared_ptr<SObjModel> obj)
 {
-    obj->ConfigureProgram(*r_prog);
+    obj->ConfigureProgram(*main_pass_shader);
     d_render_list.push_back(obj);
     return 0;
 
@@ -322,83 +230,217 @@ AABB FrustrumSize(const SMat4x4& r) {
     z_mi = fmin(z_mi,b3.z);
     z_mi = fmin(z_mi,b4.z);
 
-
-
     AABB a;
-    a.p1 = Point(x_mi,y_mi,z_mi);
-    a.p2 = Point(x_m,y_m,z_m);
+    a.min_point = Point(x_mi,y_mi,z_mi);
+    a.max_point = Point(x_m,y_m,z_m);
 
     return a;
 }
+Point2d ProjectPoint(const Point &in, const SMat4x4 &sm_mvp) {
+    SVec4 v = sm_mvp*SVec4(in.x,in.y,in.z,1.0);
+    v = v / v.w;
+    return Point2d(v.x,v.y);
+}
+Point TransformPoint(const Point &in, const SMat4x4 &sm_mvp) {
+    SVec4 v = sm_mvp*SVec4(in.x,in.y,in.z,1.0);
+    v = v / v.w;
+    v.w = 1.0;
+    return Point(v.x,v.y,v.z);
+}
+AABB PSRProjectionAABB(const AABB &a, const SMat4x4 &sm_mvp) {
+    Point p[8];
 
+    p[0] = TransformPoint(Point(a.max_point.x,a.max_point.y,a.max_point.z),sm_mvp);
+    p[1] = TransformPoint(Point(a.max_point.x,a.max_point.y,a.min_point.z),sm_mvp);
+    p[2] = TransformPoint(Point(a.max_point.x,a.min_point.y,a.max_point.z),sm_mvp);
+    p[3] = TransformPoint(Point(a.max_point.x,a.min_point.y,a.min_point.z),sm_mvp);
+    p[4] = TransformPoint(Point(a.min_point.x,a.max_point.y,a.max_point.z),sm_mvp);
+    p[5] = TransformPoint(Point(a.min_point.x,a.max_point.y,a.min_point.z),sm_mvp);
+    p[6] = TransformPoint(Point(a.min_point.x,a.min_point.y,a.max_point.z),sm_mvp);
+    p[7] = TransformPoint(Point(a.min_point.x,a.min_point.y,a.min_point.z),sm_mvp);
+    AABB res;
+    res.max_point.x = std::numeric_limits<float>::min();
+    res.max_point.y = std::numeric_limits<float>::min();
+    res.max_point.z = std::numeric_limits<float>::min();
+    res.min_point.x = std::numeric_limits<float>::max();
+    res.min_point.y = std::numeric_limits<float>::max();
+    res.min_point.z = std::numeric_limits<float>::max();
+    for (int i = 0 ; i < 8 ; i++) {
+        if (res.max_point.x < p[i].x )
+            res.max_point.x = p[i].x;
+        if (res.max_point.y < p[i].y )
+            res.max_point.y = p[i].y;
+        if (res.max_point.z < p[i].z )
+            res.max_point.z = p[i].z;
+
+        if (res.min_point.x > p[i].x )
+            res.min_point.x = p[i].x;
+        if (res.min_point.y > p[i].y )
+            res.min_point.y = p[i].y;
+        if (res.min_point.z > p[i].z )
+            res.min_point.z = p[i].z;
+     }
+
+
+    return res;
+}
+BBox PSRProjectionBoundingBox(const AABB &a, const SMat4x4 &sm_mvp) {
+    Point2d p[8];
+
+    p[0] = ProjectPoint(Point(a.max_point.x,a.max_point.y,a.max_point.z),sm_mvp);
+    p[1] = ProjectPoint(Point(a.max_point.x,a.max_point.y,a.min_point.z),sm_mvp);
+    p[2] = ProjectPoint(Point(a.max_point.x,a.min_point.y,a.max_point.z),sm_mvp);
+    p[3] = ProjectPoint(Point(a.max_point.x,a.min_point.y,a.min_point.z),sm_mvp);
+    p[4] = ProjectPoint(Point(a.min_point.x,a.max_point.y,a.max_point.z),sm_mvp);
+    p[5] = ProjectPoint(Point(a.min_point.x,a.max_point.y,a.min_point.z),sm_mvp);
+    p[6] = ProjectPoint(Point(a.min_point.x,a.min_point.y,a.max_point.z),sm_mvp);
+    p[7] = ProjectPoint(Point(a.min_point.x,a.min_point.y,a.min_point.z),sm_mvp);
+    BBox res;
+    res.max_point.x = std::numeric_limits<float>::min();
+    res.max_point.y = std::numeric_limits<float>::min();
+    res.min_point.x = std::numeric_limits<float>::max();
+    res.min_point.y = std::numeric_limits<float>::max();
+    for (int i = 0 ; i<8 ; i++) {
+        if (res.max_point.x < p[i].x )
+              res.max_point.x =p[i].x;
+        if (res.max_point.y < p[i].y )
+              res.max_point.y =p[i].y;
+        if (res.min_point.x > p[i].x )
+              res.min_point.x =p[i].x;
+        if (res.min_point.y > p[i].y )
+              res.min_point.y =p[i].y;
+     }
+    return res;
+}
+/*
+ * Generate special scale matrix operator for
+ * scaling Shadow Map Space for Potential Shadow Recivers
+ *
+*/
+SMat4x4 PSRFocusSMSTransformMatrix(const BBox &psr ) {
+    float s_x = 2.0 / ( psr.max_point.x - psr.min_point.x);
+    float o_x = -(s_x *(psr.max_point.x + psr.min_point.x))/2.0;
+    float s_y = 2.0 / ( psr.max_point.y - psr.min_point.y);
+    float o_y = -(s_y *(psr.max_point.y + psr.min_point.y))/2.0;
+    return  SMat4x4(s_x,0.0,0.0,o_x,
+                    0.0,s_y,0.0,o_y,
+                    0.0,0.0,1.0,0.0,
+                    0.0,0.0,0.0,1.0);
+}
+
+SMat4x4 LookAtMatrix(const SVec4 &forward, const SVec4 &up ) {
+
+    SVec4 zaxis = SVec4::Normalize(forward); /*direction to view point*/
+    SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(SVec4::Normalize(up),zaxis)); /* left vector*/
+    SVec4 yaxis(SVec4::Normalize(SVec4::Cross3(zaxis,xaxis))); /* new up vector */
+    SVec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
+    SVec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
+    SVec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
+    SVec4 v4 (0.0,0.0,0.0,1.0);
+    SMat4x4 l = SMat4x4(v1,v2,v3,v4);
+    return l;
+
+}
 int SScene::UpdateScene(float dt) {
-
-   sky_cam.SyncFromCamera(cam);
-    r_prog->Bind();
+    main_pass_shader->Bind();
     /*shadowmap*/
     SMat4x4 Bias = SMat4x4( 0.5,0.0,0.0,0.0,
                             0.0,0.5,0.0,0.0,
                             0.0,0.0,0.5,0.0,
                             0.5,0.5,0.5,1.0).Transpose(); //small todo
 
-    SVec4 light_dir =  SVec4(0.0,1.0,0.0,1.0);
-
     /*fit AABB*/
-    AABB r = FrustrumSize(cam.getViewProjectMatrix());
+    float shadowCascadeDiv[] = { 100.0,290.0, 840.0, 2420.0,7000.0};
+    for (int i = 0 ; i < 4 ; i++) {
+        cameraFrustrumAABB[i] = FrustrumSize(SPerspectiveProjectionMatrix(100.0, 7000.0,1.0f,toRad(26.0))*(cam.getViewMatrix()));
+    }
 
-    //SMat4x4 p =SOrtoProjectionMatrix(-1,1,1,1,-1,-1);
-    SMat4x4 p =SOrtoProjectionMatrix(0,1,1,1,-1,-1);
-    d_shadowmap_cam0.setProjMatrix(p);
-    d_shadowmap_cam1.setProjMatrix(p);
-    d_shadowmap_cam2.setProjMatrix(p);
-    d_shadowmap_cam3.setProjMatrix(p);
+   // AABB cameraFrustrumAABBFull = FrustrumSize(SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0))*cam.getViewMatrix());
+    //camera focus
+    //from view matrix
+    SVec4 pos = cam.getViewMatrix().ExtractPositionNoScale();//+cam.getViewMatrix().ExtractLeftVector()*((7000.0f-100.0f)/2.0);
+    //d_debugDrawMgr.AddCross(Point(pos),1000);
+    //d_debugDrawMgr.Update();
+    ////from aabb ???
+    //SVec4 pos = SVec4(r.min_point.x+0.5f*(r.max_point.x - r.min_point.x),r.min_point.y+0.5f*(r.max_point.y - r.min_point.y),r.min_point.z+0.5f*(r.max_point.z - r.min_point.z),1.0);
 
-    SVec4 pos = cam.getViewMatrix().ExtractPositionNoScale();
+
     SVec4 cam_up = SVec4::Normalize(cam.getViewMatrix().ExtractUpVector());
+    //works badly..
+    // non uniform scale gives vector new direction, not correct fully, so, for make it somehow correct, use biggest scale, but it produce overkill...
+    //float max_scale = (r.max_point.x - r.min_point.x);
+    //max_scale = fmax (max_scale , (r.max_point.y - r.min_point.y));
+    //max_scale = fmax (max_scale , (r.max_point.z - r.min_point.z));
 
-    SMat4x4 c = SMat4x4().Scale(2.0/fabs(r.p1.x - r.p2.x),2.0/fabs(r.p1.y - r.p2.y),2.0/fabs(r.p1.z - r.p2.z));
+    //SMat4x4 scale_nonuniform = SMat4x4().Scale  (2.0/fabs(r.min_point.x - r.max_point.x),2.0/fabs(r.min_point.y - r.max_point.y),2.0/fabs(r.min_point.z - r.max_point.z));
+    //non uniform scale change direction!!!!
+    //SMat4x4 scale_uniform = SMat4x4().Scale(2.0/max_scale);
 
-    SMat4x4 m =  SMat4x4().Move(-pos.x,-pos.y,-pos.z);
 
-    SVec4 zaxis = SVec4::Normalize(light_dir); /*direction to view point*/
-    SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(cam_up,zaxis)); /* left vector*/
-    SVec4 yaxis(SVec4::Cross3(zaxis,xaxis)); /* new up vector */
-    SVec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
-    SVec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
-    SVec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
-    SVec4 v4 (0.0,0.0,0.0,1.0);
-    SMat4x4 l = SMat4x4(v1,v2,v3,v4);
 
-    c = l*c*m;
+    //SMat4x4 m =  SMat4x4().Move(-pos.x,-pos.y,-pos.z);
+    SMat4x4 shadowMapViewMatrix = LookAtMatrix(w_sky->GetSunDirection(),cam_up);
+    //SMat4x4 shadowMapViewMatrix = LookAtMatrix(w_sky->GetSunDirection(),SVec4(1.0,0.0,0.0,1.0));
+    //SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix(100.0f, 7000.0f,1000.0f,1000.0,-1000.0,-1000.0);
 
-    d_shadowmap_cam0.setViewMatrix(c);
-    d_shadowmap_cam1.setViewMatrix(c);
-    d_shadowmap_cam2.setViewMatrix(c);
-    d_shadowmap_cam3.setViewMatrix(c);
+    //TODO: fixup
+    SMat4x4 shadowMapFinalProjectionMatrix[4];
+    for (int i = 0; i < 4; i++ ){
+        AABB psrAABB = PSRProjectionAABB (cameraFrustrumAABB[i],shadowMapViewMatrix);
+        //cameraTransformFrustrumAABB[i] = psrAABB; //debug
+        SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix((psrAABB.min_point.z), (psrAABB.max_point.z - psrAABB.min_point.z)+1000.0f,1.0f,1.0,-1.0,-1.0);
+        //SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix(100.0, 7000.0,1.0f,1.0,-1.0,-1.0);
 
-    r_prog->SetUniform("shadowMVPB0",Bias*d_shadowmap_cam0.getViewProjectMatrix());
-    r_prog->SetUniform("shadowMVPB1",Bias*d_shadowmap_cam1.getViewProjectMatrix());
-    r_prog->SetUniform("shadowMVPB2",Bias*d_shadowmap_cam2.getViewProjectMatrix());
-    r_prog->SetUniform("shadowMVPB3",Bias*d_shadowmap_cam3.getViewProjectMatrix());
+        SMat4x4 shadowMapPVMatrix = shadowMapProjectionMatrix*shadowMapViewMatrix*SMat4x4().Move(-pos.x,-pos.y,-pos.z);
 
+        SMat4x4 shadowPostPerspectiveScale = PSRFocusSMSTransformMatrix(PSRProjectionBoundingBox(cameraFrustrumAABB[i],shadowMapPVMatrix));
+
+        shadowMapFinalProjectionMatrix[i] = shadowPostPerspectiveScale*shadowMapProjectionMatrix;
+    }
+
+    for (int i = 0; i < 4; i++ ){
+        d_shadowmap_cam[i].setViewMatrix(shadowMapViewMatrix);
+        d_shadowmap_cam[i].setProjMatrix(shadowMapFinalProjectionMatrix[i]);
+    }
+
+
+
+
+    main_pass_shader->SetUniform("shadowMVPB0",Bias*d_shadowmap_cam[0].getViewProjectMatrix());
+    main_pass_shader->SetUniform("shadowMVPB1",Bias*d_shadowmap_cam[1].getViewProjectMatrix());
+    main_pass_shader->SetUniform("shadowMVPB2",Bias*d_shadowmap_cam[2].getViewProjectMatrix());
+    main_pass_shader->SetUniform("shadowMVPB3",Bias*d_shadowmap_cam[3].getViewProjectMatrix());
+    /*Set primary shader direction*/
+     main_pass_shader->SetUniform("main_light_dir",w_sky->GetSunDirection());
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
-    //pp_stage_ssao->getShader()->SetUniform("m_P",SMat4x4());
-
     return 0;
 
 }
+
+int SScene::debugSetFinalRenderOutput(std::shared_ptr<RBO> r)
+{
+    debugFinalRenderOutput = r;
+    return 0;
+}
+
+int SScene::debugSetDebugRenderOutputFlag(bool flag)
+{
+    debugRenderOutputFlag = flag;
+}
+
+
 
 
 int inline SScene::RenderShadowMap(const RBO& v) {
     v.Bind(true);
     //incapsulation fail :(
     //todo: incapsulate uniform values to camera!
-    cam_prog->SetUniform("MVP0",d_shadowmap_cam0.getProjMatrix()*d_shadowmap_cam0.getViewMatrix());
-    cam_prog->SetUniform("MVP1",d_shadowmap_cam1.getProjMatrix()*d_shadowmap_cam1.getViewMatrix());
-    cam_prog->SetUniform("MVP2",d_shadowmap_cam2.getProjMatrix()*d_shadowmap_cam2.getViewMatrix());
-    cam_prog->SetUniform("MVP3",d_shadowmap_cam3.getProjMatrix()*d_shadowmap_cam3.getViewMatrix());
-    RenderContext r_ctx(&v, cam_prog.get() ,&d_shadowmap_cam0);
+    cam_prog->SetUniform("MVP0",d_shadowmap_cam[0].getProjMatrix()*d_shadowmap_cam[0].getViewMatrix());
+    cam_prog->SetUniform("MVP1",d_shadowmap_cam[1].getProjMatrix()*d_shadowmap_cam[1].getViewMatrix());
+    cam_prog->SetUniform("MVP2",d_shadowmap_cam[2].getProjMatrix()*d_shadowmap_cam[2].getViewMatrix());
+    cam_prog->SetUniform("MVP3",d_shadowmap_cam[3].getProjMatrix()*d_shadowmap_cam[3].getViewMatrix());
+    RenderContext r_ctx(&v, cam_prog.get() ,&d_shadowmap_cam[0]);
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
     }
@@ -418,12 +460,12 @@ int SScene::RenderCubemap()
     //static int step = 0;
     //step ++;
     rtCubemap->Bind();
-    SMat4x4 pos = SMat4x4().Move(100,-200.0,0.0);
+    SMat4x4 pos = SMat4x4().Move(0,-500.0,0.0);
     //d_debugDrawMgr.AddCross({(float)(0.0-step*100.0),200,1.0},50);
     d_debugDrawMgr.Update();
     SCamera cubemap_cam(pos,SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0)));
     RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator.get() ,&cubemap_cam);
-    RenderContext r_ctx2(rtCubemap.get() , r_prog.get() ,&cubemap_cam);
+    RenderContext r_ctx2(rtCubemap.get() , main_pass_shader.get() ,&cubemap_cam);
 
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
@@ -455,24 +497,47 @@ int SScene::RenderPrepass(const RBO &v)
     }
     return 0;
 }
+
+int SScene::BlurKawase()
+{
+    int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("blurSize");
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)0.0);
+    pp_stage_hdr_blur_hor->DrawRBO(false);
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*1.0));
+    pp_stage_hdr_blur_vert->DrawRBO(false);
+
+    /*ping pong 1*/
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*2.0));
+    pp_stage_hdr_blur_hor2->DrawRBO(false);
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*2.0));
+    pp_stage_hdr_blur_vert2->DrawRBO(false);
+    /*ping pong 2*/
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*3.0));
+    pp_stage_hdr_blur_hor2->DrawRBO(false);
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*3.0));
+    pp_stage_hdr_blur_vert2->DrawRBO(false);
+    return 0;
+}
 int inline SScene::RenderDirect(const RBO& v) {
     v.Bind(true);    
     if (rWireframe)
     {
-        RenderContext r_ctx(&v, cam_prog.get() ,&d_shadowmap_cam0);
+        RenderContext r_ctx(&v, cam_prog.get() ,&d_shadowmap_cam[0]);
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
     }
     else
     {
-        RenderContext r_ctx(&v, r_prog.get() ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtCubemap->texIMG(), rtShadowMap->texIMG());
+        RenderContext r_ctx(&v, main_pass_shader.get() ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1(), rtCubemap->texIMG(), rtShadowMap->texIMG());
         r_ctx.sh_bands = rtConvoledCubemap;
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
-        RenderContext r_ctx2(&v, sky_dome_prog.get() ,&sky_cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
-        sky_dome_model->Render(r_ctx2);
+        //TODO: Move to weathersky
+        SCamera s(cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix());
+        RenderContext r_ctx2(&v, w_sky->GetSkyShader() ,&s,rtShadowMap->texDEPTH(),rtShadowMap->texIMG1() ,rtCubemap->texIMG(), rtShadowMap->texIMG());
+        w_sky->GetSkyModel()->Render(r_ctx2);
     }
 
     //d_debugDrawMgr.Render(cam.getProjMatrix()*cam.getViewMatrix());
@@ -526,22 +591,7 @@ int SScene::Render() {
         if (d_toggle_brightpass ) {
 
         pp_stage_hdr_bloom->DrawRBO(false);
-        int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("blurSize");
-        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)0.0);
-        pp_stage_hdr_blur_hor->DrawRBO(false);
-        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*1.0));
-        pp_stage_hdr_blur_vert->DrawRBO(false);
-
-        /*ping pong 1*/
-        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*2.0));
-        pp_stage_hdr_blur_hor2->DrawRBO(false);
-        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*2.0));
-        pp_stage_hdr_blur_vert2->DrawRBO(false);
-        /*ping pong 2*/
-        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*3.0));
-        pp_stage_hdr_blur_hor2->DrawRBO(false);
-        pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*3.0));
-        pp_stage_hdr_blur_vert2->DrawRBO(false);
+        BlurKawase();
         } else {
             pp_stage_hdr_blur_vert2->getResultRBO()->Bind(true); /*cleanup*/
         }
@@ -550,45 +600,23 @@ int SScene::Render() {
         pp_stage_ssao->Draw();
         pp_stage_ssao_blur_hor->DrawRBO(false);
         pp_stage_ssao_blur_vert->DrawRBO(false);
-        pp_stage_hdr_tonemap->DrawRBO(false);
+        /*normaly do tonemap and, if debug enabled set required buffer*/
+        if (debugRenderOutputFlag) {
+            rtSCREEN->Bind(true);
+            postProcessDebugOutput->setTexSrc1(debugFinalRenderOutput->texIMG());
+            postProcessDebugOutput->Draw();
+            }
+        else
+            pp_stage_hdr_tonemap->DrawRBO(false);
 
-    } else if (dbg_ui.d_v_sel_current == DebugUI::V_BLOOM) {
-        rtSCREEN->Bind(true); 
-        pp_stage_hdr_bloom->Draw();
-        
-    } else if (dbg_ui.d_v_sel_current == DebugUI::V_BLOOM_BLEND) {
-      rtHDRBloomResult->Bind(false);
-        pp_stage_hdr_bloom->Draw(); 
-
-        rtHDRHorBlurResult->Bind(false);
-        pp_stage_hdr_blur_hor->Draw();
-        rtHDRVertBlurResult->Bind(false);
-        pp_stage_hdr_blur_vert->Draw();
-        /*ping pong 1*/
-        rtHDRHorBlurResult->Bind(false);
-        pp_stage_hdr_blur_hor2->Draw();
-        rtHDRVertBlurResult->Bind(false);
-        pp_stage_hdr_blur_vert2->Draw();
-        /*ping pong 2*/
-        rtHDRHorBlurResult->Bind(false);
-        pp_stage_hdr_blur_hor2->Draw();
-        rtSCREEN->Bind(true);
-        pp_stage_hdr_blur_vert2->Draw();
-    } else if (dbg_ui.d_v_sel_current == DebugUI::V_SSAO) {
-        rtSSAOVertBlurResult->Bind(true);
-        pp_stage_ssao->Draw();
-        rtSSAOHorBlurResult->Bind(true);
-        pp_stage_ssao_blur_hor->Draw();
-        rtSCREEN->Bind(true);
-        pp_stage_ssao_blur_vert->Draw();
     } else if (dbg_ui.d_v_sel_current == DebugUI::V_SHADOW_MAP) {
         rtSCREEN->Bind(true); 
         RenderShadowMap( *rtSCREEN);
     } else if (dbg_ui.d_v_sel_current == DebugUI::V_VOLUMETRIC) {
         rtSCREEN->Bind(true); 
 
-        pp_stage_volumetric->getShader()->SetUniform("sm_proj_matrix",d_shadowmap_cam0.getProjMatrix());
-        pp_stage_volumetric->getShader()->SetUniform("sm_view_matrix",d_shadowmap_cam0.getViewMatrix());
+        pp_stage_volumetric->getShader()->SetUniform("sm_proj_matrix",d_shadowmap_cam[0].getProjMatrix());
+        pp_stage_volumetric->getShader()->SetUniform("sm_view_matrix",d_shadowmap_cam[0].getViewMatrix());
         pp_stage_volumetric->getShader()->SetUniform("cam_proj_matrix",cam.getProjMatrix());
         pp_stage_volumetric->getShader()->SetUniform("cam_view_matrix",cam.getViewMatrix());
         pp_stage_volumetric->Draw();
@@ -602,15 +630,17 @@ int SScene::Render() {
     dbg_ui.Draw();
     ui_time.End();
 
-    char buf [90];
+    char buf [120];
     auto end = std::chrono::steady_clock::now();
 
     auto diff = end- start;
 
-    sprintf(buf,"DRAW:%4.3f ms\nUI: %4.3f ms\nPP: %4.3f ms\nCPU: %4.3f\n",      (float)rtime.getTime()*(1.0/ 1000000.0), \
+    SVec4 pos = cam.getPosition();
+
+    sprintf(buf,"DRAW:%4.3f ms\nUI: %4.3f ms\nPP: %4.3f ms\nCPU: %4.3f\nX:%4.3f\nY:%4.3f\nZ:%4.3f\n",      (float)rtime.getTime()*(1.0/ 1000000.0), \
                                                                     (float)ui_time.getTime()*(1.0/1000000.0),\
                                                                     (float)pp_time.getTime()*(1.0/1000000.0),\
-                                                                      std::chrono::duration <float, std::milli> (diff).count() );
+                                                                      std::chrono::duration <float, std::milli> (diff).count(),pos.x,pos.y,pos.z );
     dbg_ui.fps_label->setText(buf);
    
     return true;

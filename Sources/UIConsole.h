@@ -7,13 +7,14 @@
 #include "e_base.h"
 /* font factory compile time depedency*/
 #include "UIFont.h"
+#include "mat_math.h"
 
 class RBO;
 
 
 class UIConsole {
 public:
-    UIConsole(RBO *v, std::shared_ptr<AbstractCommandHandler> cmd_h);
+    UIConsole(RectSize& v, std::shared_ptr<AbstractCommandHandler> cmd_h);
     ~UIConsole();
     /*Draw console*/
     void Draw();
@@ -33,7 +34,7 @@ private:
 
     const unsigned int d_con_sz =  20; /*max messages in console log*/
     UIFontFactory ft;
-    RBO *v_port;
+    RectSize v_port;
     UIFont * fnt ;
     std::vector<std::string> con;
     std::vector<std::string> console_history;

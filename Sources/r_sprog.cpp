@@ -24,6 +24,8 @@ Objectives:
 SShader::SShader (const std::string &vprog, const std::string &fprog, const std::string &gprog)
     :prog(new SProg(vprog, fprog, gprog))
 {
+    /*Register in shared info*/
+    RegisterEnum();
     IsReady =  prog->IsReady;
 }
 //mesh settings
@@ -35,6 +37,16 @@ int SShader::SetAttrib(const std::string& name, int numComponents, GLsizei strid
     } else {
         return EFAIL;
     }
+}
+
+std::list<SShader *> SShader::getShaderSharedList()
+{
+    return SShader::s_d_shaders_enum;
+}
+std::list<SShader *> SShader::s_d_shaders_enum = std::list<SShader *> ();
+int SShader::RegisterEnum()
+{
+    SShader::s_d_shaders_enum.push_back(this);
 }
 
 

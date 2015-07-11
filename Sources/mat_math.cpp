@@ -127,7 +127,17 @@ return (SMat4x4(a11-i.a11,a12-i.a12,a13-i.a13,a14-i.a14,
                a21-i.a21,a22-i.a22,a23-i.a23,a24-i.a24,
                a31-i.a31,a32-i.a32,a33-i.a33,a34-i.a34,
                a41-i.a41,a42-i.a42,a43-i.a43,a44-i.a44
-               ));    
+                ));
+}
+
+SMat4x4 SMat4x4::Move(const Point &p) const
+{
+    SMat4x4 a =  SMat4x4(0.0);
+    a.a14 = p.x;
+    a.a24 = p.y;
+    a.a34 = p.z;
+    return (* this)+a;
+
 }
 SMat4x4 SMat4x4::operator*(const SMat4x4& i) const {
     return (SMat4x4(
@@ -603,7 +613,7 @@ return (SVec2(v1.x + v2.x,
 
 
 
-SMat4x4 SMat4x4::LookAt(const SVec4 &at, const SVec4 &eye, const SVec4 &up)
+SMat4x4 LookAt(const SVec4 &at, const SVec4 &eye, const SVec4 &up)
 {
         SVec4 zaxis = SVec4::Normalize( eye -at); /*direction to view point*/
         SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(up,zaxis)); /* left vector*/
@@ -619,4 +629,30 @@ SMat4x4 SMat4x4::LookAt(const SVec4 &at, const SVec4 &eye, const SVec4 &up)
 SVec4 operator*(const SVec4 &v1, float v2)
 {
     return SVec4(v1.x*v2,v1.y*v2,v1.z*v2,v1.w*v2);
+}
+SVec4 operator/(const SVec4 &v1, float v2)
+{
+    return SVec4(v1.x/v2,v1.y/v2,v1.z/v2,v1.w/v2);
+}
+
+
+Point AABB::Center()
+{
+    return Point((max_point.x - min_point.x)/2.0  ,(max_point.y-min_point.y)/2.0,(max_point.z-min_point.z)/2.0);
+}
+Point operator+(const Point& v1,const Point& v){
+return (Point(v1.x + v.x,
+              v1.y + v.y,
+              v1.z + v.z));
+}
+
+Point operator-(const Point& v1,const Point& v2){
+return (Point(v1.x - v2.x,
+              v1.y - v2.y,
+              v1.z - v2.z));
+}
+Point operator-(const Point& v1){
+return (Point(-v1.x,
+              -v1.y,
+              -v1.z));
 }

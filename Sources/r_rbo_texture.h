@@ -31,6 +31,10 @@ public:
         TEX_CLAMP = 0,
         TEX_REPEAT
     };
+    enum InterpolationType  {
+        RTINT_NEAREST = 0,
+        RTINT_LINERAL
+    };
     /* simple empty texture */
     SRBOTexture(int _x, int _y)
     :SRBOTexture(_x,_y,RT_TEXTURE_FLOAT) {}
@@ -38,8 +42,11 @@ public:
     SRBOTexture(int _x, int _y, RTType t) :SRBOTexture(_x,_y,t,1) {}
     SRBOTexture(const SRBOTexture&) = delete;
      ~SRBOTexture();
+
     int Bind(unsigned int sampler) const; /*bind as texture to sampler*/
     int BindImage(unsigned int unit);
+
+    int setInterpolationMode(InterpolationType t);
     unsigned int getGLId() const;
     int x,y;
 

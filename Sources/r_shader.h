@@ -39,6 +39,11 @@ class SProg {
         int SetAttrib(unsigned int location, int numComponents, GLsizei stride, unsigned int offset, GLenum type);
         bool IsReady = false;
 
+        /*Request Information*/
+        inline std::string GetVertexShaderFileName() {return v_pname;};
+        inline std::string GetFragmentShaderFileName() {return f_pname;};
+        inline std::string GetGeometryShaderFileName() {return g_pname;};
+
     private:
 
         std::unordered_map<std::string, int> d_location_lookup;

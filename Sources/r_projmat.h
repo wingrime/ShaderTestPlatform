@@ -23,6 +23,9 @@ public:
 
 class SOrtoProjectionMatrix: public SMat4x4 {
 public: 
+        /*
+         * Here: n - near plane f - far plane
+        */
         SOrtoProjectionMatrix(float n, float f,float r,float t, float l , float b) : SMat4x4() {
          a11 = 2.0 / (r-l); a12 = 0.0;         a13 = 0.0;       a14 = -(r+l)/(r-l);
          a21 = 0.0;         a22 = 2.0/(t-b);   a23 = 0.0;       a24 = -(t+b)/(t-b);

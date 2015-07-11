@@ -4,7 +4,8 @@
 #include "UIConsole.h"
 #include "r_sprog.h"
 #include <imgui.h>
-DebugUI::DebugUI(SScene *_s, RBO *_v)
+#include <RBO.h>
+DebugUI::DebugUI(SScene *_s, RectSize &_v)
     :v(_v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
     ,err_con(new UIConsoleErrorHandler(con))
@@ -30,6 +31,8 @@ int DebugUI::Draw()
     con->Draw();
 
 }
+/*todo: move to some place*/
+
 AABB FrustrumSize2(const SMat4x4& r) {
 
     SMat4x4 invPV = r.Inverse();
@@ -108,8 +111,8 @@ AABB FrustrumSize2(const SMat4x4& r) {
 
 
     AABB a;
-    a.p1 = Point(x_mi,y_mi,z_mi);
-    a.p2 = Point(x_m,y_m,z_m);
+    a.min_point = Point(x_mi,y_mi,z_mi);
+    a.max_point = Point(x_m,y_m,z_m);
 
     return a;
 }
@@ -122,28 +125,27 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("r_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[2]);
-        sc->r_prog->SetUniform(args[1],val_f);
+        sc->main_pass_shader->SetUniform(args[1],val_f);
 
     }));
     d_console_cmd_handler->AddCommand("r_set_i", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         int val_f = std::stoi(args[2]);
-        sc->r_prog->SetUniform(args[1],val_f);
+        sc->main_pass_shader->SetUniform(args[1],val_f);
 
     }));
        d_console_cmd_handler->AddCommand("sky_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[2]);
-        sc->sky_dome_prog->SetUniform(args[1],val_f);
+        sc->w_sky->GetSkyShader()->SetUniform(args[1],val_f);
 
     }));
 
     d_console_cmd_handler->AddCommand("sm_cam_set", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        sc->d_shadowmap_cam0 = sc->cam;
-        sc->d_shadowmap_cam1 = sc->cam;
-        sc->d_shadowmap_cam2 = sc->cam;
-        sc->d_shadowmap_cam3 = sc->cam;
+        for (int i = 0; i < 4 ; i++) {
+            sc->d_shadowmap_cam[i] = sc->cam;
+        }
         sc->d_first_render = false;
 
     }));
@@ -186,7 +188,6 @@ int DebugUI::InitDebugCommands()
             glGetIntegerv(0x904B, &evictedMem);
             con->Msg(string_format("Dedicated mem: %d[kb]\nTotal available mem: %d[kb]\nCurrent available mem: %d[kb]\nEviction count: %d\nEvicted mem: %d[kb]\n",
                             dedVideoMem,totalAvailableMem, curAvailableMem, evictionCount, evictedMem));
-        //con->Msg(os.str());
 
     }));
 
@@ -195,7 +196,7 @@ int DebugUI::InitDebugCommands()
 
         d_console_cmd_handler->AddCommand("sm_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        sc->d_shadowmap_cam0.LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,4000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
+        sc->d_shadowmap_cam[0].LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,4000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
 
     }));
         d_console_cmd_handler->AddCommand("dump_smcam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -205,7 +206,7 @@ int DebugUI::InitDebugCommands()
         {
             /*use raii */
             cereal::JSONOutputArchive archive( os);
-            archive( CEREAL_NVP( sc->d_shadowmap_cam0));
+            archive( CEREAL_NVP( sc->d_shadowmap_cam[0]));
         }
         con->Msg(os.str());
     }));
@@ -252,9 +253,12 @@ int DebugUI::InitDebugCommands()
 
     d_console_cmd_handler->AddCommand("li", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        SVec4 vect(args[1]);
-        sc->r_prog->SetUniform("main_light_dir", vect);
-        sc->d_prim_light_dir = vect;
+        //SVec4 vect(args[1]);
+        //sc->main_pass_shader->SetUniform("main_light_dir", vect);
+        //sc->d_prim_light_dir = vect;
+
+        float val_f = std::stof(args[1]);
+        sc->w_sky->SetTime(val_f);
 
     }));
 
@@ -266,10 +270,8 @@ int DebugUI::InitDebugCommands()
     }));
     d_console_cmd_handler->AddCommand("vis_cascades", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam0.getViewProjectMatrix());
-        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam1.getViewProjectMatrix());
-        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam2.getViewProjectMatrix());
-        sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam3.getViewProjectMatrix());
+        for (int i = 0 ; i < 4 ; i++)
+            sc->d_debugDrawMgr.AddCameraFrustrum(sc->d_shadowmap_cam[i].getViewProjectMatrix());
 
         sc->d_debugDrawMgr.Update();
 
@@ -277,11 +279,22 @@ int DebugUI::InitDebugCommands()
 
     d_console_cmd_handler->AddCommand("vis_camaabb", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        sc->d_debugDrawMgr.AddAABB(FrustrumSize2(sc->cam.getViewProjectMatrix()));
+        //sc->d_debugDrawMgr.AddAABB(FrustrumSize2(sc->cam.getViewProjectMatrix()));
+        //sc->d_debugDrawMgr.Update();
+
+        for (int i = 0 ; i < 4; i++)
+            sc->d_debugDrawMgr.AddAABB(sc->cameraFrustrumAABB[i] );
         sc->d_debugDrawMgr.Update();
 
     }));
+    d_console_cmd_handler->AddCommand("vis_cascadeaabb", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
 
+        for (int i = 0 ; i < 4; i++)
+            sc->d_debugDrawMgr.AddAABB(sc->cameraTransformFrustrumAABB[i] );
+        sc->d_debugDrawMgr.Update();
+
+    }));
 
     d_console_cmd_handler->AddCommand("rec", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
@@ -299,7 +312,7 @@ int DebugUI::InitDebugCommands()
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
         sc->d_render_list[0].reset(new SObjModel(args[1]));
-        sc->d_render_list[0]->ConfigureProgram( *(sc->r_prog));
+        sc->d_render_list[0]->ConfigureProgram( *(sc->main_pass_shader));
         sc->d_render_list[0]->ConfigureProgram( *(sc->cam_prog));
         sc->d_render_list[0]->ConfigureProgram( *(sc->cubemap_prog_generator));
         sc->d_first_render = false;
@@ -474,8 +487,112 @@ int DebugUI::DrawGUI()
             sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",bloomMul);
          }
     }
-    ImGui::End();
+    static float shadowBias = 1.0;
+    static float shadowEpsMult = 1.0;
+    static float shadowPenumbra = 1500.0;
+    if (ImGui::CollapsingHeader("Shadows"))
+    {
+        ImGui::Text("Bias");
+        if (ImGui::SliderFloat("Bias", &shadowBias, 0.0f,25.0f)) {
+            sc->main_pass_shader->SetUniform("shadowEps", 0.0001f*shadowBias);
+        }
+        if (ImGui::SliderFloat("Penumbra", &shadowPenumbra, 0.0f,2200.0f)) {
+            sc->main_pass_shader->SetUniform("shadowPenumbra", shadowPenumbra);
+        }
+        if (ImGui::SliderFloat("shadowEpsMult", &shadowEpsMult,0.0f,25.0f)) {
+            sc->main_pass_shader->SetUniform("shadowEpsMult", 0.0001f*shadowEpsMult);
+        }
+        if (ImGui::Button("Reset"))
+        {
+            shadowBias = 1.0;
+            shadowPenumbra = 1500.0;
+            shadowEpsMult = 1.0;
+            sc->main_pass_shader->SetUniform("shadowEps",0.0001f*shadowBias);
+            sc->main_pass_shader->SetUniform("shadowEpsMult",0.0001f*shadowEpsMult);
+            sc->main_pass_shader->SetUniform("shadowPenumbra",shadowPenumbra);
+        }
+    }
+    static float WeatherLocalTime = 1.0;
+    static float WeatherSkyTurbidity = 2.0;
+    static float WearherSunSize = 100.0;
+    if (ImGui::CollapsingHeader("Weather")) {
+        if (ImGui::SliderFloat("LocalTime", &WeatherLocalTime, 0.0f,25.0f)) {
+            sc->w_sky->SetTime(WeatherLocalTime);
+        }
+        if (ImGui::SliderFloat("SkyTurbidity", &WeatherSkyTurbidity, 0.0f,25.0f)) {
+            sc->w_sky->SetTurbidity(WeatherSkyTurbidity);
+        }
+        if (ImGui::SliderFloat("SunSize", &WearherSunSize, 0.0f,1000.0f)) {
+            sc->w_sky->SetSunSize(WearherSunSize);
+        }
+        if (ImGui::Button("Reset"))
+        {
+            WeatherLocalTime = 1.0;
+            WeatherSkyTurbidity = 2.0;
+            WearherSunSize = 100.0;
+            sc->w_sky->SetTime(WeatherLocalTime);
+            sc->w_sky->SetTurbidity(WeatherSkyTurbidity);
+            sc->w_sky->SetSunSize(WearherSunSize);
+        }
+    }
 
+    /*Sample code*/
+    static bool gImGuiTest = false;
+    ImGui::Checkbox("GuiTest", &gImGuiTest);
+    if (gImGuiTest) {
+        ImGui::ShowTestWindow(&gImGuiTest);
+    }
+    static bool s_guiWndIs = false;
+    ImGui::Checkbox("Introspection",&s_guiWndIs);
+    if (s_guiWndIs) {
+        DrawIntrospectionGUI(&s_guiWndIs);
+    }
+
+    ImGui::End();
+}
+
+int DebugUI::DrawIntrospectionGUI(bool *opened)
+{
+    ImGui::Begin("Introspection",opened, ImGuiWindowFlags_AlwaysAutoResize);
+
+    if (ImGui::TreeNode("Shaders"))
+    {
+        auto sh = SShader::getShaderSharedList();
+        for (auto &s : sh) {
+         if (ImGui::TreeNode((s->GetVertexShaderFileName() + std::string("  ")+ s->GetFragmentShaderFileName()).c_str())) {
+            //ImGui::TreeNode("Source");
+            //ImGui::TreeNode("Uniforms");
+            ImGui::TreePop();
+         }
+        }
+
+
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Pipeline"))
+    {
+        ImGui::Text("TODO");
+        ImGui::TreePop();
+    }
+    static int rbSelect = 0;
+    if (ImGui::TreeNode("Render Buffers"))
+    {
+
+        ImGui::RadioButton("Normal output", &rbSelect, 0);
+        auto rlist = RBO::debugGetRenderOutputList();
+        int it = 0;
+        for (auto &r : rlist) {
+            it++;
+            ImGui::RadioButton(r->getName().c_str(), &rbSelect, it);
+            if (it == rbSelect) {
+            sc->debugSetFinalRenderOutput(r);
+            }
+        }
+        sc->debugSetDebugRenderOutputFlag(!!rbSelect);
+
+        ImGui::TreePop();
+    }
+    ImGui::End();
 
 }
 
@@ -499,24 +616,6 @@ int DebugUI::UpdateCfgLabel() {
 
 
 
-    cfg_label->setText(std::string("----------Settings-----------\n") +
-            C_I(0) + string_format("%f - SSAO Bloor Size\n",d_cfg[0]) +
-            C_I(1) + string_format("%f - SSAO Size \n",d_cfg[1])  +
-            C_I(2) + string_format("%f - SSAO LevelClamp\n",d_cfg[2]) +
-            C_I(3) + string_format("%f - SSAO DepthClamp\n",d_cfg[3]) +
-            C_I(4) + string_format("%f - HDR Bloom Clamp\n",d_cfg[4]) +
-            C_I(5) + string_format("%f - HDR Bloom Mul\n",d_cfg[5])   +
-            C_I(6) + string_format("%f - HDR Bloor Size\n",d_cfg[6])  +
-            C_I(7) + string_format("%f - HDR (A) Shoulder Strength\n",d_cfg[7])  +
-            C_I(8) + string_format("%f - HDR (B) Lineral Strength\n",d_cfg[8])  +
-            C_I(9) + string_format("%f - HDR (C) Lineral Angle\n",d_cfg[9])  +
-            C_I(10) + string_format("%f - HDR (D) Toe Strength\n",d_cfg[10])  +
-            C_I(11) + string_format("%f - HDR (E) Toe Numerator\n",d_cfg[11])  +
-            C_I(12) + string_format("%f - HDR (F) Toe Numerator\n",d_cfg[12])  +
-            C_I(13) + string_format("%f - HDR (LW) Lineral White\n",d_cfg[13])  +
-             C_I(14) + string_format("%f - Base Light Power Multipler\n",d_cfg[14])
-            );
-
     sc->pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",d_cfg[0]);
     sc->pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",d_cfg[0]);
     /*dbg*/
@@ -530,10 +629,6 @@ int DebugUI::UpdateCfgLabel() {
     sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",d_cfg[5]);
 
 
-    //pp_prog_hdr_blur_hor->SetUniform("blurSize",d_cfg[6]);
-    //pp_prog_hdr_blur_vert->SetUniform("blurSize",d_cfg[6]);
-
-
     sc->pp_prog_hdr_tonemap->SetUniform("A",d_cfg[7]);
     sc->pp_prog_hdr_tonemap->SetUniform("B",d_cfg[8]);
     sc->pp_prog_hdr_tonemap->SetUniform("C",d_cfg[9]);
@@ -542,7 +637,7 @@ int DebugUI::UpdateCfgLabel() {
     sc->pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
     sc->pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])));
 
-    sc->r_prog->SetUniform("lightIntensity",d_cfg[14]);
+    sc->main_pass_shader->SetUniform("lightIntensity",d_cfg[14]);
 
     return ESUCCESS;
 }

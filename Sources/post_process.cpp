@@ -137,6 +137,12 @@ std::shared_ptr<RBO> SPostProcess::getResultRBO()
 
 }
 
+int SPostProcess::setTexSrc1(std::shared_ptr<SRBOTexture> r)
+{
+    d_texSRC1 = r;
+    return 0;
+}
+
 void SPostProcess::InitQuard()
 {
     GLfloat vertices[] = { -1, -1, //bottom left corner

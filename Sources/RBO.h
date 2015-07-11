@@ -1,10 +1,10 @@
-#pragma once 
+#pragma once
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
 /* enums can't forward */
 #include "r_rbo_texture.h"
-
+#include <vector>
 class SVec2;
 
 /*RenderTarget Type*/
@@ -25,23 +25,24 @@ public:
     };
 
 	/*base constructor*/
-    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
+    RBO(std::string name,int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
                                                std::shared_ptr<SRBOTexture> texIMG1,\
                                                std::shared_ptr<SRBOTexture> texIMG2,\
                                                std::shared_ptr<SRBOTexture> texDEPTH);
 
-    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
+    RBO(std::string name,int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
                                                std::shared_ptr<SRBOTexture> texDEPTH)
-        :RBO(w, h , type , texIMG,nullptr,nullptr, texDEPTH ){}
-    RBO(int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(w, h , type , texIMG, nullptr ){}
 
-    RBO(int def_w, int def_h,RBOType type);
+        : RBO(name , w, h , type , texIMG,nullptr,nullptr, texDEPTH ){}
+    RBO(std::string name,int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(name,w, h , type , texIMG, nullptr ){}
 
-    RBO(int w, int h) :RBO(w,h,RBO_SCREEN) {}
+    RBO(std::string name,int def_w, int def_h,RBOType type);
+
+    RBO(std::string name,int w, int h) :RBO(name,w,h,RBO_SCREEN) {}
     ~RBO();
 
     /*new interface*/
-    RBO(int def_w, int def_h,RBOType type, SRBOTexture::RTType t0_type, int t0_s, \
+    RBO(std::string name,int def_w, int def_h,RBOType type, SRBOTexture::RTType t0_type, int t0_s, \
                                            SRBOTexture::RTType t1_type, int t1_s, \
                                            SRBOTexture::RTType t2_type, int t2_s );
 
@@ -51,6 +52,8 @@ public:
 
     int Bind(bool clear) const;
     int Bind() const {return Bind(true);}
+
+    std::string getName();
 
 
 
@@ -69,6 +72,7 @@ private:
 
     int d_w;
     int d_h;
+    std::string d_name;
     GLuint depthrenderbuffer = 0;
     GLuint d_fbo = 0;
 
@@ -90,4 +94,11 @@ private:
     static SRBOTexture::RTType  getRelatedRBOTextueTypeFromRBOType( RBOType t);
     static SRBOTexture::RTType  getRelatedDepthRBOTextueTypeFromRBOType( RBOType t);
     static bool isDepthOnlyType(RBOType t);
+    /*debug API to RBOList*/
+public:
+    static std::vector<std::shared_ptr<RBO> > debugGetRenderOutputList();
+private:
+    int debugRegisterSelf();
+    static std::vector< std::shared_ptr <RBO> > debugRenderOutputList;
 };
+
