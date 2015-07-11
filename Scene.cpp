@@ -20,7 +20,7 @@
 #include "r_sprog.h"
 
 
-SScene::SScene(RectSize v)
+SScene::SScene(RectSizeInt v)
     :rtSCREEN(new RBO(std::string("rtSCREEN"), v.w,v.h,RBO::RBO_SCREEN))
     ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
     //,cam(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1.0f,100.0,-100.0,-100.0))

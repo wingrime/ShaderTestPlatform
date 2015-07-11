@@ -1,6 +1,6 @@
 #include "UILabel.h"
 #include "mat_math.h"
-UILabel::UILabel(RectSize &v, float x , float y) {
+UILabel::UILabel(RectSizeInt &v, float x , float y) {
 
     fnt = ft.Construct(20);
     v_port = v;

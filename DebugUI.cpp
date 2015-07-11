@@ -5,7 +5,7 @@
 #include "r_sprog.h"
 #include <imgui.h>
 #include <RBO.h>
-DebugUI::DebugUI(SScene *_s, RectSize &_v)
+DebugUI::DebugUI(SScene *_s, RectSizeInt &_v)
     :v(_v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
     ,err_con(new UIConsoleErrorHandler(con))
@@ -30,91 +30,6 @@ int DebugUI::Draw()
     }
     con->Draw();
 
-}
-/*todo: move to some place*/
-
-AABB FrustrumSize2(const SMat4x4& r) {
-
-    SMat4x4 invPV = r.Inverse();
-    SVec4 f1 = invPV*SVec4(1.0,-1.0,-1.0,1.0);
-    f1.DivW();
-    SVec4 f2 = invPV*SVec4(-1.0,1.0,-1.0,1.0);
-    f2.DivW();
-    SVec4 f3 = invPV*SVec4(1.0,1.0,-1.0,1.0);
-    f3.DivW();
-    SVec4 f4 = invPV*SVec4(-1.0,-1.0,-1.0,1.0);
-    f4.DivW();
-
-    SVec4 b1 = invPV*SVec4(1.0,-1.0,1.0,1.0);
-    b1.DivW();
-    SVec4 b2 = invPV*SVec4(-1.0,1.0,1.0,1.0);
-    b2.DivW();
-    SVec4 b3 = invPV*SVec4(1.0,1.0,1.0,1.0);
-    b3.DivW();
-    SVec4 b4 = invPV*SVec4(-1.0,-1.0,1.0,1.0);
-    b4.DivW();
-
-    float x_m;
-    x_m = fmax(f1.x,f2.x);
-    x_m = fmax(x_m,f3.x);
-    x_m = fmax(x_m,f4.x);
-    x_m = fmax(x_m,b1.x);
-    x_m = fmax(x_m,b2.x);
-    x_m = fmax(x_m,b3.x);
-    x_m = fmax(x_m,b4.x);
-
-    float x_mi;
-    x_mi = fmin(f1.x,f2.x);
-    x_mi = fmin(x_mi,f3.x);
-    x_mi = fmin(x_mi,f4.x);
-    x_mi = fmin(x_mi,b1.x);
-    x_mi = fmin(x_mi,b2.x);
-    x_mi = fmin(x_mi,b3.x);
-    x_mi = fmin(x_mi,b4.x);
-
-    float y_m;
-    y_m = fmax(f1.y,f2.y);
-    y_m = fmax(y_m,f3.y);
-    y_m = fmax(y_m,f4.y);
-    y_m = fmax(y_m,b1.y);
-    y_m = fmax(y_m,b2.y);
-    y_m = fmax(y_m,b3.y);
-    y_m = fmax(y_m,b4.y);
-
-    float y_mi;
-    y_mi = fmin(f1.y,f2.y);
-    y_mi = fmin(y_mi,f3.y);
-    y_mi = fmin(y_mi,f4.y);
-    y_mi = fmin(y_mi,b1.y);
-    y_mi = fmin(y_mi,b2.y);
-    y_mi = fmin(y_mi,b3.y);
-    y_mi = fmin(y_mi,b4.y);
-
-    float z_m;
-    z_m = fmax(f1.z,f2.z);
-    z_m = fmax(z_m,f3.z);
-    z_m = fmax(z_m,f4.z);
-    z_m = fmax(z_m,b1.z);
-    z_m = fmax(z_m,b2.z);
-    z_m = fmax(z_m,b3.z);
-    z_m = fmax(z_m,b4.z);
-
-    float z_mi;
-    z_mi = fmin(f1.z,f2.z);
-    z_mi = fmin(z_mi,f3.z);
-    z_mi = fmin(z_mi,f4.z);
-    z_mi = fmin(z_mi,b1.z);
-    z_mi = fmin(z_mi,b2.z);
-    z_mi = fmin(z_mi,b3.z);
-    z_mi = fmin(z_mi,b4.z);
-
-
-
-    AABB a;
-    a.min_point = Point(x_mi,y_mi,z_mi);
-    a.max_point = Point(x_m,y_m,z_m);
-
-    return a;
 }
 int DebugUI::InitDebugCommands()
 {

@@ -6,12 +6,12 @@ class SScene;
 class DebugUI {
 public:
 
-        RectSize v;
+        RectSizeInt v;
         std::shared_ptr<ConsoleCommandHandler> d_console_cmd_handler;
         UIConsole *con;
 
 
-    DebugUI(SScene *_s, RectSize &v);
+    DebugUI(SScene *_s, RectSizeInt &v);
     int Draw();
     int InitDebugCommands();
 

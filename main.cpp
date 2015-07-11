@@ -395,7 +395,6 @@ void special(int key, int x, int y){
     //else if (key == GLUT_KEY_RIGHT) sc->dbg_ui.incCfgItem();
    // FIXME else s_input->HandleInputKey(key); FIXME
 }
-
 void mouse(int button, int state, int x, int y)  {
     ImGuiIO& io = ImGui::GetIO();
     /*imgui hook*/
@@ -537,7 +536,7 @@ int main ( int argc, char * argv [] )
 
     LOGV("Create Scene");
 
-    MainScene msc(RectSize(h,w));
+    MainScene msc(RectSizeInt(h,w));
 
     imGuiSetup();
 

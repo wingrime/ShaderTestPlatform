@@ -14,7 +14,7 @@ class RBO;
 
 class UIConsole {
 public:
-    UIConsole(RectSize& v, std::shared_ptr<AbstractCommandHandler> cmd_h);
+    UIConsole(RectSizeInt& v, std::shared_ptr<AbstractCommandHandler> cmd_h);
     ~UIConsole();
     /*Draw console*/
     void Draw();
@@ -34,7 +34,7 @@ private:
 
     const unsigned int d_con_sz =  20; /*max messages in console log*/
     UIFontFactory ft;
-    RectSize v_port;
+    RectSizeInt v_port;
     UIFont * fnt ;
     std::vector<std::string> con;
     std::vector<std::string> console_history;

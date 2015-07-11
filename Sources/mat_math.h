@@ -228,11 +228,11 @@ struct Point2d  {
     Point2d () :x(0.0),y(0.0) {}
     float x,y;
 };
-/* rectangle size in D2*/
-struct RectSize  {
-    RectSize(float _h,float _w) :h(_h),w(_h) {}
-    RectSize () :h(0.0),w(0.0) {}
-    float h,w;
+/* intger rectangle size in D2*/
+struct RectSizeInt  {
+    RectSizeInt(int _h,int _w) :h(_h),w(_h) {}
+    RectSizeInt () :h(0.0),w(0.0) {}
+    int h,w;
 };
 /* AABB in 2d */
 class BBox {

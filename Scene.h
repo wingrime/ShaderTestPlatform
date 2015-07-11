@@ -26,7 +26,7 @@
 class SScene {
 public:
     friend class DebugUI;
-    SScene(RectSize v);
+    SScene(RectSizeInt v);
     ~SScene();
     int Render();
 
@@ -152,5 +152,5 @@ public:
 };
 class MainScene :public Singltone<SScene>  ,public SScene{
 public:
-    MainScene(RectSize t) :SScene (t), Singltone(this){}
+    MainScene(RectSizeInt t) :SScene (t), Singltone(this){}
 };
