@@ -24,7 +24,7 @@ public:
     /*on screen UI shold be rid from there*/
     int UpdateCfgLabel();
     int UpdateViewSelLabel();
-    inline int Init() { UpdateCfgLabel();UpdateViewSelLabel();InitDebugCommands();}
+    inline int Init() { UpdateViewSelLabel();InitDebugCommands();}
     int upCfgItem();
     int downCfgItem();
     int incCfgItem();
@@ -64,7 +64,7 @@ public:
     int d_cfg_current = 0;
     int d_cfg_max = 14;
     /*default parameter set*/
-    float  d_cfg [15] = {0.020, 0.40,0.00,0.26,2.0,0.75,0.015,0.22,0.30,0.10,0.20,0.01,0.30,1.12,4.6};
+
     float d_cfg_step = 0.001;
 
     SScene *sc;

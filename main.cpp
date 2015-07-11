@@ -389,10 +389,10 @@ void mouse_move (  int x , int y) {
 void special(int key, int x, int y){
     SScene * sc = MainScene::GetInstance();
 
-    if (key == GLUT_KEY_DOWN) sc->dbg_ui.downCfgItem();
-    else if (key == GLUT_KEY_UP) sc->dbg_ui.upCfgItem();
-    else if (key == GLUT_KEY_LEFT) sc->dbg_ui.decCfgItem();
-    else if (key == GLUT_KEY_RIGHT) sc->dbg_ui.incCfgItem();
+    //if (key == GLUT_KEY_DOWN) sc->dbg_ui.downCfgItem();
+    //else if (key == GLUT_KEY_UP) sc->dbg_ui.upCfgItem();
+    //else if (key == GLUT_KEY_LEFT) sc->dbg_ui.decCfgItem();
+    //else if (key == GLUT_KEY_RIGHT) sc->dbg_ui.incCfgItem();
    // FIXME else s_input->HandleInputKey(key); FIXME
 }
 

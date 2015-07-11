@@ -117,6 +117,8 @@ SScene::SScene(RectSize v)
 
     dbg_ui.Init();
 
+    UpdateCfgLabel();
+
 }
 
 SScene::~SScene()
@@ -503,18 +505,18 @@ int SScene::BlurKawase()
     int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("blurSize");
     pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)0.0);
     pp_stage_hdr_blur_hor->DrawRBO(false);
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*1.0));
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*1.0));
     pp_stage_hdr_blur_vert->DrawRBO(false);
 
     /*ping pong 1*/
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*2.0));
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*2.0));
     pp_stage_hdr_blur_hor2->DrawRBO(false);
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*2.0));
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*2.0));
     pp_stage_hdr_blur_vert2->DrawRBO(false);
     /*ping pong 2*/
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*3.0));
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*3.0));
     pp_stage_hdr_blur_hor2->DrawRBO(false);
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(dbg_ui.d_cfg[6]*3.0));
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(d_cfg[6]*3.0));
     pp_stage_hdr_blur_vert2->DrawRBO(false);
     return 0;
 }
@@ -644,4 +646,31 @@ int SScene::Render() {
     dbg_ui.fps_label->setText(buf);
    
     return true;
+}
+int SScene::UpdateCfgLabel() {
+
+    pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",d_cfg[0]);
+    pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",d_cfg[0]);
+    /*dbg*/
+    pp_prog_hdr_tonemap->SetUniform("aoStrength",d_cfg[0]);
+
+    SShader * s = pp_stage_ssao->getShader();
+    s->SetUniform("ssaoSize",d_cfg[1]);
+    s->SetUniform("ssaoLevelClamp",d_cfg[2]);
+    s->SetUniform("ssaoDepthClamp",d_cfg[3]);
+    pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomClamp",d_cfg[4]);
+    pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",d_cfg[5]);
+
+
+    pp_prog_hdr_tonemap->SetUniform("A",d_cfg[7]);
+    pp_prog_hdr_tonemap->SetUniform("B",d_cfg[8]);
+    pp_prog_hdr_tonemap->SetUniform("C",d_cfg[9]);
+    pp_prog_hdr_tonemap->SetUniform("D",d_cfg[10]);
+    pp_prog_hdr_tonemap->SetUniform("E",d_cfg[11]);
+    pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
+    pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])));
+
+    main_pass_shader->SetUniform("lightIntensity",d_cfg[14]);
+
+    return ESUCCESS;
 }

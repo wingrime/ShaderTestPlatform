@@ -338,16 +338,6 @@ int DebugUI::downCfgItem() {
         d_cfg_current++;
     return 0;
 }
-int DebugUI::incCfgItem() {
-    d_cfg[d_cfg_current] +=d_cfg_step;
-    return 0;
-}
-
-int DebugUI::decCfgItem() {
-    d_cfg[d_cfg_current] -=d_cfg_step;
-    return 0;
-}
-
 const inline std::string DebugUI::C_I(int n) {
     const std::string s("[>]");
     const std::string ns("[ ]");
@@ -609,35 +599,6 @@ int DebugUI::UpdateViewSelLabel() {
              V_I(V_VOLUMETRIC) + string_format("Volumetric Test \n",d_v_sel[V_VOLUMETRIC]) +
              V_I(V_CUBEMAPTEST) + string_format("LuxKey\n",d_v_sel[V_CUBEMAPTEST])
             );
-
-    return ESUCCESS;
-}
-int DebugUI::UpdateCfgLabel() {
-
-
-
-    sc->pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",d_cfg[0]);
-    sc->pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",d_cfg[0]);
-    /*dbg*/
-    sc->pp_prog_hdr_tonemap->SetUniform("aoStrength",d_cfg[0]);
-
-    SShader * s = sc->pp_stage_ssao->getShader();
-    s->SetUniform("ssaoSize",d_cfg[1]);
-    s->SetUniform("ssaoLevelClamp",d_cfg[2]);
-    s->SetUniform("ssaoDepthClamp",d_cfg[3]);
-    sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomClamp",d_cfg[4]);
-    sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",d_cfg[5]);
-
-
-    sc->pp_prog_hdr_tonemap->SetUniform("A",d_cfg[7]);
-    sc->pp_prog_hdr_tonemap->SetUniform("B",d_cfg[8]);
-    sc->pp_prog_hdr_tonemap->SetUniform("C",d_cfg[9]);
-    sc->pp_prog_hdr_tonemap->SetUniform("D",d_cfg[10]);
-    sc->pp_prog_hdr_tonemap->SetUniform("E",d_cfg[11]);
-    sc->pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
-    sc->pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])));
-
-    sc->main_pass_shader->SetUniform("lightIntensity",d_cfg[14]);
 
     return ESUCCESS;
 }
