@@ -277,24 +277,14 @@ void SObjModel::Render(RenderContext& r) {
             if (last_hash != m.name_hash){
                 last_hash = m.name_hash;
                 BindTextures(&m);
-
+                for (int i = 0 ; i < r.MAX_RBO_TEXTURES;i++)
+                {
+                    if (r.d_RBOTexture[i]) {
+                       r.d_RBOTexture[i]->Bind(5+i);
+                   }
+                }
                 /*shader*/
                 /*shadow mapping*/
-                if (r.d_RBOTexture[0]) {
-                   r.d_RBOTexture[0]->Bind(5);
-               }
-                if (r.d_RBOTexture[1]) {
-                   r.d_RBOTexture[1]->Bind(6);
-               }
-                if (r.d_RBOTexture[2]) {
-                   r.d_RBOTexture[2]->Bind(7);
-                }
-                if (r.d_RBOTexture[3]) {
-                   r.d_RBOTexture[3]->Bind(8);
-                }
-                if (r.d_RBOTexture[4]) {
-                   r.d_RBOTexture[4]->Bind(9);
-                }
             }
             auto& idx = submesh_idx[submesh->id];
             glBindBuffer(GL_ARRAY_BUFFER, idx.vbo);

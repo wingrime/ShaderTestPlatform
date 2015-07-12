@@ -57,8 +57,8 @@ class RenderContext {
     	const RBO *viewport;
         SMat4x4 d_V;
         SMat4x4 d_P;
-
-        std::shared_ptr<SRBOTexture> d_RBOTexture[5];
+        static constexpr int MAX_RBO_TEXTURES = 5;
+        std::shared_ptr<SRBOTexture> d_RBOTexture[MAX_RBO_TEXTURES];
         /**/
         inline int initUniforms() {
             d_viewMatrixLoc = shader->getUniformLocation("view");
