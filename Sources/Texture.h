@@ -35,7 +35,7 @@ public:
     STexture(const STexture&) = delete;
      ~STexture();
     int Bind(unsigned int sampler) const;
-
+    int setInterpolationMode(InterpolationType t);
     int BindImage(unsigned int unit);
     int x,y;
 

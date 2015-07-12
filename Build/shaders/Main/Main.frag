@@ -34,6 +34,7 @@ uniform sampler2D texIMG;
 uniform sampler2D texBUMP;
 uniform sampler2D texture_alpha_sampler;
 uniform sampler2D sh_bands_sampler;
+uniform sampler2D samplerRandomNoise;
 /* Shadow map depth buffer*/
 uniform sampler2DArray sm_depth_sampler;
 /*test*/
@@ -349,14 +350,20 @@ Directional Light not translable, so set w to 0.0;
 
 	shadow = 0.0;
  	float shadowPenumbraDisp = shadowPenumbra ;
+ 	/*Too costly !!!*/
+ 	vec2 randomFromTexture = normalize(-1.0+2.0*texture(samplerRandomNoise, 0.5+0.5*reflect(UvMS,gl_FragCoord.yx)).gb);
 if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
                 vec4 s;
                 for (int i=0;i<sm_samples;i+=4)
                 {
-                    s.x = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                    s.y = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[1+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                    s.z = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[2+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                    s.w = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[3+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                    s.x = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                   	s.y = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+1],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                   	s.z = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+2],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                   	s.w = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+3],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                    //s.y = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[1+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                    //s.z = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[2+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                    //s.w = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[3+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                    
                     shadow += dot (s,vec4(1.0));
 
                 }

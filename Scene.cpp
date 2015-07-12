@@ -6,6 +6,7 @@
 #include "math.h"
 #include "mat_math.h"
 #include "RenderState.h"
+#include "Texture.h"
 
 
 /////PROTO//////
@@ -113,8 +114,10 @@ SScene::SScene(RectSizeInt v)
     postProcessDebugOutput.reset(new SPostProcess(shaderViewAsIs.get(),w,h));
 
 
-    rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::RTINT_NEAREST);
+    rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
 
+    texRandom.reset(new STexture("noise.png"));
+    texRandom->setInterpolationMode(STexture::InterpolationType::TEX_NEAREST);
     dbg_ui.Init();
 
     UpdateCfgLabel();
@@ -523,7 +526,13 @@ int SScene::BlurKawase()
 }
 int inline SScene::RenderDirect(const RBO& v) {
     v.Bind(true);    
-        RenderContext r_ctx(main_pass_shader.get() ,cam.getViewMatrix(), cam.getProjMatrix() ,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1), rtCubemap->texIMG(0), rtShadowMap->texIMG(0),rtConvoledCubemap);
+        RenderContext r_ctx(main_pass_shader.get() ,cam.getViewMatrix(), cam.getProjMatrix() ,
+                            rtShadowMap->texDEPTH(),
+                            rtShadowMap->texIMG(1),
+                            rtCubemap->texIMG(0),
+                            rtShadowMap->texIMG(0),
+                            rtConvoledCubemap,
+                            texRandom);
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }

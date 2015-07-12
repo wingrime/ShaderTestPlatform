@@ -8,6 +8,10 @@ public:
         TEX_CLAMP = 0,
         TEX_REPEAT
     };
+    enum InterpolationType  {
+        TEX_NEAREST = 0,
+        TEX_LINERAL
+    };
     virtual int Bind(unsigned int sampler) const = 0;
     unsigned int inline getGLId() const {
         return d_glTexID;

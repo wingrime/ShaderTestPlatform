@@ -29,10 +29,7 @@ public:
         RT_TEXTURE_DEPTH_ARRAY
     };
 
-    enum InterpolationType  {
-        RTINT_NEAREST = 0,
-        RTINT_LINERAL
-    };
+
     /* simple empty texture */
     SRBOTexture(RectSizeInt s)
     :SRBOTexture(s,RT_TEXTURE_FLOAT) {}

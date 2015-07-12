@@ -70,6 +70,7 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     sprog.SetUniform("rsm_vector_sampler",7);
     sprog.SetUniform("rsm_albedo_sampler",8);
     sprog.SetUniform("sh_bands_sampler",9);
+    sprog.SetUniform("samplerRandomNoise",10);
     sprog.Bind();
 
     return 0;
