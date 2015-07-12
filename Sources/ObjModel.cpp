@@ -262,11 +262,11 @@ void SObjModel::Render(RenderContext& r) {
         }
     */
         s->SetUniform(r.d_modelMatrixLoc,model);
-        s->SetUniform(r.d_viewMatrixLoc,r.camera->getViewMatrix());
-        s->SetUniform(r.d_projMatrixLoc,r.camera->getProjMatrix());
+        s->SetUniform(r.d_viewMatrixLoc,r.d_V);
+        s->SetUniform(r.d_projMatrixLoc,r.d_P);
         /*optimize*/
-         s->SetUniform(r.d_MVP,r.camera->getViewProjectMatrix());
-         s->SetUniform(r.d_MV,r.camera->getViewMatrix()*model);//small todo
+         s->SetUniform(r.d_uniformMVP,r.d_P*r.d_V);
+         s->SetUniform(r.d_uniformMV,r.d_V*model);//small todo
 
         std::size_t last_hash = -1;
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {

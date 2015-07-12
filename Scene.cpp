@@ -442,7 +442,7 @@ int inline SScene::RenderShadowMap(const RBO& v) {
     cam_prog->SetUniform("MVP1",d_shadowmap_cam[1].getProjMatrix()*d_shadowmap_cam[1].getViewMatrix());
     cam_prog->SetUniform("MVP2",d_shadowmap_cam[2].getProjMatrix()*d_shadowmap_cam[2].getViewMatrix());
     cam_prog->SetUniform("MVP3",d_shadowmap_cam[3].getProjMatrix()*d_shadowmap_cam[3].getViewMatrix());
-    RenderContext r_ctx(&v, cam_prog.get() ,&d_shadowmap_cam[0]);
+    RenderContext r_ctx(&v, cam_prog.get() ,d_shadowmap_cam[0].getViewMatrix(),d_shadowmap_cam[0].getProjMatrix());
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
     }
@@ -465,9 +465,9 @@ int SScene::RenderCubemap()
     SMat4x4 pos = SMat4x4().Move(0,-500.0,0.0);
     //d_debugDrawMgr.AddCross({(float)(0.0-step*100.0),200,1.0},50);
     d_debugDrawMgr.Update();
-    SCamera cubemap_cam(pos,SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0)));
-    RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator.get() ,&cubemap_cam);
-    RenderContext r_ctx2(rtCubemap.get() , main_pass_shader.get() ,&cubemap_cam);
+    SMat4x4 cube_projection = SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0));
+    RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator.get() ,pos,cube_projection);
+    RenderContext r_ctx2(rtCubemap.get() , main_pass_shader.get() ,pos,cube_projection);
 
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
@@ -493,7 +493,7 @@ int SScene::RenderPrepass(const RBO &v)
 {
     v.Bind(true);
     /*submit geometry for prepass*/
-    RenderContext r_ctx_prepass(&v, prepass_prog.get() ,&cam);
+    RenderContext r_ctx_prepass(&v, prepass_prog.get() ,cam.getViewMatrix(),cam.getProjMatrix());
     for (auto& r : d_render_list ) {
         r->Render(r_ctx_prepass);
     }
@@ -525,21 +525,20 @@ int inline SScene::RenderDirect(const RBO& v) {
     v.Bind(true);    
     if (rWireframe)
     {
-        RenderContext r_ctx(&v, cam_prog.get() ,&d_shadowmap_cam[0]);
+        RenderContext r_ctx(&v, cam_prog.get() ,d_shadowmap_cam[0].getViewMatrix(), d_shadowmap_cam[0].getProjMatrix());
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
     }
     else
     {
-        RenderContext r_ctx(&v, main_pass_shader.get() ,&cam,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1), rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
+        RenderContext r_ctx(&v, main_pass_shader.get() ,cam.getViewMatrix(), cam.getProjMatrix() ,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1), rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
         r_ctx.sh_bands = rtConvoledCubemap;
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
         //TODO: Move to weathersky
-        SCamera s(cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix());
-        RenderContext r_ctx2(&v, w_sky->GetSkyShader() ,&s,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1) ,rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
+        RenderContext r_ctx2(&v, w_sky->GetSkyShader() ,cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1) ,rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
         w_sky->GetSkyModel()->Render(r_ctx2);
     }
 
