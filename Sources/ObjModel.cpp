@@ -15,9 +15,9 @@
 #include "r_shader.h"
 #include "mat_math.h"
 #include "RBO.h"
-#include "r_texture.h"
+#include "Texture.h"
 #include "r_projmat.h"
-#include "r_context.h"
+#include "RenderContext.h"
 #include "MAssert.h"
 
 #include "string_format.h"

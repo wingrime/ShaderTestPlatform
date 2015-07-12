@@ -3,7 +3,7 @@
 #include <GL/gl.h>
 #include <GL/wglew.h>
 /* enums can't forward */
-#include "r_rbo_texture.h"
+#include "RBOTexture.h"
 #include <vector>
 class SVec2;
 

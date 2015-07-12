@@ -1,11 +1,11 @@
-#include "r_rbo_texture.h"
+#include "RBOTexture.h"
 #include "ErrorCodes.h"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
 
-#include "r_texture.h"
+#include "Texture.h"
 #include "string_format.h"
 #include "MAssert.h"
 #include "Log.h"
