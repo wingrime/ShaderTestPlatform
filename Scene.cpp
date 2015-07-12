@@ -442,7 +442,7 @@ int inline SScene::RenderShadowMap(const RBO& v) {
     cam_prog->SetUniform("MVP1",d_shadowmap_cam[1].getProjMatrix()*d_shadowmap_cam[1].getViewMatrix());
     cam_prog->SetUniform("MVP2",d_shadowmap_cam[2].getProjMatrix()*d_shadowmap_cam[2].getViewMatrix());
     cam_prog->SetUniform("MVP3",d_shadowmap_cam[3].getProjMatrix()*d_shadowmap_cam[3].getViewMatrix());
-    RenderContext r_ctx(cam_prog.get() ,d_shadowmap_cam[0].getViewMatrix(),d_shadowmap_cam[0].getProjMatrix());
+    RenderContext r_ctx(cam_prog.get());
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
     }

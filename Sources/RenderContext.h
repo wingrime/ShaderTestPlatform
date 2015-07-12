@@ -13,6 +13,11 @@ Required
 */
 class RenderContext {
     public:
+        RenderContext(SShader* _s)
+            :shader(_s)
+        {
+            initUniforms();
+        }
         RenderContext(SShader* _s, const SMat4x4& _V, const SMat4x4 &_P)
             :shader(_s),
             d_V(_V),
