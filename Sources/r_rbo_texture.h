@@ -10,8 +10,8 @@
 #include <cereal/archives/binary.hpp>
 
 #include "mat_math.h"
-
-class SRBOTexture {
+#include "GenericTexture.h"
+class SRBOTexture :public SGenericTexture {
 public:
     enum RTType  {
         RT_NONE, /* empty slot*/
@@ -28,10 +28,7 @@ public:
         RT_TEXTURE_DEPTH_CUBEMAP,
         RT_TEXTURE_DEPTH_ARRAY
     };
-    enum BorderType {
-        TEX_CLAMP = 0,
-        TEX_REPEAT
-    };
+
     enum InterpolationType  {
         RTINT_NEAREST = 0,
         RTINT_LINERAL
@@ -48,7 +45,7 @@ public:
     int BindImage(unsigned int unit);
 
     int setInterpolationMode(InterpolationType t);
-    unsigned int getGLId() const;
+
     RectSizeInt d_s;
 
     bool IsReady = false;
@@ -69,7 +66,7 @@ public:
     static RTType getRelatedTextureType(RTType t );
 
 private:
-    unsigned int d_glTexID;
+
     int ConfigureTexture(const BorderType t) const;
     bool d_isMSAA = false;
 

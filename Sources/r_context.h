@@ -2,8 +2,7 @@
 
 #include "r_sprog.h"
 #include "mat_math.h"
-#include "r_texture.h"
-#include "r_rbo_texture.h"
+#include "GenericTexture.h"
 #include "r_projmat.h"
 #include "r_camera.h"
 /*
@@ -21,7 +20,7 @@ class RenderContext {
          {
             initUniforms();
         }
-        RenderContext(SShader* s,const SMat4x4& _V, const SMat4x4& _P, std::shared_ptr<SRBOTexture> tex0)
+        RenderContext(SShader* s,const SMat4x4& _V, const SMat4x4& _P, std::shared_ptr<SGenericTexture> tex0)
             :shader(s),
             d_V(_V),
             d_P(_P)
@@ -30,10 +29,10 @@ class RenderContext {
             initUniforms();
         }
         RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                    std::shared_ptr<SRBOTexture> tex0,
-                    std::shared_ptr<SRBOTexture> tex1,
-                    std::shared_ptr<SRBOTexture> tex2,
-                    std::shared_ptr<SRBOTexture> tex3)
+                    std::shared_ptr<SGenericTexture> tex0,
+                    std::shared_ptr<SGenericTexture> tex1,
+                    std::shared_ptr<SGenericTexture> tex2,
+                    std::shared_ptr<SGenericTexture> tex3)
             :shader(s),
             d_V(_V),
             d_P(_P)
@@ -46,11 +45,11 @@ class RenderContext {
 
         }
         RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                    std::shared_ptr<SRBOTexture> tex0,
-                    std::shared_ptr<SRBOTexture> tex1,
-                    std::shared_ptr<SRBOTexture> tex2,
-                    std::shared_ptr<SRBOTexture> tex3,
-                    std::shared_ptr<SRBOTexture> tex4)
+                    std::shared_ptr<SGenericTexture> tex0,
+                    std::shared_ptr<SGenericTexture> tex1,
+                    std::shared_ptr<SGenericTexture> tex2,
+                    std::shared_ptr<SGenericTexture> tex3,
+                    std::shared_ptr<SGenericTexture> tex4)
             :shader(s),
             d_V(_V),
             d_P(_P)
@@ -68,7 +67,7 @@ class RenderContext {
         const SMat4x4 d_V;
         const SMat4x4 d_P;
         static constexpr int MAX_RBO_TEXTURES = 5;
-        std::shared_ptr<SRBOTexture> d_RBOTexture[MAX_RBO_TEXTURES];
+        std::shared_ptr<SGenericTexture> d_RBOTexture[MAX_RBO_TEXTURES];
         /**/
         inline int initUniforms() {
             d_viewMatrixLoc = shader->getUniformLocation("view");

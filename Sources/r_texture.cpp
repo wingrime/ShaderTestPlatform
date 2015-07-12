@@ -3,10 +3,6 @@
 #include "Log.h"
 #include "MAssert.h"
 #include "ImageBuffer.h"
-unsigned int STexture::getGLId() const {
-    return d_glTexID;
-}
-
 unsigned int STexture::resolveGLType(STexture::TextureType t, bool sRGB)
 {
     switch (t) {

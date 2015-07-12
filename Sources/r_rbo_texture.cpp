@@ -9,10 +9,6 @@
 #include "string_format.h"
 #include "MAssert.h"
 #include "Log.h"
-unsigned int SRBOTexture::getGLId() const {
-    return d_glTexID;
-}
-
 bool SRBOTexture::IsMSAA()
 {
     return d_isMSAA;

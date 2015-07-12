@@ -15,18 +15,14 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
-
-class STexture {
+#include "GenericTexture.h"
+class STexture :public SGenericTexture{
 public:
     /* from image sRGB is default*/
     enum TextureType {
         TEX_RGBA = 0,
         TEX_RGB,
         TEX_R,
-    };
-    enum BorderType {
-        TEX_CLAMP = 0,
-        TEX_REPEAT
     };
     STexture(const std::string& fname, bool sRGB);
     STexture(const std::string& fname)
@@ -41,7 +37,6 @@ public:
     int Bind(unsigned int sampler) const;
 
     int BindImage(unsigned int unit);
-    unsigned int getGLId() const;
     int x,y;
 
     std::string d_fname;
@@ -58,7 +53,6 @@ public:
 
     unsigned int static resolveGLType(TextureType t,bool sRGB);
 private:
-    unsigned int d_glTexID;
     int CreateTexture(GLsizei num_mipmaps, GLenum internalformat);
     int ConfigureTexture(const BorderType t) const;
 
