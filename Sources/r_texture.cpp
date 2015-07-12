@@ -4,7 +4,7 @@
 #include "MAssert.h"
 #include "ImageBuffer.h"
 unsigned int STexture::getGLId() const {
-    return tex;
+    return d_glTexID;
 }
 
 unsigned int STexture::resolveGLType(STexture::TextureType t, bool sRGB)
@@ -27,7 +27,7 @@ int STexture::Bind(unsigned int sampler) const {
         * glBindTexture( GL_TEXTURE_2D,tex);
         */
         /*EXT_direct_state_access*/
-        glBindMultiTextureEXT( GL_TEXTURE0 + sampler,GL_TEXTURE_2D,tex);
+        glBindMultiTextureEXT( GL_TEXTURE0 + sampler,GL_TEXTURE_2D,d_glTexID);
 
         return ESUCCESS;
 
@@ -41,7 +41,7 @@ int STexture::Bind(unsigned int sampler) const {
 
 int STexture::BindImage(unsigned int unit)
 {
-    glBindImageTexture(unit, tex, 0,GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+    glBindImageTexture(unit, d_glTexID, 0,GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
 }
 int STexture::ConfigureTexture(const BorderType t) const {
         if (t == TEX_REPEAT) {
@@ -62,9 +62,9 @@ int STexture::ConfigureTexture(const BorderType t) const {
    return 0;
 }
 int STexture::CreateTexture(GLsizei num_mipmaps,GLenum internalformat) {
-    glGenTextures(1, &tex);
+    glGenTextures(1, &d_glTexID);
 
-    glBindTexture(GL_TEXTURE_2D,tex);
+    glBindTexture(GL_TEXTURE_2D,d_glTexID);
     glTexStorage2D(GL_TEXTURE_2D, num_mipmaps, internalformat, x, y);
     ConfigureTexture(TEX_CLAMP);
 
@@ -88,8 +88,8 @@ STexture::STexture(const std::string& fname, bool sRGB)
     y = img.y();
 
 
-    glGenTextures(1, &tex); 
-    glBindTexture(GL_TEXTURE_2D,tex);    
+    glGenTextures(1, &d_glTexID);
+    glBindTexture(GL_TEXTURE_2D,d_glTexID);
     GLsizei num_mipmaps = 4;
 
 
@@ -112,7 +112,7 @@ STexture::STexture(const std::string& fname, bool sRGB)
 	IsReady = true;
 }
 STexture::~STexture() {
-    glDeleteTextures(1,&tex);
+    glDeleteTextures(1,&d_glTexID);
 }
 
 

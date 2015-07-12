@@ -69,7 +69,7 @@ public:
     static RTType getRelatedTextureType(RTType t );
 
 private:
-    unsigned int tex;
+    unsigned int d_glTexID;
     int ConfigureTexture(const BorderType t) const;
     bool d_isMSAA = false;
 

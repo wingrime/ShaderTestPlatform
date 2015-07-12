@@ -58,7 +58,7 @@ public:
 
     unsigned int static resolveGLType(TextureType t,bool sRGB);
 private:
-    unsigned int tex;
+    unsigned int d_glTexID;
     int CreateTexture(GLsizei num_mipmaps, GLenum internalformat);
     int ConfigureTexture(const BorderType t) const;
 
