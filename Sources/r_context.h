@@ -22,8 +22,7 @@ class RenderContext {
             :shader(_s),
             viewport(_v),
             d_V(_V),
-            d_P(_P),
-         	sm_map(false)
+            d_P(_P)
          {
             initUniforms();
         }
@@ -32,8 +31,7 @@ class RenderContext {
         	shader(s),
          	viewport(v),
             d_V(_V),
-            d_P(_P),
-         	sm_map(true)
+            d_P(_P)
         {
             initUniforms();
         }
@@ -47,7 +45,6 @@ class RenderContext {
          	viewport(v),
             d_V(_V),
             d_P(_P),
-         	sm_map(true),
          	rsm_normal_texture(rsm_normal_tex),
          	rsm_vector_texture(rsm_vector_tex),
          	rsm_albedo_texture(rsm_albedo_tex)
@@ -80,5 +77,4 @@ class RenderContext {
         /*optimize*/
         int d_uniformMVP;
         int d_uniformMV;
-    	bool sm_map;
 };
