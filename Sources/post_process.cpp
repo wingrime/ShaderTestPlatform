@@ -18,19 +18,7 @@ SPostProcess::SPostProcess(SShader *prog, int w, int h,
     d_texSRC[2] = texSRC3;
     d_texSRC[3] = texSRC4;
     InitQuard();
-
-
-    /*configure windows size*/
-    p_prog->SetUniform("vp",SVec4(w,h,0,0));
-
-    if (d_texSRC[0])
-        p_prog->SetUniform("texSRC1",0);
-    if (d_texSRC[1])
-        p_prog->SetUniform("texSRC2",1);
-    if (d_texSRC[2])
-        p_prog->SetUniform("texSRC3",2);
-    if (d_texSRC[3])
-        p_prog->SetUniform("texSRC4",3);
+    InitUniforms(RectSizeInt(w,h));
 
 
 
@@ -43,47 +31,43 @@ SPostProcess::SPostProcess(SShader *prog,  std::shared_ptr<RBO> resultRBO,
                                            std::shared_ptr<RBO> srcRBO4)
 :p_prog(prog),d_resultRBO(resultRBO)
 {
-    std::shared_ptr<RBO> d_RBO [4];
     d_RBO[0] = srcRBO1;
     d_RBO[1] = srcRBO2;
     d_RBO[2] = srcRBO3;
     d_RBO[3] = srcRBO4;
-    /*configure outbuffer size*/
 
-    SVec2 sz = resultRBO->getSize();
-
-    d_texSRC[0] = srcRBO1->texIMG(0);
-    if (d_RBO[1])
-        d_texSRC[1] = d_RBO[1]->texIMG(0);
-    if (d_RBO[2])
-        d_texSRC[2] = d_RBO[2]->texIMG(0);
-    if (d_RBO[3])
-        d_texSRC[3] = d_RBO[3]->texIMG(0);
+    for (int i = 0 ; i < SRC_TEXTURES_MAX ; i++){
+        if (d_RBO[i])
+            d_texSRC[i] = d_RBO[i]->texIMG(0);
+    }
 
     InitQuard();
-    p_prog->SetUniform("vp",SVec4(sz.w,sz.h,0,0));
-    p_prog->SetUniform("texSRC1",0);
-    if (d_texSRC[1])
-        p_prog->SetUniform("texSRC2",1);
-    if (d_texSRC[2])
-        p_prog->SetUniform("texSRC3",2);
-    if (d_texSRC[3])
-        p_prog->SetUniform("texSRC4",3);
+    SVec2 sz = resultRBO->getSize();
+    InitUniforms(RectSizeInt(sz.w,sz.h));
 }
 
+void SPostProcess::InitUniforms(RectSizeInt s)
+{
+    for (int i = 0 ; i < SRC_TEXTURES_MAX ; i++){
+        char  buf[20];
+        sprintf(buf,"texSRC%d",i+1);
+        if (d_texSRC[i])
+            p_prog->SetUniform(buf,i);
+    }
+    /*configure outbuffer size*/
+    p_prog->SetUniform("vp",SVec4(s.w,s.h,0,0));
+
+}
 void SPostProcess::Draw() {
     if (p_prog->IsReady)
     {
         glBindVertexArray ( vao );
         p_prog-> Bind();
-        if (d_texSRC[0])
-            d_texSRC[0]->Bind(0);
-        if (d_texSRC[1])
-            d_texSRC[1]->Bind(1);
-        if (d_texSRC[2])
-            d_texSRC[2]->Bind(2);
-        if (d_texSRC[3])
-            d_texSRC[3]->Bind(3);
+        for (int i = 0 ; i < SRC_TEXTURES_MAX ; i++){
+            if (d_texSRC[i])
+                d_texSRC[i]->Bind(i);
+        }
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid *)0);
         glBindVertexArray ( 0 );
     }
@@ -97,18 +81,7 @@ void SPostProcess::DrawRBO(bool redraw)
     {
         MASSERT(!d_RBO);
         d_resultRBO->Bind(redraw);
-        glBindVertexArray ( vao );
-        p_prog-> Bind();
-        if (d_texSRC[0])
-            d_texSRC[0]->Bind(0);
-        if (d_texSRC[1])
-            d_texSRC[1]->Bind(1);
-        if (d_texSRC[2])
-            d_texSRC[2]->Bind(2);
-        if (d_texSRC[3])
-            d_texSRC[3]->Bind(3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid *)0);
-        glBindVertexArray ( 0 );
+        Draw();
     }
 }
 
@@ -166,3 +139,4 @@ void SPostProcess::InitQuard()
 
     glBindVertexArray (0);
 }
+

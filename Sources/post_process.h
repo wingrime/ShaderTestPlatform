@@ -7,6 +7,7 @@
 #include <GL/wglew.h>
 
 #include <memory>
+#include "mat_math.h"
 
 
 class SRBOTexture;
@@ -72,17 +73,21 @@ private:
     /*working shader */
     SShader * p_prog;
     void InitQuard();
+    void InitUniforms(RectSizeInt s);
 
     GLuint vbo;
     GLuint vao;
     GLuint ibo;
 
+    constexpr static int SRC_TEXTURES_MAX = 4;
 
-    std::shared_ptr<SRBOTexture> d_texSRC[4];
+    std::shared_ptr<SRBOTexture> d_texSRC[SRC_TEXTURES_MAX];
 
     /*Result RBO*/
     std::shared_ptr<RBO> d_resultRBO;
     /*SRC RBO*/
-    std::shared_ptr<RBO> d_RBO[4];
+    std::shared_ptr<RBO> d_RBO[SRC_TEXTURES_MAX];
+
+
 
 };
