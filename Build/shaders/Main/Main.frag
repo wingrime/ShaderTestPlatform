@@ -30,18 +30,16 @@ in vec3 PositionMS;
 uniform int mesh_flags;
 /* Source texture */
 uniform float bump_amount = 50.0;
-uniform sampler2D texIMG;
-uniform sampler2D texBUMP;
-uniform sampler2D texture_alpha_sampler;
-uniform sampler2D sh_bands_sampler;
+uniform sampler2D samplerAlbedo;
+uniform sampler2D samplerNormalMap;
+uniform sampler2D samplerAlphaMap;
+uniform sampler2D samplerEnvSH;
 uniform sampler2D samplerRandomNoise;
 /* Shadow map depth buffer*/
-uniform sampler2DArray sm_depth_sampler;
+uniform sampler2DArray samplerShadowMap;
 /*test*/
 uniform float slice= 0.0;
-uniform sampler2D rsm_normal_sampler;
-uniform samplerCube rsm_vector_sampler;
-uniform sampler2D rsm_albedo_sampler;
+uniform samplerCube samplerEnvCubeMap;
 
 uniform float lightIntensity = 1.0;
 uniform float shadowPenumbra = 200.0;
@@ -245,7 +243,7 @@ poissonDisk[58] = vec2(0.155736, 0.065157); poissonDisk[59] = vec2(0.391522, 0.8
 poissonDisk[60] = vec2(-0.620106, -0.328104); poissonDisk[61] = vec2(0.789239, -0.419965);
 poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -0.596057);
 
-        float texture_alpha = texture(texture_alpha_sampler,UvMS).r;
+        float texture_alpha = texture(samplerAlphaMap,UvMS).r;
 	//fix me (get viewport sizes)
 	vec3 tesc;
 	const int sm_samples = 32;
@@ -299,7 +297,7 @@ sm_pos = shadowMVPB2*vec4(PositionMS ,1.0);
 
 	/* diffuse color texture*/
 	
-        vec3 texB = 2.0*(texture( texBUMP,UvMS).rgb)-1.0;
+        vec3 texB = 2.0*(texture( samplerNormalMap,UvMS).rgb)-1.0;
 	
 	texB.z = sqrt( 1. - dot( texB.xy, texB.xy ) );
 
@@ -336,7 +334,7 @@ Directional Light not translable, so set w to 0.0;
 
 	//vec2 parallax_uv = uv+texBump*tng_v.xy;
 	//vec3 texColor = (texture2D( texIMG,parallax_uv).rgb);
-        vec3 texColor = (texture( texIMG,UvMS).rgb);
+    vec3 texColor = (texture( samplerAlbedo,UvMS).rgb);
 	vec3 diffColor = texColor;//vec3(1.0f,0.71f,0.29f);
 	vec3 specColor =  vec3(1.0);//vec3(1.0f,0.71f,0.29f);
 	float diff = lambert (n,l);
@@ -356,14 +354,10 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
                 vec4 s;
                 for (int i=0;i<sm_samples;i+=4)
                 {
-                    s.x = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                   	s.y = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+1],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                   	s.z = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+2],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                   	s.w = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+3],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                    //s.y = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[1+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                    //s.z = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[2+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                    //s.w = step(texture(sm_depth_sampler,vec3(sm_pos.xy+vec2(poissonDisk[3+i]/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                    
+                    s.x = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                   	s.y = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+1],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                   	s.z = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+2],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
+                   	s.w = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+3],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z); 
                     shadow += dot (s,vec4(1.0));
 
                 }
@@ -399,9 +393,9 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 	/*SH bands load*/
 	vec3  SH[9];
 	for (int c = 0 ; c < 9; c++) {
-		SH[c].r = texelFetch(sh_bands_sampler, ivec2(c,1u),0).r;
-		SH[c].g = texelFetch(sh_bands_sampler, ivec2(c,2u),0).r;
-		SH[c].b = texelFetch(sh_bands_sampler, ivec2(c,3u),0).r;
+		SH[c].r = texelFetch(samplerEnvSH, ivec2(c,1u),0).r;
+		SH[c].g = texelFetch(samplerEnvSH, ivec2(c,2u),0).r;
+		SH[c].b = texelFetch(samplerEnvSH, ivec2(c,3u),0).r;
         }
         //vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(MV_n)*vec4(normalize(d_normal),1.0)).xyz);
                 vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(MV)*vec4(normalize(reflect(v,n)),1.0) ).xyz);
@@ -409,7 +403,7 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 
 
 	/*reflections */
-        vec3 cubemap_sample = vec3(texture(rsm_vector_sampler,(transpose(MV)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz);
+        vec3 cubemap_sample = vec3(texture(samplerEnvCubeMap,(transpose(MV)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz);
 
 	vec3 reflection = fressnel*cubemap_sample;
 
@@ -435,7 +429,7 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 		dstColor = vec4(vec3(tesc),1.0);
         else if (dbg_out ==  DBG_OUT_REFLECT) {
 
-            //dstColor = vec4(vec3(texture(rsm_vector_sampler,(transpose(_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz),1.0);
+            //dstColor = vec4(vec3(texture(samplerEnvCubeMap,(transpose(_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz),1.0);
 
             vec3 relfectWS = (transpose(view)*vec4(normalize(reflect(v,n)),1.0) ).xyz; /*cubemap placed at 0, and we can use v for it*/
             /*cheap approximation https://seblagarde.files.wordpress.com/2012/08/parallax_corrected_cubemap-gameconnection2012.pdf */
@@ -458,7 +452,7 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 
 
 
-            dstColor = vec4(diffColor*diff,1.0)*0.5+0.5*vec4(vec3(texture(rsm_vector_sampler,rdir).xyz),1.0);
+            dstColor = vec4(diffColor*diff,1.0)*0.5+0.5*vec4(vec3(texture(samplerEnvCubeMap,rdir).xyz),1.0);
             }
             else if (dbg_out ==  DBG_OUT_SH)
 		dstColor = vec4(vec3(ambient_spectral_harmonics),1.0);
