@@ -532,13 +532,12 @@ int inline SScene::RenderDirect(const RBO& v) {
     }
     else
     {
-        RenderContext r_ctx(&v, main_pass_shader.get() ,cam.getViewMatrix(), cam.getProjMatrix() ,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1), rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
-        r_ctx.d_RBOTexture[4] = rtConvoledCubemap;
+        RenderContext r_ctx(main_pass_shader.get() ,cam.getViewMatrix(), cam.getProjMatrix() ,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1), rtCubemap->texIMG(0), rtShadowMap->texIMG(0),rtConvoledCubemap);
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
         //TODO: Move to weathersky
-        RenderContext r_ctx2(&v, w_sky->GetSkyShader() ,cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1) ,rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
+        RenderContext r_ctx2(w_sky->GetSkyShader() ,cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1) ,rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
         w_sky->GetSkyModel()->Render(r_ctx2);
     }
 

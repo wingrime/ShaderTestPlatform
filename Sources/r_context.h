@@ -2,7 +2,6 @@
 
 #include "r_sprog.h"
 #include "mat_math.h"
-#include "RBO.h"
 #include "r_texture.h"
 #include "r_rbo_texture.h"
 
@@ -11,9 +10,7 @@
 /*
 Static object for storage current render context set:
 Current Shader,
-Current Camera Matrix,
-Current ViewPort 
-Current Object Matrix ???
+Required
 
 */
 class RenderContext {
@@ -25,16 +22,16 @@ class RenderContext {
          {
             initUniforms();
         }
-        RenderContext(SShader* s,const SMat4x4& _V, const SMat4x4& _P, std::shared_ptr<SRBOTexture> sm_tex)
+        RenderContext(SShader* s,const SMat4x4& _V, const SMat4x4& _P, std::shared_ptr<SRBOTexture> tex0)
             :shader(s),
             d_V(_V),
             d_P(_P)
         {
-            d_RBOTexture[0] = sm_tex;
+            d_RBOTexture[0] = tex0;
             initUniforms();
         }
-        RenderContext(const RBO* v,SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                    std::shared_ptr<SRBOTexture> sm_tex,
+        RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
+                    std::shared_ptr<SRBOTexture> tex0,
                     std::shared_ptr<SRBOTexture> tex1,
                     std::shared_ptr<SRBOTexture> tex2,
                     std::shared_ptr<SRBOTexture> tex3)
@@ -42,10 +39,28 @@ class RenderContext {
             d_V(_V),
             d_P(_P)
         {
-            d_RBOTexture[0] = sm_tex;
+            d_RBOTexture[0] = tex0;
             d_RBOTexture[1] = tex1;
             d_RBOTexture[2] = tex2;
             d_RBOTexture[3] = tex3;
+            initUniforms();
+
+        }
+        RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
+                    std::shared_ptr<SRBOTexture> tex0,
+                    std::shared_ptr<SRBOTexture> tex1,
+                    std::shared_ptr<SRBOTexture> tex2,
+                    std::shared_ptr<SRBOTexture> tex3,
+                    std::shared_ptr<SRBOTexture> tex4)
+            :shader(s),
+            d_V(_V),
+            d_P(_P)
+        {
+            d_RBOTexture[0] = tex0;
+            d_RBOTexture[1] = tex1;
+            d_RBOTexture[2] = tex2;
+            d_RBOTexture[3] = tex3;
+            d_RBOTexture[4] = tex4;
             initUniforms();
 
         }
@@ -63,11 +78,10 @@ class RenderContext {
             d_uniformMVP = shader->getUniformLocation("MVP");
             d_uniformMV = shader->getUniformLocation("MV");
         }
-        /*speedup test*/
+        /*located uniform storage*/
         int d_viewMatrixLoc;
         int d_projMatrixLoc;
         int d_modelMatrixLoc;
-        /*optimize*/
         int d_uniformMVP;
         int d_uniformMV;
 };
