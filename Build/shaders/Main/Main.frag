@@ -337,7 +337,6 @@ Directional Light not translable, so set w to 0.0;
 	//Automatic biasing v1
 	//sm_pos.z -= clamp(shadowEps*tan(acos (diff)) ,0,0.1) ;
 
-	shadow = 0.0;
  	float shadowPenumbraDisp = shadowPenumbra ;
  	/*Too costly !!!*/
  	//vec2 randomFromTexture = normalize(-1.0+2.0*texture(samplerRandomNoise, 0.5+0.5*reflect(UvMS,gl_FragCoord.yx)).gb);
@@ -364,7 +363,7 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 // HARD shadows
 //shadow  =  1.0-step(texture(sm_depth_sampler,vec3(sm_pos.xy,slice)).r,sm_pos.z);
 //shadow  =texture(sm_depth_sampler,vec4(sm_pos.xyz,float(1)));
-// shadow =  clamp(shadow,0.0,1.0);//bug check
+	shadow =  clamp(shadow,0.0,1.0);//bug check
 	if (dot(n,l) <= 0) {
 		shadow = 0.0;
 		//diffColor = vec3(1.0,0.0,0.0);
