@@ -83,6 +83,8 @@ public:
 
     std::shared_ptr<SRBOTexture> rtConvoledCubemap;
 
+    std::shared_ptr<STexture> texRandom;
+
     SPerfMan rtime;
     SPerfMan ui_time;
     SPerfMan pp_time;
