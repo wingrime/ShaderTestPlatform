@@ -1,4 +1,4 @@
-#include "post_process.h"
+#include "PostProcess.h"
 #include "MAssert.h"
 #include "RBO.h"
 #include "r_sprog.h"
