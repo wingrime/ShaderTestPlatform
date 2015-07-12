@@ -533,7 +533,7 @@ int inline SScene::RenderDirect(const RBO& v) {
     else
     {
         RenderContext r_ctx(&v, main_pass_shader.get() ,cam.getViewMatrix(), cam.getProjMatrix() ,rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1), rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
-        r_ctx.sh_bands = rtConvoledCubemap;
+        r_ctx.d_RBOTexture[4] = rtConvoledCubemap;
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }

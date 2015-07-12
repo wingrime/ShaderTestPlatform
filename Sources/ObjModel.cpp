@@ -280,20 +280,20 @@ void SObjModel::Render(RenderContext& r) {
 
                 /*shader*/
                 /*shadow mapping*/
-                if (r.sm_texture) {
-                   r.sm_texture->Bind(5);
-                }
                 if (r.d_RBOTexture[0]) {
-                   r.d_RBOTexture[0]->Bind(6);
+                   r.d_RBOTexture[0]->Bind(5);
                }
                 if (r.d_RBOTexture[1]) {
-                   r.d_RBOTexture[1]->Bind(7);
-                }
+                   r.d_RBOTexture[1]->Bind(6);
+               }
                 if (r.d_RBOTexture[2]) {
-                   r.d_RBOTexture[2]->Bind(8);
+                   r.d_RBOTexture[2]->Bind(7);
                 }
-                if (r.sh_bands) {
-                   r.sh_bands->Bind(9);
+                if (r.d_RBOTexture[3]) {
+                   r.d_RBOTexture[3]->Bind(8);
+                }
+                if (r.d_RBOTexture[4]) {
+                   r.d_RBOTexture[4]->Bind(9);
                 }
             }
             auto& idx = submesh_idx[submesh->id];

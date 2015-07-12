@@ -27,12 +27,12 @@ class RenderContext {
             initUniforms();
         }
         RenderContext(const RBO* v,SShader* s,SMat4x4 _V, SMat4x4 _P, std::shared_ptr<SRBOTexture> sm_tex)
-        	:sm_texture(sm_tex),
-        	shader(s),
+            :shader(s),
          	viewport(v),
             d_V(_V),
             d_P(_P)
         {
+            d_RBOTexture[0] = sm_tex;
             initUniforms();
         }
         RenderContext(const RBO* v,SShader* s, SMat4x4 _V, SMat4x4 _P,
@@ -40,15 +40,15 @@ class RenderContext {
                     std::shared_ptr<SRBOTexture> tex1,
                     std::shared_ptr<SRBOTexture> tex2,
                     std::shared_ptr<SRBOTexture> tex3)
-            :sm_texture(sm_tex),
-            shader(s),
+            :shader(s),
             viewport(v),
             d_V(_V),
             d_P(_P)
         {
-            d_RBOTexture[0] = tex1;
-            d_RBOTexture[1] = tex2;
-            d_RBOTexture[2] = tex3;
+            d_RBOTexture[0] = sm_tex;
+            d_RBOTexture[1] = tex1;
+            d_RBOTexture[2] = tex2;
+            d_RBOTexture[3] = tex3;
             initUniforms();
 
         }
@@ -57,11 +57,8 @@ class RenderContext {
     	const RBO *viewport;
         SMat4x4 d_V;
         SMat4x4 d_P;
-        std::shared_ptr<SRBOTexture> sm_texture;
 
-        std::shared_ptr<SRBOTexture> d_RBOTexture[3];
-
-        std::shared_ptr<SRBOTexture> sh_bands;
+        std::shared_ptr<SRBOTexture> d_RBOTexture[5];
         /**/
         inline int initUniforms() {
             d_viewMatrixLoc = shader->getUniformLocation("view");
