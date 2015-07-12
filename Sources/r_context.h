@@ -37,18 +37,18 @@ class RenderContext {
         }
         RenderContext(const RBO* v,SShader* s, SMat4x4 _V, SMat4x4 _P,
                     std::shared_ptr<SRBOTexture> sm_tex,
-                    std::shared_ptr<SRBOTexture> rsm_normal_tex,
-                    std::shared_ptr<SRBOTexture> rsm_vector_tex,
-                    std::shared_ptr<SRBOTexture> rsm_albedo_tex)
-        	:sm_texture(sm_tex),
-        	shader(s),
-         	viewport(v),
+                    std::shared_ptr<SRBOTexture> tex1,
+                    std::shared_ptr<SRBOTexture> tex2,
+                    std::shared_ptr<SRBOTexture> tex3)
+            :sm_texture(sm_tex),
+            shader(s),
+            viewport(v),
             d_V(_V),
-            d_P(_P),
-         	rsm_normal_texture(rsm_normal_tex),
-         	rsm_vector_texture(rsm_vector_tex),
-         	rsm_albedo_texture(rsm_albedo_tex)
+            d_P(_P)
         {
+            d_RBOTexture[0] = tex1;
+            d_RBOTexture[1] = tex2;
+            d_RBOTexture[2] = tex3;
             initUniforms();
 
         }
@@ -58,9 +58,9 @@ class RenderContext {
         SMat4x4 d_V;
         SMat4x4 d_P;
         std::shared_ptr<SRBOTexture> sm_texture;
-        std::shared_ptr<SRBOTexture> rsm_normal_texture;
-        std::shared_ptr<SRBOTexture> rsm_vector_texture;
-        std::shared_ptr<SRBOTexture> rsm_albedo_texture;
+
+        std::shared_ptr<SRBOTexture> d_RBOTexture[3];
+
         std::shared_ptr<SRBOTexture> sh_bands;
         /**/
         inline int initUniforms() {

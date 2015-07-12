@@ -283,14 +283,14 @@ void SObjModel::Render(RenderContext& r) {
                 if (r.sm_texture) {
                    r.sm_texture->Bind(5);
                 }
-                if (r.rsm_normal_texture) {
-                   r.rsm_normal_texture->Bind(6);
+                if (r.d_RBOTexture[0]) {
+                   r.d_RBOTexture[0]->Bind(6);
                }
-                if (r.rsm_vector_texture) {
-                   r.rsm_vector_texture->Bind(7);
+                if (r.d_RBOTexture[1]) {
+                   r.d_RBOTexture[1]->Bind(7);
                 }
-                if (r.rsm_albedo_texture) {
-                   r.rsm_albedo_texture->Bind(8);
+                if (r.d_RBOTexture[2]) {
+                   r.d_RBOTexture[2]->Bind(8);
                 }
                 if (r.sh_bands) {
                    r.sh_bands->Bind(9);
