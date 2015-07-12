@@ -297,8 +297,6 @@ void reshape ( int w, int h )
 void key ( unsigned char key, int x, int y )
 {
     SScene * sc = MainScene::GetInstance();
-
-    static int wireframe = 0;
     static int fullscreen = 0;
     static int console_mode = 0;
     if (console_mode) {
@@ -326,16 +324,6 @@ void key ( unsigned char key, int x, int y )
          glutLeaveMainLoop();
          return;
     }
-            else if (key == 'p')
-                    //wireframe
-                if (wireframe) {
-                    wireframe = 0;
-                    sc->rWireframe = 0;
-                }
-                else {
-                    wireframe = 1;
-                    sc->rWireframe = 1;
-                }
 
 else if (key == '9' ) sc->dbg_ui.upViewItem();
 else if (key == '0' ) sc->dbg_ui.downViewItem();

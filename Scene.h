@@ -88,7 +88,6 @@ public:
     SPerfMan pp_time;
 
     /* flags*/
-    bool rWireframe = false;
     bool rSSAO  = false;
 
     int toggleBrightPass(bool b);
