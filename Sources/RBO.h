@@ -67,7 +67,7 @@ public:
     bool IsReady = false;
     RBOType getType();
 private:
-
+    static constexpr int MAX_COLOR_ATTACHMENTS = 3;
     int d_w;
     int d_h;
     std::string d_name;
@@ -78,7 +78,7 @@ private:
 
     int d_buffers = 0;
 
-    std::shared_ptr<SRBOTexture> d_texIMG[3]; /*color attachments*/
+    std::shared_ptr<SRBOTexture> d_texIMG[MAX_COLOR_ATTACHMENTS]; /*color attachments*/
 
     std::shared_ptr<SRBOTexture> d_texDEPTH;
 
@@ -97,5 +97,7 @@ public:
 private:
     int debugRegisterSelf();
     static std::vector< std::shared_ptr <RBO> > debugRenderOutputList;
+
+
 };
 

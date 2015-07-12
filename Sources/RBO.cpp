@@ -63,24 +63,21 @@ int RBO::attachRBOTextures()
 {
 
 
-    int buffers = 1;
+
     /*Create FBO*/
     glGenFramebuffers(1, &d_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, d_fbo);
     /* attach */
     glFramebufferTexture(GL_FRAMEBUFFER,    GL_DEPTH_ATTACHMENT,   d_texDEPTH->getGLId(), 0);
-    if (d_texIMG[0] != nullptr) {
-        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0,  d_texIMG[0]->getGLId(), 0);
-    }
-    if (d_texIMG[1] != nullptr) {
-        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT1,   d_texIMG[1]->getGLId(), 0);
-        buffers++;
+
+    int buffers = 0;
+    for (int i = 0 ; i < MAX_COLOR_ATTACHMENTS; i++) {
+        if (d_texIMG[i] != nullptr) {
+            glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0+i,  d_texIMG[i]->getGLId(), 0);
+            buffers++;
+        }
     }
 
-    if (d_texIMG[2] != nullptr) {
-        glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT2,    d_texIMG[2]->getGLId(), 0);
-        buffers++;
-    }
     int rcode = glCheckFramebufferStatus(GL_FRAMEBUFFER) ;
     if(rcode != GL_FRAMEBUFFER_COMPLETE) {
         LOGE(string_format("FBO error(!GL_FRAMEBUFFER_COMPLETE) %d\n",rcode));
@@ -88,22 +85,8 @@ int RBO::attachRBOTextures()
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         return EFAIL;
     }
-    GLenum  buffers1 [] = { GL_COLOR_ATTACHMENT0 };
-    GLenum  buffers2 [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1 };
-    GLenum  buffers3 [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
-    switch (buffers)
-    {
-
-    case 1:
-            glDrawBuffers (1, buffers1 );
-        break;
-    case 2:
-            glDrawBuffers (2, buffers2 );
-        break;
-    case 3:
-            glDrawBuffers (3, buffers3 );
-        break;
-    }
+    GLenum  buffers_attachments  [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
+    glDrawBuffers (buffers, buffers_attachments );
 
     d_buffers =  buffers;
 
@@ -267,6 +250,17 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
     MASSERT(SRBOTexture::isDepthType(t1_type));
     MASSERT(SRBOTexture::isDepthType(t2_type));
     MASSERT(t0_s <= 0);
+
+    SRBOTexture::RTType tex_type[MAX_COLOR_ATTACHMENTS];
+    int tex_size_mul[MAX_COLOR_ATTACHMENTS];
+
+    tex_type[0] = t0_type;
+    tex_type[1] = t1_type;
+    tex_type[2] = t2_type;
+    tex_size_mul[0] = t0_s;
+    tex_size_mul[1] = t1_s;
+    tex_size_mul[2] = t2_s;
+
     debugRegisterSelf();
     //TODO: add type check
     unsigned int mip = 1;
@@ -278,15 +272,13 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
     /*depth*/
     d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s), SRBOTexture::getRelatedDepthType(t0_type) ,mip));
 
+    for (int i = 1 ; i < MAX_COLOR_ATTACHMENTS; i++) {
+        if (tex_type[i] != SRBOTexture::RTType::RT_NONE) {
+            MASSERT(tex_size_mul[i] <= 0);
+            d_texIMG[i].reset(new SRBOTexture(RectSizeInt(d_w/tex_size_mul[i],d_h/tex_size_mul[i]),tex_type[i],mip));
+        }
+    }
 
-    if (t1_type != SRBOTexture::RTType::RT_NONE) {
-        MASSERT(t1_s <= 0);
-        d_texIMG[1].reset(new SRBOTexture(RectSizeInt(d_w/t1_s,d_h/t1_s),t1_type,mip));
-    }
-    if (t2_type != SRBOTexture::RTType::RT_NONE) {
-        MASSERT(t2_s <= 0);
-        d_texIMG[2].reset(new SRBOTexture(RectSizeInt(d_w/t2_s,d_h/t2_s),t2_type,mip));
-    }
     if (!isDepthOnlyType(type))
         d_isMSAA = d_texIMG[0]->IsMSAA() ; /*TODO: make external*/
     else
@@ -303,42 +295,19 @@ int RBO::ResolveMSAA(const RBO &dst)
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst.d_fbo);   // Make sure no FBO is set as the draw framebuffer
       glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo); // Make sure your multisampled FBO is the read framebuffer
       //glDrawBuffer(GL_BACK);                       // Set the back buffer as the draw buffer
-      GLenum  buffers1 [] = { GL_COLOR_ATTACHMENT0};
-      GLenum  buffers2 [] = { GL_COLOR_ATTACHMENT1};
-      GLenum  buffers3 [] = { GL_COLOR_ATTACHMENT2};
-      if (d_buffers >= 1) {
+
+      for (int i = 0 ; i < d_buffers; i++) {
+        GLenum  buffers_att [] = { GL_COLOR_ATTACHMENT0+(unsigned int)i};
         glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glDrawBuffers ( 1, buffers1 );
-        glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        if (d_buffers >= 2) {
-            glReadBuffer(GL_COLOR_ATTACHMENT1);
-            glDrawBuffers ( 1, buffers2 );
-            glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
-            if (d_buffers >= 3) {
-                glReadBuffer(GL_COLOR_ATTACHMENT2);
-                glDrawBuffers ( 1, buffers3 );
-                glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, GL_COLOR_BUFFER_BIT , GL_NEAREST);
-            }
-        }
+        glDrawBuffers ( 1, buffers_att );
+        glBlitFramebuffer(0, 0, d_w, d_h, 0, 0, dst.d_w, dst.d_h, (i == 0) ? (GL_COLOR_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT) : (GL_COLOR_BUFFER_BIT), GL_NEAREST);
       }
+
       //Reset procedure
       glReadBuffer(GL_COLOR_ATTACHMENT0);
-      GLenum  buffers_1 [] = { GL_COLOR_ATTACHMENT0 };
-      GLenum  buffers_2 [] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1 };
-      GLenum  buffers_3 [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
-      switch (d_buffers)
-      {
+      GLenum  buffers_attachments [] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,GL_COLOR_ATTACHMENT2};
 
-      case 1:
-              glDrawBuffers (1, buffers_1 );
-          break;
-      case 2:
-              glDrawBuffers (2, buffers_2 );
-          break;
-      case 3:
-              glDrawBuffers (3, buffers_3 );
-          break;
-      }
+      glDrawBuffers (d_buffers, buffers_attachments );
       return 0;
 }
 /*shared list for debug */
