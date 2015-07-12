@@ -122,9 +122,9 @@ class RenderContext {
         std::shared_ptr<SGenericTexture> d_RBOTexture[MAX_RBO_TEXTURES];
         /**/
         inline int initUniforms() {
-            d_viewMatrixLoc = shader->getUniformLocation("view");
-            d_projMatrixLoc = shader->getUniformLocation("cam_proj");
-            d_modelMatrixLoc = shader->getUniformLocation("model");
+            d_viewMatrixLoc = shader->getUniformLocation("matrixView");
+            d_projMatrixLoc = shader->getUniformLocation("matrixProjection");
+            d_modelMatrixLoc = shader->getUniformLocation("matrixModel");
             d_uniformMVP = shader->getUniformLocation("MVP");
             d_uniformMV = shader->getUniformLocation("MV");
         }

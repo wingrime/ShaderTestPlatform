@@ -1,5 +1,5 @@
 #version 330
-uniform mat4 cam_proj;
+uniform mat4 matrixProjection;
 uniform mat4 model;
 uniform mat4 view;
 

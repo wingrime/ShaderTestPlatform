@@ -4,9 +4,9 @@ layout(location = 0) out vec4 dstColor;
 const float pi = 3.14159;
 uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,0.0);
 
-uniform mat4 cam_proj;
-uniform mat4 model;
-uniform mat4 view;
+uniform mat4 matrixProjection;
+uniform mat4 matrixModel;
+uniform mat4 matrixView;
 
 uniform mat4 MVP;
 uniform mat4 MV;
@@ -30,10 +30,7 @@ uniform sampler2D samplerNormalMap;
 uniform sampler2D samplerAlphaMap;
 uniform sampler2D samplerEnvSH;
 uniform sampler2D samplerRandomNoise;
-/* Shadow map depth buffer*/
 uniform sampler2DArray samplerShadowMap;
-/*test*/
-uniform float slice= 0.0;
 uniform samplerCube samplerEnvCubeMap;
 
 uniform float lightIntensity = 1.0;
@@ -45,9 +42,9 @@ uniform	float s1 = 840.0;
 uniform	float s2 = 2420.0;
 uniform	float s3 = 7000.0;
 uniform float ambientIntensity = 0.1;
-uniform float sh_int = 5.2;
-uniform float ggx_alpha = 0.4;
-uniform float ggx_f0 = 0.04 ;/*fressnel*/
+uniform float shIntensity = 5.2;
+uniform float materialBRDFAlpha = 0.4;
+uniform float materialBRDFressnel = 0.04 ;/*fressnel*/
 #define DBG_OUT_FULL 0
 #define DBG_OUT_NORMAL  1
 #define DBG_OUT_ALBEDO  2
@@ -250,7 +247,7 @@ poissonDisk[62] = vec2(-0.545396, 0.538133); poissonDisk[63] = vec2(-0.178564, -
 	//not general way for light with dir 0,1,0
 	//normal way length(light_dir - o_pos_v)
 	/*slowest sol*/
-        vec4 view_space = inverse(cam_proj)*gl_FragCoord;
+    vec4 view_space = inverse(matrixProjection)*gl_FragCoord;
 	view_space.xyz /= view_space.w; // ?
 
 	float d =  1.0-view_space.z;//((2*far*near) /((2.0*gl_FragCoord.z-1.0)*(far-near)-(far+near)));// far-near;
@@ -313,7 +310,7 @@ sm_pos = shadowMVPB2*vec4(PositionMS ,1.0);
 Directional Light not translable, so set w to 0.0;
 */
 	vec4 sunDirectionalLightWS = vec4(main_light_dir.xyz,0.0);
-    vec3 lp = (view*sunDirectionalLightWS).xyz;
+    vec3 lp = (matrixView*sunDirectionalLightWS).xyz;
 
 
 	vec3 n = normalize(d_normal);
@@ -349,10 +346,10 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
                 vec4 s;
                 for (int i=0;i<sm_samples;i+=4)
                 {
-                    s.x = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                   	s.y = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+1],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                   	s.z = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+2],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z);
-                   	s.w = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+3],randomFromTexture)/shadowPenumbraDisp),slice)).r,sm_pos.z); 
+                    s.x = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i],randomFromTexture)/shadowPenumbraDisp),slice_sel)).r,sm_pos.z);
+                   	s.y = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+1],randomFromTexture)/shadowPenumbraDisp),slice_sel)).r,sm_pos.z);
+                   	s.z = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+2],randomFromTexture)/shadowPenumbraDisp),slice_sel)).r,sm_pos.z);
+                   	s.w = step(texture(samplerShadowMap,vec3(sm_pos.xy+vec2(reflect(poissonDisk[i+3],randomFromTexture)/shadowPenumbraDisp),slice_sel)).r,sm_pos.z); 
                     shadow += dot (s,vec4(1.0));
 
                 }
@@ -377,7 +374,7 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 	
 	//spec = LightingFuncGGX_OPT2(n,v,l, 0.4,0.25)*lightIntensity*F_schlick(h,l,vec3(diffColor))*diff;
 	//spec = binn_phong(n,h,l,2.0,diffColor,specColor)*lightIntensity*10;
-	vec3 spec =ggx_full_t(n,h,l,v,ggx_alpha,ggx_f0,diffColor,specColor)*lightIntensity;
+	vec3 spec =ggx_full_t(n,h,l,v,materialBRDFAlpha,materialBRDFressnel,diffColor,specColor)*lightIntensity;
 	//spec = 0;
 	vec3 fressnel =  F_schlick(l,n,diff*vec3(0.003,0.003,0.003));
 	//float dist = length(vPos - lightPos );
@@ -403,7 +400,7 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 	vec3 reflection = fressnel*cubemap_sample;
 
 	if (dbg_out == DBG_OUT_FULL)
-		dstColor = vec4((shadow)*(spec)+(ambient_spectral_harmonics)*sh_int*diffColor,texture_alpha);
+		dstColor = vec4((shadow)*(spec)+(ambient_spectral_harmonics)*shIntensity*diffColor,texture_alpha);
 	else if (dbg_out ==  DBG_OUT_ALBEDO)
 		dstColor = dstColor = vec4(vec3(diff),1.0);
 	else if (dbg_out ==  DBG_OUT_DIFFUSE)
@@ -426,7 +423,7 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 
             //dstColor = vec4(vec3(texture(samplerEnvCubeMap,(transpose(_n)*vec4(normalize(reflect(v,n)),1.0) ).xyz).xyz),1.0);
 
-            vec3 relfectWS = (transpose(view)*vec4(normalize(reflect(v,n)),1.0) ).xyz; /*cubemap placed at 0, and we can use v for it*/
+            vec3 relfectWS = (transpose(matrixView)*vec4(normalize(reflect(v,n)),1.0) ).xyz; /*cubemap placed at 0, and we can use v for it*/
             /*cheap approximation https://seblagarde.files.wordpress.com/2012/08/parallax_corrected_cubemap-gameconnection2012.pdf */
             //vec3 bpcem (vec3 v, vec3 Emax, vec3 Emin, vec3 Epos, vec3 Pos)
             vec3 AABBmin= vec3(-1200,0,-200.0);

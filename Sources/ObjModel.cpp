@@ -59,7 +59,7 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 int SObjModel::ConfigureProgram(SShader& sprog){
     if (!IsReady)
         return EFAIL;
-    sprog.SetUniform("model",model);
+    sprog.SetUniform("matrixModel",model);
 
     sprog.SetUniform("samplerAlbedo",0);
     sprog.SetUniform("samplerNormalMap",1);

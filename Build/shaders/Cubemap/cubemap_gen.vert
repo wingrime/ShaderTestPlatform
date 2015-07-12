@@ -1,7 +1,7 @@
 #version 430 core
-uniform mat4 cam_proj;
-uniform mat4 model;
-uniform mat4 view;
+uniform mat4 matrixProjection;
+uniform mat4 matrixModel;
+uniform mat4 matrixView;
 
 uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,0.0);
 
@@ -45,19 +45,19 @@ const mat4 bias = (mat4(0.5 , 0.0 , 0.0, 0.0 ,
 					  0.5 , 0.5 , 0.5, 1.0 ));
 
 sm_mat_gs = bias*sm_proj_gs*sm_view_gs;
-mat4 M = model;
-mat4 MV = view*model;
+mat4 M = matrixModel;
+mat4 MV = matrixView*matrixModel;
 //MV_n = transpose(inverse(MV));
 // rigid transform only
 MV_n = MV;
-mat4 MVP = (cam_proj)*MV;
+mat4 MVP = (matrixProjection)*MV;
 vec3 t_tangent;
 
 t_normal_gs = normalize((MV_n*vec4(normal,0.0)).xyz);
 o_normal_gs = normalize(normal);
 
 o_view_gs = MV;
-o_proj_gs = cam_proj;
+o_proj_gs = matrixProjection;
 vPos_gs = (MV*vec4( position,1.0)).xyz;
 
 /*BRDF Required vectors  */
