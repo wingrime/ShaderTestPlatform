@@ -18,17 +18,15 @@ Current Object Matrix ???
 */
 class RenderContext {
     public:
-        RenderContext(const RBO* _v,SShader* _s, const SMat4x4& _V, const SMat4x4 &_P)
+        RenderContext(SShader* _s, const SMat4x4& _V, const SMat4x4 &_P)
             :shader(_s),
-            viewport(_v),
             d_V(_V),
             d_P(_P)
          {
             initUniforms();
         }
-        RenderContext(const RBO* v,SShader* s,const SMat4x4& _V, const SMat4x4& _P, std::shared_ptr<SRBOTexture> sm_tex)
+        RenderContext(SShader* s,const SMat4x4& _V, const SMat4x4& _P, std::shared_ptr<SRBOTexture> sm_tex)
             :shader(s),
-         	viewport(v),
             d_V(_V),
             d_P(_P)
         {
@@ -41,7 +39,6 @@ class RenderContext {
                     std::shared_ptr<SRBOTexture> tex2,
                     std::shared_ptr<SRBOTexture> tex3)
             :shader(s),
-            viewport(v),
             d_V(_V),
             d_P(_P)
         {
@@ -54,7 +51,6 @@ class RenderContext {
         }
         RenderContext(const RenderContext&) = delete;
     	SShader *shader;
-    	const RBO *viewport;
         const SMat4x4 d_V;
         const SMat4x4 d_P;
         static constexpr int MAX_RBO_TEXTURES = 5;

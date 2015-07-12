@@ -442,7 +442,7 @@ int inline SScene::RenderShadowMap(const RBO& v) {
     cam_prog->SetUniform("MVP1",d_shadowmap_cam[1].getProjMatrix()*d_shadowmap_cam[1].getViewMatrix());
     cam_prog->SetUniform("MVP2",d_shadowmap_cam[2].getProjMatrix()*d_shadowmap_cam[2].getViewMatrix());
     cam_prog->SetUniform("MVP3",d_shadowmap_cam[3].getProjMatrix()*d_shadowmap_cam[3].getViewMatrix());
-    RenderContext r_ctx(&v, cam_prog.get() ,d_shadowmap_cam[0].getViewMatrix(),d_shadowmap_cam[0].getProjMatrix());
+    RenderContext r_ctx(cam_prog.get() ,d_shadowmap_cam[0].getViewMatrix(),d_shadowmap_cam[0].getProjMatrix());
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
     }
@@ -466,8 +466,8 @@ int SScene::RenderCubemap()
     //d_debugDrawMgr.AddCross({(float)(0.0-step*100.0),200,1.0},50);
     d_debugDrawMgr.Update();
     SMat4x4 cube_projection = SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0));
-    RenderContext r_ctx(rtCubemap.get() , cubemap_prog_generator.get() ,pos,cube_projection);
-    RenderContext r_ctx2(rtCubemap.get() , main_pass_shader.get() ,pos,cube_projection);
+    RenderContext r_ctx(cubemap_prog_generator.get() ,pos,cube_projection);
+    RenderContext r_ctx2(main_pass_shader.get() ,pos,cube_projection);
 
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
@@ -493,7 +493,7 @@ int SScene::RenderPrepass(const RBO &v)
 {
     v.Bind(true);
     /*submit geometry for prepass*/
-    RenderContext r_ctx_prepass(&v, prepass_prog.get() ,cam.getViewMatrix(),cam.getProjMatrix());
+    RenderContext r_ctx_prepass(prepass_prog.get() ,cam.getViewMatrix(),cam.getProjMatrix());
     for (auto& r : d_render_list ) {
         r->Render(r_ctx_prepass);
     }
@@ -525,7 +525,7 @@ int inline SScene::RenderDirect(const RBO& v) {
     v.Bind(true);    
     if (rWireframe)
     {
-        RenderContext r_ctx(&v, cam_prog.get() ,d_shadowmap_cam[0].getViewMatrix(), d_shadowmap_cam[0].getProjMatrix());
+        RenderContext r_ctx(cam_prog.get() ,d_shadowmap_cam[0].getViewMatrix(), d_shadowmap_cam[0].getProjMatrix());
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
