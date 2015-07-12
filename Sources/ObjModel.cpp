@@ -265,7 +265,7 @@ void SObjModel::Render(RenderContext& r) {
         s->SetUniform(r.d_viewMatrixLoc,r.d_V);
         s->SetUniform(r.d_projMatrixLoc,r.d_P);
         /*optimize*/
-         s->SetUniform(r.d_uniformMVP,r.d_P*r.d_V);
+         s->SetUniform(r.d_uniformMVP,r.d_P*r.d_V*model);
          s->SetUniform(r.d_uniformMV,r.d_V*model);//small todo
 
         std::size_t last_hash = -1;
