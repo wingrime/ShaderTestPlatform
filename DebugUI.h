@@ -28,7 +28,7 @@ public:
     int upViewItem();
     int downViewItem();
 
-    /* imGUI integration code*/
+    /* imGUI code*/
     int DrawGUI();
     int DrawIntrospectionGUI(bool *opened);
 
@@ -49,8 +49,6 @@ public:
     int d_v_sel [V_MAX] = {1 };
     const int d_v_sel_max = V_MAX-1;
 
-
-    const inline std::string C_I(int n);
     const inline std::string V_I(int n);
 
     std::shared_ptr<UILabel> fps_label;

@@ -62,10 +62,8 @@ public:
 
     SShader * getShader();
 
-    std::shared_ptr<SRBOTexture> texSRC1();
-    std::shared_ptr<SRBOTexture> texSRC2();
-    std::shared_ptr<SRBOTexture> texSRC3();
-    std::shared_ptr<SRBOTexture> texSRC4();
+    std::shared_ptr<SRBOTexture> texSRC(int id);
+
 
     std::shared_ptr<RBO> getResultRBO();
 
@@ -80,17 +78,11 @@ private:
     GLuint ibo;
 
 
-    std::shared_ptr<SRBOTexture> d_texSRC1;
-    std::shared_ptr<SRBOTexture> d_texSRC2;
-    std::shared_ptr<SRBOTexture> d_texSRC3;
-    std::shared_ptr<SRBOTexture> d_texSRC4;
-    /*Result RBO*/
-    std::shared_ptr<RBO> d_RBO;
-    /*SRC RBO*/
-    std::shared_ptr<RBO> d_RBO1;
-    std::shared_ptr<RBO> d_RBO2;
-    std::shared_ptr<RBO> d_RBO3;
-    std::shared_ptr<RBO> d_RBO4;
+    std::shared_ptr<SRBOTexture> d_texSRC[4];
 
+    /*Result RBO*/
+    std::shared_ptr<RBO> d_resultRBO;
+    /*SRC RBO*/
+    std::shared_ptr<RBO> d_RBO[4];
 
 };

@@ -543,7 +543,6 @@ int inline SScene::RenderDirect(const RBO& v) {
         w_sky->GetSkyModel()->Render(r_ctx2);
     }
 
-    //d_debugDrawMgr.Render(cam.getProjMatrix()*cam.getViewMatrix());
     d_debugDrawMgr.Render(SInfinityFarProjectionMatrix(100,1.0,toRad(26.0))*cam.getViewMatrix());
 
     return 0;
