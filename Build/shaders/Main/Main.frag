@@ -11,8 +11,8 @@ uniform mat4 view;
 uniform mat4 MVP;
 uniform mat4 MV;
 
-uniform mat4 sm_projection_mat;
-uniform mat4 sm_view_mat;
+uniform mat4 matrixShadowMapProjection;
+uniform mat4 matrixShadowMapView ;
 
 /* BRDF Required vectors*/
 
@@ -24,12 +24,7 @@ in vec3 NormalCS;
 in vec3 NormalMS;
 in vec3 PositionMS;
 
-
-//flat in mat4 sm_mat;
-//in vec4 sm_pos;
-uniform int mesh_flags;
 /* Source texture */
-uniform float bump_amount = 50.0;
 uniform sampler2D samplerAlbedo;
 uniform sampler2D samplerNormalMap;
 uniform sampler2D samplerAlphaMap;

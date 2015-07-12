@@ -5,8 +5,8 @@ uniform mat4 view;
 
 uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,0.0);
 
-uniform mat4 sm_projection_mat;
-uniform mat4 sm_view_mat;
+uniform mat4 matrixShadowMapProjection;
+uniform mat4 matrixShadowMapView;
 
 
 in vec3 normal;
@@ -36,8 +36,8 @@ out mat4 MV_n;
 void main(void)
 {
 o_pos_v_gs =  position;
-sm_proj_gs = sm_projection_mat;
-sm_view_gs = sm_view_mat;
+sm_proj_gs = matrixShadowMapProjection;
+sm_view_gs = matrixShadowMapView;
 
 const mat4 bias = (mat4(0.5 , 0.0 , 0.0, 0.0 ,
 					  0.0 , 0.5 , 0.0, 0.0 ,

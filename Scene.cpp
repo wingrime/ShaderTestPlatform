@@ -613,8 +613,8 @@ int SScene::Render() {
     } else if (dbg_ui.d_v_sel_current == DebugUI::V_VOLUMETRIC) {
         rtSCREEN->Bind(true); 
 
-        pp_stage_volumetric->getShader()->SetUniform("sm_proj_matrix",d_shadowmap_cam[0].getProjMatrix());
-        pp_stage_volumetric->getShader()->SetUniform("sm_view_matrix",d_shadowmap_cam[0].getViewMatrix());
+        pp_stage_volumetric->getShader()->SetUniform("matrixShadowMapProjection",d_shadowmap_cam[0].getProjMatrix());
+        pp_stage_volumetric->getShader()->SetUniform("matrixShadowMapView",d_shadowmap_cam[0].getViewMatrix());
         pp_stage_volumetric->getShader()->SetUniform("cam_proj_matrix",cam.getProjMatrix());
         pp_stage_volumetric->getShader()->SetUniform("cam_view_matrix",cam.getViewMatrix());
         pp_stage_volumetric->Draw();

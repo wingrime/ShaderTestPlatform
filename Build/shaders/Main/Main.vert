@@ -7,8 +7,8 @@ uniform mat4 MVP;
 uniform mat4 MV;
 uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,1.0);
 
-uniform mat4 sm_projection_mat;
-uniform mat4 sm_view_mat;
+uniform mat4 matrixShadowMapProjection;
+uniform mat4 matrixShadowMapView;
 
 /*input vertex format*/
 in vec3 normal;
