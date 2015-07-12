@@ -613,7 +613,7 @@ return (SVec2(v1.x + v2.x,
 
 
 
-SMat4x4 LookAt(const SVec4 &at, const SVec4 &eye, const SVec4 &up)
+SMat4x4 LookAtMatrix(const SVec4 &at, const SVec4 &eye, const SVec4 &up)
 {
         SVec4 zaxis = SVec4::Normalize( eye -at); /*direction to view point*/
         SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(up,zaxis)); /* left vector*/
@@ -656,3 +656,6 @@ return (Point(-v1.x,
               -v1.y,
               -v1.z));
 }
+
+
+

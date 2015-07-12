@@ -175,7 +175,7 @@ public:
     }
 
 };
-SMat4x4 LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up);
+SMat4x4 LookAtMatrix(const SVec4& at,const  SVec4& eye,const SVec4& up);
 class UnitQuaterion {
 public:
     UnitQuaterion();

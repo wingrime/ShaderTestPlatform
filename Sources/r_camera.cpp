@@ -32,7 +32,7 @@ int SCamera::rotEuler(const SVec4& v)
 
 int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
 {
-    view = LookAt(at,eye,up);
+    view = LookAtMatrix(at,eye,up);
     return 0;
 }
 
