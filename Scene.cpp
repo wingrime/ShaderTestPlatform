@@ -527,8 +527,7 @@ int inline SScene::RenderDirect(const RBO& v) {
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
         }
-        //TODO: Move to weathersky
-        RenderContext r_ctx2(w_sky->GetSkyShader() ,cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(1) ,rtCubemap->texIMG(0), rtShadowMap->texIMG(0));
+        RenderContext r_ctx2(w_sky->GetSkyShader() ,cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix());
         w_sky->Draw(r_ctx2);
 
     d_debugDrawMgr.Render(SInfinityFarProjectionMatrix(100,1.0,toRad(26.0))*cam.getViewMatrix());
