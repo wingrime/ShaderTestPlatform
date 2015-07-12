@@ -147,6 +147,7 @@ target_link_libraries(tests "${FREETYPE_LIBRARY}")
 add_custom_command(TARGET tests
           POST_BUILD
           # thast should not be there but seems cmake not build tests in right output
+          # test autorun disabled
           COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/tests.exe" "${PROJECT_SOURCE_DIR}/Build/"
-          COMMAND "${PROJECT_SOURCE_DIR}/Build/tests.exe"
+          #COMMAND "${PROJECT_SOURCE_DIR}/Build/tests.exe"
           )
