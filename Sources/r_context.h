@@ -18,7 +18,7 @@ Current Object Matrix ???
 */
 class RenderContext {
     public:
-        RenderContext(const RBO* _v,SShader* _s, SMat4x4 _V, SMat4x4 _P)
+        RenderContext(const RBO* _v,SShader* _s, const SMat4x4& _V, const SMat4x4 &_P)
             :shader(_s),
             viewport(_v),
             d_V(_V),
@@ -26,7 +26,7 @@ class RenderContext {
          {
             initUniforms();
         }
-        RenderContext(const RBO* v,SShader* s,SMat4x4 _V, SMat4x4 _P, std::shared_ptr<SRBOTexture> sm_tex)
+        RenderContext(const RBO* v,SShader* s,const SMat4x4& _V, const SMat4x4& _P, std::shared_ptr<SRBOTexture> sm_tex)
             :shader(s),
          	viewport(v),
             d_V(_V),
@@ -35,7 +35,7 @@ class RenderContext {
             d_RBOTexture[0] = sm_tex;
             initUniforms();
         }
-        RenderContext(const RBO* v,SShader* s, SMat4x4 _V, SMat4x4 _P,
+        RenderContext(const RBO* v,SShader* s, const SMat4x4& _V, const SMat4x4& _P,
                     std::shared_ptr<SRBOTexture> sm_tex,
                     std::shared_ptr<SRBOTexture> tex1,
                     std::shared_ptr<SRBOTexture> tex2,
@@ -55,8 +55,8 @@ class RenderContext {
         RenderContext(const RenderContext&) = delete;
     	SShader *shader;
     	const RBO *viewport;
-        SMat4x4 d_V;
-        SMat4x4 d_P;
+        const SMat4x4 d_V;
+        const SMat4x4 d_P;
         static constexpr int MAX_RBO_TEXTURES = 5;
         std::shared_ptr<SRBOTexture> d_RBOTexture[MAX_RBO_TEXTURES];
         /**/
