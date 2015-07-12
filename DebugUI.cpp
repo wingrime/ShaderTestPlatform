@@ -429,6 +429,7 @@ int DebugUI::DrawGUI()
     static float shIntensity = 5.2;
     static float materialBRDFAlpha = 0.4;
     static float materialBRDFressnel = 0.04;
+    static float lightIntensity = 1.0;
 
     if (ImGui::CollapsingHeader("Lighting")) {
         if (ImGui::SliderFloat("shIntensity", &shIntensity, 0.0f, 20.2f)) {
@@ -440,6 +441,9 @@ int DebugUI::DrawGUI()
         if (ImGui::SliderFloat("materialBRDFressnel", &materialBRDFressnel, 0.0f, 1.0f)) {
             sc->main_pass_shader->SetUniform("materialBRDFressnel",materialBRDFressnel);
         }
+        if (ImGui::SliderFloat("lightIntensity", &lightIntensity, 0.0f, 100.0f)) {
+            sc->main_pass_shader->SetUniform("lightIntensity",lightIntensity);
+        }
 
 
         if (ImGui::Button("Reset"))
@@ -447,9 +451,11 @@ int DebugUI::DrawGUI()
             shIntensity = 5.2;
             materialBRDFAlpha = 0.4;
             materialBRDFressnel = 0.04;
+            lightIntensity = 1.0;
             sc->main_pass_shader->SetUniform("shIntensity",shIntensity);
             sc->main_pass_shader->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
             sc->main_pass_shader->SetUniform("materialBRDFressnel",materialBRDFressnel);
+            sc->main_pass_shader->SetUniform("lightIntensity",lightIntensity);
 
 
          }

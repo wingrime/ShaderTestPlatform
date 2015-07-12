@@ -340,7 +340,8 @@ Directional Light not translable, so set w to 0.0;
 	shadow = 0.0;
  	float shadowPenumbraDisp = shadowPenumbra ;
  	/*Too costly !!!*/
- 	vec2 randomFromTexture = normalize(-1.0+2.0*texture(samplerRandomNoise, 0.5+0.5*reflect(UvMS,gl_FragCoord.yx)).gb);
+ 	//vec2 randomFromTexture = normalize(-1.0+2.0*texture(samplerRandomNoise, 0.5+0.5*reflect(UvMS,gl_FragCoord.yx)).gb);
+ 	vec2 randomFromTexture = normalize(-1.0+2.0*texture(samplerRandomNoise, UvMS* 4.0).gb);
 if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
                 vec4 s;
                 for (int i=0;i<sm_samples;i+=4)
