@@ -78,10 +78,10 @@ SWeatherSky::SWeatherSky() {
     sky_dome_prog->SetUniform("sky_sunpos",SVec4( 0.0,1.0,0.0,1.0 ));
 
 }
-void SWeatherSky::Draw() {
-    if (sky_dome_prog->IsReady)
+void SWeatherSky::Draw(RenderContext& r) {
+    if (sky_dome_prog->IsReady && sky_dome_model->IsReady)
     {
-        //TODO
+        sky_dome_model->Render(r);
     }
 
 }

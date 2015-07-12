@@ -14,6 +14,7 @@
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 
+#include "RenderContext.h"
 
 struct SolAng {
     float Elev;
@@ -23,7 +24,7 @@ struct SolAng {
 class SWeatherSky {
 public:
     SWeatherSky ();
-    void Draw();
+    void Draw(RenderContext &r);
     SolAng SolarAngleModel(float LT,float delta_GMT,float d, float longtitude, float attitude);
     void SetTime(float time);
     void SetTurbidity(float t);
