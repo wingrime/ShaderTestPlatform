@@ -425,6 +425,37 @@ int DebugUI::DrawGUI()
         }
     }
 
+
+    static float shIntensity = 5.2;
+    static float materialBRDFAlpha = 0.4;
+    static float materialBRDFressnel = 0.04;
+
+    if (ImGui::CollapsingHeader("Lighting")) {
+        if (ImGui::SliderFloat("shIntensity", &shIntensity, 0.0f, 20.2f)) {
+            sc->main_pass_shader->SetUniform("shIntensity",shIntensity);
+        }
+        if (ImGui::SliderFloat("materialBRDFAlpha", &materialBRDFAlpha, 0.0f, 1.0f)) {
+            sc->main_pass_shader->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
+        }
+        if (ImGui::SliderFloat("materialBRDFressnel", &materialBRDFressnel, 0.0f, 1.0f)) {
+            sc->main_pass_shader->SetUniform("materialBRDFressnel",materialBRDFressnel);
+        }
+
+
+        if (ImGui::Button("Reset"))
+        {
+            shIntensity = 5.2;
+            materialBRDFAlpha = 0.4;
+            materialBRDFressnel = 0.04;
+            sc->main_pass_shader->SetUniform("shIntensity",shIntensity);
+            sc->main_pass_shader->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
+            sc->main_pass_shader->SetUniform("materialBRDFressnel",materialBRDFressnel);
+
+
+         }
+    }
+
+
     /*Sample code*/
     static bool gImGuiTest = false;
     ImGui::Checkbox("GuiTest", &gImGuiTest);

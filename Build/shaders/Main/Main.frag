@@ -41,7 +41,6 @@ uniform	float s0 = 290.0;
 uniform	float s1 = 840.0;
 uniform	float s2 = 2420.0;
 uniform	float s3 = 7000.0;
-uniform float ambientIntensity = 0.1;
 uniform float shIntensity = 5.2;
 uniform float materialBRDFAlpha = 0.4;
 uniform float materialBRDFressnel = 0.04 ;/*fressnel*/
