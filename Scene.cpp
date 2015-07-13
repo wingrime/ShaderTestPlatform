@@ -462,15 +462,10 @@ int SScene::RenderCubemap()
     else
        normal_pass.Bind();
 
-    //static int step = 0;
-    //step ++;
     rtCubemap->Bind();
     SMat4x4 pos = SMat4x4().Move(0,-500.0,0.0);
-    //d_debugDrawMgr.AddCross({(float)(0.0-step*100.0),200,1.0},50);
-    d_debugDrawMgr.Update();
     SMat4x4 cube_projection = SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0));
     RenderContext r_ctx(cubemap_prog_generator.get() ,pos,cube_projection);
-    RenderContext r_ctx2(main_pass_shader.get() ,pos,cube_projection);
 
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
@@ -583,7 +578,6 @@ int SScene::Render() {
     /*Bloom + SSAO + RenderShadowMap*/
     if (dbg_ui.d_v_sel_current == DebugUI::V_NORMAL) {
         /*LumKEY*/
-
         pp_stage_hdr_lum_log->DrawRBO(false);
         pp_stage_hdr_lum_key->DrawRBO(false);
         if (d_toggle_brightpass ) {
