@@ -454,9 +454,9 @@ int inline SScene::RenderShadowMap(const RBO& v) {
 
 int SScene::RenderCubemap()
 {
-    glClearColor(1.0,1.0,1.0,1.0);
+    //glClearColor(0.0,0.0,0.0,1.0);
     //glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+    //glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
     if (d_toggle_MSAA)
        msaa_pass.Bind();
     else
@@ -467,9 +467,15 @@ int SScene::RenderCubemap()
     SMat4x4 cube_projection = SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0));
     RenderContext r_ctx(cubemap_prog_generator.get() ,pos,cube_projection);
 
-    for (auto& r : d_render_list ) {
-        r->Render(r_ctx);
-    }
+    /*Sky support*/
+    RenderContext r_ctx_sky(w_sky->GetSkyCubemapShader() ,pos,cube_projection);
+
+    w_sky->Draw(r_ctx_sky);
+
+    //for (auto& r : d_render_list ) {
+    //    r->Render(r_ctx);
+    //}
+
     SCProg cs("Cubemap/cubemap_convolve.comp");
     cs.Barrier();
     cs.Use();

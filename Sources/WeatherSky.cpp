@@ -12,8 +12,9 @@ void SWeatherSky::SetTime(float LT) {
     sun_light_direction = SVec4(sun_x, sun_y , sun_z,1.0);
 
     sky_dome_prog->SetUniform("sky_sunpos",SVec4(sun_x,sun_y,sun_z,0.0) );
-
-    printf("sun: %f %f %f\n Elev %f, Ath %f\n", sun_x,sun_y,sun_z,toDeg(a.Elev),toDeg(a.Ath));
+    sky_dome_cubemap_prog->SetUniform("sky_sunpos",SVec4(sun_x,sun_y,sun_z,0.0) );
+    //Debug info
+    //printf("sun: %f %f %f\n Elev %f, Ath %f\n", sun_x,sun_y,sun_z,toDeg(a.Elev),toDeg(a.Ath));
 
 }
 
@@ -24,17 +25,20 @@ SVec4 SWeatherSky::GetSunDirection()
 
 void SWeatherSky::SetSunPos(const SVec4& sun) {
     sky_dome_prog->SetUniform("sky_sunpos",sun);
+    sky_dome_cubemap_prog->SetUniform("sky_sunpos",sun);
 }
 
 void SWeatherSky::SetTurbidity(float t) {
     sky_turbidity = t;
     sky_dome_prog->SetUniform("sky_turbidity",t);
+    sky_dome_cubemap_prog->SetUniform("sky_turbidity",t);
 }
 
 void SWeatherSky::SetSunSize(float s)
 {
     sky_disksize = s;
     sky_dome_prog->SetUniform("sky_sunsize",sky_disksize);
+    sky_dome_cubemap_prog->SetUniform("sky_sunsize",sky_disksize);
 }
 SolAng SWeatherSky::SolarAngleModel(float LT,float delta_GMT,float d, float longtitude, float attitude) {
     SolAng pos;
@@ -67,8 +71,10 @@ SWeatherSky::SWeatherSky() {
 
     sky_dome_model = new SObjModel("sky_dome.obj");
     sky_dome_prog = new SShader("Sky/PerezSky.vert","Sky/PerezSky.frag");
+    sky_dome_cubemap_prog = new SShader("Sky/PerezSkyCubemap.vert","Sky/PerezSkyCubemap.frag","Sky/PerezSkyCubemap.geom");
 
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
+    sky_dome_model->ConfigureProgram( *sky_dome_cubemap_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
 
     sky_dome_prog->SetUniform("sky_turbidity",sky_turbidity);
@@ -77,9 +83,14 @@ SWeatherSky::SWeatherSky() {
     sky_dome_prog->SetUniform("sky_power",sky_power);
     sky_dome_prog->SetUniform("sky_sunpos",SVec4( 0.0,1.0,0.0,1.0 ));
 
+    sky_dome_cubemap_prog->SetUniform("sky_turbidity",sky_turbidity);
+    sky_dome_cubemap_prog->SetUniform("sky_sunsize",sky_disksize);
+    sky_dome_cubemap_prog->SetUniform("sky_sunpower",sky_sunpower);
+    sky_dome_cubemap_prog->SetUniform("sky_power",sky_power);
+    sky_dome_cubemap_prog->SetUniform("sky_sunpos",SVec4( 0.0,1.0,0.0,1.0 ));
 }
 void SWeatherSky::Draw(RenderContext& r) {
-    if (sky_dome_prog->IsReady && sky_dome_model->IsReady)
+    if (sky_dome_model->IsReady)
     {
         sky_dome_model->Render(r);
     }

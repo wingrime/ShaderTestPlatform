@@ -443,7 +443,9 @@ if (  clamp(sm_pos.xyz,1.0,0.0) != sm_pos.xyz) {
 
 
 
-            dstColor = vec4(diffColor*diff,1.0)*0.5+0.5*vec4(vec3(texture(samplerEnvCubeMap,rdir).xyz),1.0);
+            //dstColor = vec4(diffColor*diff,1.0)*0.5+0.5*vec4(vec3(texture(samplerEnvCubeMap,rdir).xyz),1.0);
+            dstColor = vec4(vec3(texture(samplerEnvCubeMap,rdir).xyz),1.0);
+            
             }
             else if (dbg_out ==  DBG_OUT_SH)
 		dstColor = vec4(vec3(ambient_spectral_harmonics),1.0);

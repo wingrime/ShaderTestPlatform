@@ -407,15 +407,19 @@ int DebugUI::DrawGUI()
     if (ImGui::CollapsingHeader("Weather")) {
         if (ImGui::SliderFloat("LocalTime", &WeatherLocalTime, 0.0f,25.0f)) {
             sc->w_sky->SetTime(WeatherLocalTime);
+            sc->d_first_render = false;
         }
         if (ImGui::SliderFloat("SkyTurbidity", &WeatherSkyTurbidity, 0.0f,25.0f)) {
             sc->w_sky->SetTurbidity(WeatherSkyTurbidity);
+            sc->d_first_render = false;
         }
         if (ImGui::SliderFloat("SunSize", &WearherSunSize, 0.0f,1000.0f)) {
             sc->w_sky->SetSunSize(WearherSunSize);
+            sc->d_first_render = false;
         }
         if (ImGui::Button("Reset"))
         {
+            sc->d_first_render = false;
             WeatherLocalTime = 1.0;
             WeatherSkyTurbidity = 2.0;
             WearherSunSize = 100.0;

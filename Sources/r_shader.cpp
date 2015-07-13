@@ -125,9 +125,10 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
         }
     }
     glAttachShader ( d_program, vs );
-    glAttachShader ( d_program, fs );
     if (gs_used)
         glAttachShader( d_program, gs);
+    glAttachShader ( d_program, fs );
+
     
 
     glLinkProgram  ( d_program );

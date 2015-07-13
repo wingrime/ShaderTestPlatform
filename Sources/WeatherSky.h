@@ -34,6 +34,7 @@ public:
 
 
     SShader * GetSkyShader() {return sky_dome_prog;}
+    SShader * GetSkyCubemapShader() {return sky_dome_cubemap_prog;}
     SObjModel * GetSkyModel() {return sky_dome_model;}
     SMat4x4  GetSkyProjectionMatrix() {return matrix_projection;}
 
@@ -44,6 +45,7 @@ private:
     SMat4x4 model;
     SObjModel *sky_dome_model;
     SShader  *sky_dome_prog;
+    SShader  *sky_dome_cubemap_prog;
 
 
     SMat4x4 matrix_projection = SInfinityFarProjectionMatrix(100.0f,1.0f,toRad(26.0));
