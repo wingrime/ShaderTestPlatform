@@ -422,7 +422,7 @@ int SScene::UpdateScene(float dt) {
     float shadowCascadeDiv[] = { 100.0,290.0, 840.0, 2420.0,7000.0};
 
     SMat4x4 PV = cam.getViewProjectMatrix();
-    std::vector <Point> psrPoints;// = FrustumPoints(PV);
+    std::vector <Point> psrPoints;// = FrustumPoints(PV); - use view-frustum as PSR
     AABB psrAABB =AABB(Point(-2000.0,-100,-1300.0), Point(2000.0,1300.0,1300.0) );
     std::vector <Point> aabbPoints = AABBPoints(psrAABB);
     psrPoints.insert(psrPoints.end(),aabbPoints.begin(),aabbPoints.end()); /*JOIN - better solution, convex hull*/
@@ -457,52 +457,14 @@ int SScene::UpdateScene(float dt) {
     Point p = psrPoints[max_idx];
 
     SVec4 pos = SVec4(p.x,p.y,p.z,1.0);
-    //pos.Reflect();
-
-    //for (int i = 0 ; i < 4 ; i++) {
-    //    cameraFrustrumAABB[i] = FrustrumSize(SPerspectiveProjectionMatrix(100.0, 7000.0,1.0f,toRad(26.0))*(cam.getViewMatrix()));
-    //}
-
-   // AABB cameraFrustrumAABBFull = FrustrumSize(SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0))*cam.getViewMatrix());
-    //camera focus
-    //from view matrix
-    //SVec4 pos = cam.getViewMatrix().ExtractPositionNoScale();//+cam.getViewMatrix().ExtractLeftVector()*((7000.0f-100.0f)/2.0);
-    //d_debugDrawMgr.AddCross(Point(pos),1000);
-    //d_debugDrawMgr.Update();
-    ////from aabb ???
-    //SVec4 pos = SVec4(r.min_point.x+0.5f*(r.max_point.x - r.min_point.x),r.min_point.y+0.5f*(r.max_point.y - r.min_point.y),r.min_point.z+0.5f*(r.max_point.z - r.min_point.z),1.0);
 
 
-
-    //works badly..
-    // non uniform scale gives vector new direction, not correct fully, so, for make it somehow correct, use biggest scale, but it produce overkill...
-    //float max_scale = (r.max_point.x - r.min_point.x);
-    //max_scale = fmax (max_scale , (r.max_point.y - r.min_point.y));
-    //max_scale = fmax (max_scale , (r.max_point.z - r.min_point.z));
-
-    //SMat4x4 scale_nonuniform = SMat4x4().Scale  (2.0/fabs(r.min_point.x - r.max_point.x),2.0/fabs(r.min_point.y - r.max_point.y),2.0/fabs(r.min_point.z - r.max_point.z));
-    //non uniform scale change direction!!!!
-    //SMat4x4 scale_uniform = SMat4x4().Scale(2.0/max_scale);
-
-
-
-    //SMat4x4 m =  SMat4x4().Move(-pos.x,-pos.y,-pos.z);
-
-    //SMat4x4 shadowMapViewMatrix = LookAtMatrix(w_sky->GetSunDirection(),SVec4(1.0,0.0,0.0,1.0));
-    //SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix(100.0f, 7000.0f,1000.0f,1000.0,-1000.0,-1000.0);
-
-    //TODO: fixup
     SMat4x4 shadowMapFinalProjectionMatrix[4];
     for (int i = 0; i < 4; i++ ){
-        //AABB psrAABB = PSRProjectionAABB (cameraFrustrumAABB[i],shadowMapViewMatrix);
 
-        //cameraTransformFrustrumAABB[i] = psrAABB; //debug
-        //SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix((psrAABB.min_point.z), (psrAABB.max_point.z - psrAABB.min_point.z)+1000.0f,1.0f,1.0,-1.0,-1.0);
         SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix(0.1, shadowMapDistance,1.0f,1.0,-1.0,-1.0);
 
-        //SMat4x4 shadowMapPVMatrix = shadowMapProjectionMatrix*shadowMapViewMatrix*SMat4x4().Move(-pos.x,-pos.y,-pos.z);
         SMat4x4 shadowMapPVMatrix = shadowMapProjectionMatrix*shadowMapViewMatrix*SMat4x4().Move(-pos);
-       // SMat4x4 shadowPostPerspectiveScale = PSRFocusSMSTransformMatrix(PSRProjectionBoundingBox(cameraFrustrumAABB[i],shadowMapPVMatrix));
         SMat4x4 shadowPostPerspectiveScale = PSRFocusSMSTransformMatrix(PSRProjectionPointSet(psrPoints,shadowMapPVMatrix));
 
         shadowMapFinalProjectionMatrix[i] = shadowPostPerspectiveScale*shadowMapProjectionMatrix;
@@ -513,11 +475,14 @@ int SScene::UpdateScene(float dt) {
         d_shadowmap_cam[i].setProjMatrix(shadowMapFinalProjectionMatrix[i]);
     }
 
+    /*
     d_debugDrawMgr.ClearAll();
     d_debugDrawMgr.AddCross(pos,200);
     d_debugDrawMgr.AddAABB(psrAABB);
     d_debugDrawMgr.AddCameraFrustrum(d_shadowmap_cam[0].getViewProjectMatrix());
     d_debugDrawMgr.Update();
+
+    */
 
     main_pass_shader->SetUniform("shadowMVPB0",Bias*d_shadowmap_cam[0].getViewProjectMatrix());
     main_pass_shader->SetUniform("shadowMVPB1",Bias*d_shadowmap_cam[1].getViewProjectMatrix());
