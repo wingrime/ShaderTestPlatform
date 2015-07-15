@@ -57,6 +57,10 @@ SScene::SScene(RectSizeInt v)
     int w = rtHDRScene->getSize().w;
     int h = rtHDRScene->getSize().h;
     /*bloom shaders */
+
+    texRandom.reset(new STexture("noise.png"));
+    texRandom->setInterpolationMode(STexture::InterpolationType::TEX_NEAREST);
+
     pp_prog_hdr_tonemap.reset(new SShader("PostProcessing/PostProccessQuard.vert",\
                                       "PostProcessing/Tonemap/Filmic.frag"));
 
@@ -116,8 +120,7 @@ SScene::SScene(RectSizeInt v)
 
     rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
 
-    texRandom.reset(new STexture("noise.png"));
-    texRandom->setInterpolationMode(STexture::InterpolationType::TEX_NEAREST);
+
     dbg_ui.Init();
 
     UpdateCfgLabel();
