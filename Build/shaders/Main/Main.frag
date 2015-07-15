@@ -274,7 +274,7 @@ void main()
 	//not general way for light with dir 0,1,0
 	//normal way length(light_dir - o_pos_v)
 	/*slowest sol*/
-        vec4 view_space = inverse(matrixProjection)*gl_FragCoord;
+    vec4 view_space = inverse(matrixProjection)*gl_FragCoord;
 	view_space.xyz /= view_space.w; // ?
 
 	float d =  1.0-view_space.z;//((2*far*near) /((2.0*gl_FragCoord.z-1.0)*(far-near)-(far+near)));// far-near;
@@ -328,7 +328,7 @@ void main()
 
         const int shadowMapSamples = 8;
         float shadow = shadowFactorRotatedPossionSampling(samplerRandomNoise, samplerShadowMap,sm_pos.xyz, shadowEps,shadowPenumbra,UvMS,shadowMapSamples,slice_sel );
-        if (diff < 0.0001) { /*machine EPSILON*/
+        if (diff < 0.001) { /*machine EPSILON*/
 		shadow = 0.0;
 		//diffColor = vec3(1.0,0.0,0.0);
 	}
