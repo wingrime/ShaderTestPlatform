@@ -3,12 +3,13 @@
 #include "RBO.h"
 #include "r_sprog.h"
 #include "mat_math.h"
+#include "GenericTexture.h"
 
 SPostProcess::SPostProcess(SShader *prog, int w, int h,
-                           const std::shared_ptr<SRBOTexture> &texSRC1,
-                           const std::shared_ptr<SRBOTexture> &texSRC2,
-                           const std::shared_ptr<SRBOTexture> &texSRC3,
-                           const std::shared_ptr<SRBOTexture> &texSRC4)
+                           const std::shared_ptr<SGenericTexture> &texSRC1,
+                           const std::shared_ptr<SGenericTexture> &texSRC2,
+                           const std::shared_ptr<SGenericTexture> &texSRC3,
+                           const std::shared_ptr<SGenericTexture> &texSRC4)
 
     :p_prog(prog)
 {
@@ -90,7 +91,7 @@ SShader *SPostProcess::getShader()
     return p_prog;
 }
 
-std::shared_ptr<SRBOTexture> SPostProcess::texSRC(int id)
+std::shared_ptr<SGenericTexture> SPostProcess::texSRC(int id)
 {
     return d_texSRC[id];
 
@@ -102,7 +103,7 @@ std::shared_ptr<RBO> SPostProcess::getResultRBO()
 
 }
 
-int SPostProcess::setTexSrc1(std::shared_ptr<SRBOTexture> r)
+int SPostProcess::setTexSrc1(std::shared_ptr<SGenericTexture> r)
 {
     d_texSRC[0] = r;
     return 0;
