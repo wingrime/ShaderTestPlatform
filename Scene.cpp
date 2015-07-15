@@ -31,12 +31,12 @@ SScene::SScene(RectSizeInt v)
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
     
-    ,rtShadowMap(new RBO(std::string("ShadowMap"),v.w*4,(v.h)*4, RBO::RBO_DEPTH_ARRAY_ONLY))
+    ,rtShadowMap(new RBO(std::string("ShadowMap"),v.w,v.h, RBO::RBO_DEPTH_ARRAY_ONLY))
     ,rtPrepass(new RBO(std::string("DepthPrePass"),v.w/2,v.h/2, RBO::RBO_RGBA))
     ,rtHDRScene_MSAA(new RBO(std::string("HDR Mainpass MSAA"),v.w,v.h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_NONE,1,
                                                    SRBOTexture::RT_NONE, 1 ))
-    ,rtHDRScene(new RBO(std::string("HDR Mainpass"),v.w,v.h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
+    ,rtHDRScene(new RBO(std::string("HDR Mainpass"),v.w/2,v.h/2 ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_NONE,1,
                                                    SRBOTexture::RT_NONE, 1 ))
     ,rtHDRBloomResult( new RBO(std::string("rtHDRBloomResult"),v.w/2,v.h/2, RBO::RBO_FLOAT_RED)) /* is it better HDR */
