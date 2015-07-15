@@ -36,7 +36,7 @@ SScene::SScene(RectSizeInt v)
     ,rtHDRScene_MSAA(new RBO(std::string("HDR Mainpass MSAA"),v.w,v.h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
                                                    SRBOTexture::RT_NONE,1,
                                                    SRBOTexture::RT_NONE, 1 ))
-    ,rtHDRScene(new RBO(std::string("HDR Mainpass"),v.w/2,v.h/2 ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
+    ,rtHDRScene(new RBO(std::string("HDR Mainpass"),v.w,v.h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
                                                    SRBOTexture::RT_NONE,1,
                                                    SRBOTexture::RT_NONE, 1 ))
     ,rtHDRBloomResult( new RBO(std::string("rtHDRBloomResult"),v.w/2,v.h/2, RBO::RBO_FLOAT_RED)) /* is it better HDR */
