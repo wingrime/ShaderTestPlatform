@@ -69,7 +69,7 @@ SScene::SScene(RectSizeInt v)
 
     pp_stage_ssao.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
                                                   "PostProcessing/SSAO/SimpleSSAO.frag") \
-                                      ,w/2,h/2,rtPrepass->texIMG(0),rtPrepass->texDEPTH()));
+                                      ,w/2,h/2,rtPrepass->texIMG(0),rtPrepass->texDEPTH(),texRandom));
 
     pp_stage_ssao_blur_hor.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
                                                           "PostProcessing/Bloor/GaussHorizontal.frag"),\
