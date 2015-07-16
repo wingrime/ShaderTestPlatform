@@ -293,6 +293,7 @@ int DebugUI::DrawGUI()
     static float tmc_E = 0.01f;
     static float tmc_F = 0.3f;
     static float tmc_LW = 1.2f;
+    static float eyeAdoptSpeed = 0.008;
     if (ImGui::CollapsingHeader("Tonemapping"))
     {
         ImGui::Text("Tonemapping curve");
@@ -317,8 +318,11 @@ int DebugUI::DrawGUI()
         if (ImGui::SliderFloat("LW", &tmc_LW, 0.0f, 3.0f)) {
             sc->pp_prog_hdr_tonemap->SetUniform("LW",tmc_LW);
         }
-
-        if (ImGui::Button("Reset"))
+        ImGui::Text("Eye adaptation");
+        if (ImGui::SliderFloat("eyeAdoptSpeed", &eyeAdoptSpeed, 0.0f, 0.5f)) {
+            sc->pp_stage_hdr_lum_key->getShader()->SetUniform("eyeAdoptSpeed",eyeAdoptSpeed);
+        }
+        if (ImGui::Button("Reset Tonemapping"))
             {
                 tmc_A = 0.22;
                 tmc_B = 0.30;
@@ -327,6 +331,7 @@ int DebugUI::DrawGUI()
                 tmc_E = 0.01;
                 tmc_F = 0.30;
                 tmc_LW = 1.2;
+                eyeAdoptSpeed = 0.008;
                 sc->pp_prog_hdr_tonemap->SetUniform("A",tmc_A);
                 sc->pp_prog_hdr_tonemap->SetUniform("B",tmc_B);
                 sc->pp_prog_hdr_tonemap->SetUniform("C",tmc_C);
@@ -351,7 +356,7 @@ int DebugUI::DrawGUI()
             sc->pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",ssaoblurSize);
             sc->pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",ssaoblurSize);
         }
-        if (ImGui::Button("Reset"))
+        if (ImGui::Button("Reset SSAO"))
         {
             ssao_Size = 0.3;
             ssaoLevelClamp = 0.21;
@@ -373,7 +378,7 @@ int DebugUI::DrawGUI()
         if (ImGui::SliderFloat("hdrBloomMul", &bloomMul, 0.0f, 5.0f)) {
             sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",bloomMul);
         }
-        if (ImGui::Button("Reset"))
+        if (ImGui::Button("Reset Bloom"))
         {
             bloomClamp = 0.75;
             bloomMul = 2.0;
@@ -396,7 +401,7 @@ int DebugUI::DrawGUI()
         if (ImGui::SliderFloat("shadowEpsMult", &shadowEpsMult,0.0f,25.0f)) {
             sc->main_pass_shader->SetUniform("shadowEpsMult", 0.0001f*shadowEpsMult);
         }
-        if (ImGui::Button("Reset"))
+        if (ImGui::Button("Reset Shadows"))
         {
             shadowBias = 1.0;
             shadowPenumbra = 1500.0;
@@ -422,7 +427,7 @@ int DebugUI::DrawGUI()
             sc->w_sky->SetSunSize(WearherSunSize);
             sc->d_first_render = false;
         }
-        if (ImGui::Button("Reset"))
+        if (ImGui::Button("Reset Weather"))
         {
             sc->d_first_render = false;
             WeatherLocalTime = 1.0;
@@ -455,7 +460,7 @@ int DebugUI::DrawGUI()
         }
 
 
-        if (ImGui::Button("Reset"))
+        if (ImGui::Button("Reset Lighting"))
         {
             shIntensity = 5.2;
             materialBRDFAlpha = 0.4;
