@@ -54,10 +54,10 @@ private:
 
 
     /*Sun location model*/
-    float local_att = toRad(10.0);
-    float local_long = toRad(10.0);
+    float local_att = toRad(56.0);
+    float local_long = toRad(60.0);
     float local_GMT_delta = -5;
-    float local_day_of_year = 10;
+    float local_day_of_year = 150;
     /*Sky model*/
     float sky_turbidity = 2.0;
     float sky_disksize = 100.0;
