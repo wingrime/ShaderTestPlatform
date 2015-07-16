@@ -81,9 +81,16 @@ void SPostProcess::DrawRBO(bool redraw)
     if (p_prog->IsReady)
     {
         MASSERT(!d_RBO);
+        MASSERT(!d_resultRBO);
         d_resultRBO->Bind(redraw);
         Draw();
     }
+}
+
+void SPostProcess::Clean()
+{
+    MASSERT(!d_resultRBO);
+    d_resultRBO->Clean();
 }
 
 SShader *SPostProcess::getShader()

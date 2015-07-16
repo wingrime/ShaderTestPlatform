@@ -59,6 +59,7 @@ public:
     void Draw();
     void DrawRBO(bool redraw); /*Draw to rbo selected on creation*/
     void inline DrawRBO() { DrawRBO(true); }
+    void Clean();
 
 
     SShader * getShader();

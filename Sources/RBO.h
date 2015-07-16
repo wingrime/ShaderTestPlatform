@@ -52,6 +52,7 @@ public:
 
     int Bind(bool clear) const;
     int Bind() const {return Bind(true);}
+    int Clean();
 
     std::string getName();
 

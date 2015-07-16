@@ -89,11 +89,10 @@ public:
     SPerfMan ui_time;
     SPerfMan pp_time;
 
-    /* flags*/
-    bool rSSAO  = false;
 
     int toggleBrightPass(bool b);
     int toggleMSAA(bool b);
+    int toggleSSAO(bool b);
 
 
 private:
@@ -130,6 +129,7 @@ private:
    bool d_toggle_fullscreen = false;
    bool d_toggle_MSAA = true;
    bool d_toggle_brightpass = true;
+   bool d_toggle_ssao = true;
 public:
     int UpdateScene(float dt);
 private:

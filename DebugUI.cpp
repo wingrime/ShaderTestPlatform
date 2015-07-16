@@ -272,12 +272,17 @@ int DebugUI::DrawGUI()
     /*Graphics flags*/
     static bool cfg_brightpass = false;
     static bool cfg_msaa = true;
+    static bool cfg_ssao = true;
     if (ImGui::Checkbox("Brightpass", &cfg_brightpass)) {
         sc->toggleBrightPass(cfg_brightpass);
     }
     ImGui::SameLine(150);
     if (ImGui::Checkbox("MSAA", &cfg_msaa)) {
         sc->toggleMSAA(cfg_msaa);
+    }
+    ImGui::SameLine(250);
+    if (ImGui::Checkbox("SSAO", &cfg_ssao)) {
+        sc->toggleSSAO(cfg_ssao);
     }
 
     /*Base post-processing configuration*/
@@ -335,7 +340,7 @@ int DebugUI::DrawGUI()
     static float ssao_Size = 0.3;
     static float ssaoLevelClamp = 0.21;
     static float ssaoblurSize = 0.021;
-    if (ImGui::CollapsingHeader("SSAO")) {
+    if (ImGui::CollapsingHeader("SSAO Config")) {
         if (ImGui::SliderFloat("ssaoSize", &ssao_Size, 0.0f, 2.0f)) {
             sc->pp_stage_ssao->getShader()->SetUniform("ssaoSize",ssao_Size);
         }

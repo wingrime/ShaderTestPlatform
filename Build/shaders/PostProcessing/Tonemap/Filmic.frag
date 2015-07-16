@@ -18,6 +18,8 @@ uniform float D = 0.20;
 uniform float E = 0.01;
 uniform float F = 0.30;
 uniform float LW = 1.2;
+uniform int b_SSAO = 1;
+uniform int b_brightPass = 1;
 vec3 filmic(vec3 x) {
   return ((x*(A*x+C*B)+D*E)/ (x*(A*x+B)+D*F))-E/F;
 }
@@ -45,8 +47,16 @@ vec3 gamma_v3( vec3 c) {
 void main ()
 {
   vec3 img_color = ( texture(texHDR,uv)).rgb;
-  vec3 img_bloom =  vec3(( texture(texBLUM,uv)).r);
-  vec3 img_ssao =  vec3( texture(texSSAO,uv).r);//use single color
+  vec3 img_bloom;
+  if (b_brightPass == 1)
+    img_bloom =  vec3(( texture(texBLUM,uv)).r);
+  else
+    img_bloom = vec3(0.0);
+  vec3 img_ssao;
+  if (b_SSAO == 1)
+    img_ssao =  vec3( texture(texSSAO,uv).r);//use single color
+  else
+    img_ssao = vec3(1.0);
   vec4 lumdata =   (texture(texLumKey,vec2(0.5,0.5))).rgba;//use single color
 	
 

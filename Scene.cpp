@@ -119,6 +119,7 @@ SScene::SScene(RectSizeInt v)
 
 
     rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
+    rtPrepass->texIMG(0)->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
 
 
     dbg_ui.Init();
@@ -154,11 +155,18 @@ int SScene::AddObjectToRender(std::shared_ptr<SObjModel> obj)
 int SScene::toggleBrightPass(bool b)
 {
     d_toggle_brightpass = b;
+    pp_stage_hdr_tonemap->getShader()->SetUniform("b_brightPass",(int) d_toggle_brightpass);
 }
 
 int SScene::toggleMSAA(bool b)
 {
     d_toggle_MSAA = b;
+}
+
+int SScene::toggleSSAO(bool b)
+{
+    d_toggle_ssao = b;
+    pp_stage_hdr_tonemap->getShader()->SetUniform("b_SSAO",(int) d_toggle_ssao);
 }
 
 /*todo: move to some place*/
@@ -667,14 +675,18 @@ int SScene::Render() {
         pp_stage_hdr_bloom->DrawRBO(false);
         BlurKawase();
         } else {
-            pp_stage_hdr_blur_vert2->getResultRBO()->Bind(true); /*cleanup*/
+            pp_stage_hdr_blur_vert2->Clean();
         }
         /*SSAO*/
-        rtSSAOVertBlurResult->Bind(false);
-        pp_stage_ssao->Draw();
-        pp_stage_ssao_blur_hor->DrawRBO(false);
-        pp_stage_ssao_blur_vert->DrawRBO(false);
-        /*normaly do tonemap and, if debug enabled set required buffer*/
+        if (d_toggle_ssao)
+        {
+            rtSSAOVertBlurResult->Bind(false);
+            pp_stage_ssao->Draw();
+            pp_stage_ssao_blur_hor->DrawRBO(false);
+            pp_stage_ssao_blur_vert->DrawRBO(false);
+            /*normaly do tonemap and, if debug enabled set required buffer*/
+        }
+
         if (debugRenderOutputFlag) {
             rtSCREEN->Bind(true);
             postProcessDebugOutput->setTexSrc1(debugFinalRenderOutput->texIMG(0));

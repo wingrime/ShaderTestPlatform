@@ -16,6 +16,17 @@ int RBO::Bind(bool clear) const {
     return ESUCCESS;
 }
 
+int RBO::Clean()
+{
+    if (!IsReady)
+        return EFAIL;
+     /* in case when viewport is not texture target just use 0*/
+    glBindFramebuffer(GL_FRAMEBUFFER, d_fbo);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    return 0;
+}
+
 std::string RBO::getName()
 {
     return d_name;
