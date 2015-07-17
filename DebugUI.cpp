@@ -129,12 +129,20 @@ int DebugUI::InitDebugCommands()
         d_toggle_cfg_view = !d_toggle_cfg_view;
 
     }));
-    d_console_cmd_handler->AddCommand("toggle_msaa", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        sc->d_toggle_MSAA= !sc->d_toggle_MSAA;
+    d_console_cmd_handler->AddCommand("msaa_enable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        sc->toggleMSAA(true);
 
     }));
-    d_console_cmd_handler->AddCommand("toggle_brightpass", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        sc->d_toggle_brightpass= !sc->d_toggle_brightpass;
+    d_console_cmd_handler->AddCommand("msaa_disable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        sc->toggleMSAA(false);
+
+    }));
+    d_console_cmd_handler->AddCommand("brightpass_enable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        sc->toggleBrightPass(true);
+
+    }));
+    d_console_cmd_handler->AddCommand("brightpass_disable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        sc->toggleBrightPass(false);
 
     }));
 
@@ -164,12 +172,8 @@ int DebugUI::InitDebugCommands()
         sc->cam.rotEulerZ(toRad(val_f));
     }));
 
-    d_console_cmd_handler->AddCommand("li", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("weather_time", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        //SVec4 vect(args[1]);
-        //sc->main_pass_shader->SetUniform("main_light_dir", vect);
-        //sc->d_prim_light_dir = vect;
-
         float val_f = std::stof(args[1]);
         sc->w_sky->SetTime(val_f);
 
@@ -209,9 +213,9 @@ int DebugUI::InitDebugCommands()
 
     }));
 
-    d_console_cmd_handler->AddCommand("rec", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("regenerate_envmap", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
-        sc->d_first_render = false;
+        sc->regenerateEnvCubeMap();
     }));
 
     d_console_cmd_handler->AddCommand("updc", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -224,11 +228,22 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("load", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
-        sc->d_render_list[0].reset(new SObjModel(args[1]));
-        sc->d_render_list[0]->ConfigureProgram( *(sc->main_pass_shader));
-        sc->d_render_list[0]->ConfigureProgram( *(sc->cam_prog));
-        sc->d_render_list[0]->ConfigureProgram( *(sc->cubemap_prog_generator));
-        sc->d_first_render = false;
+        std::shared_ptr<SObjModel> m =  std::shared_ptr<SObjModel>(new SObjModel(args[1]));
+        m->ConfigureProgram( *(sc->main_pass_shader));
+        m->ConfigureProgram( *(sc->cam_prog));
+        m->ConfigureProgram( *(sc->cubemap_prog_generator));\
+        sc->d_render_list[0] = m;
+        sc->regenerateEnvCubeMap();
+
+    }));
+    d_console_cmd_handler->AddCommand("add", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        con->Msg("Load new model..");
+        std::shared_ptr<SObjModel> m =  std::shared_ptr<SObjModel>(new SObjModel(args[1]));
+        m->ConfigureProgram( *(sc->main_pass_shader));
+
+        sc->AddObjectToRender(m);
+        sc->regenerateEnvCubeMap();
 
     }));
     d_console_cmd_handler->AddCommand("script", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {

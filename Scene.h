@@ -93,6 +93,9 @@ public:
     int toggleBrightPass(bool b);
     int toggleMSAA(bool b);
     int toggleSSAO(bool b);
+    int regenerateEnvCubeMap();
+
+
 
 
 private:

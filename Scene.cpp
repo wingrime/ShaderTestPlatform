@@ -147,6 +147,8 @@ int SScene::Reshape(int w, int h) {
 int SScene::AddObjectToRender(std::shared_ptr<SObjModel> obj)
 {
     obj->ConfigureProgram(*main_pass_shader);
+    obj->ConfigureProgram( *(cam_prog));
+    obj->ConfigureProgram( *(cubemap_prog_generator));
     d_render_list.push_back(obj);
     return 0;
 
@@ -167,6 +169,12 @@ int SScene::toggleSSAO(bool b)
 {
     d_toggle_ssao = b;
     pp_stage_hdr_tonemap->getShader()->SetUniform("b_SSAO",(int) d_toggle_ssao);
+}
+
+int SScene::regenerateEnvCubeMap()
+{
+    d_first_render = false;
+    return 0;
 }
 
 
@@ -299,7 +307,7 @@ int SScene::UpdateScene(float dt) {
     float shadowCascadeDiv[] = { 100.0,290.0, 840.0, 2420.0,7000.0};
 
     SMat4x4 PV = cam.getViewProjectMatrix();
-    std::vector <Point> psrPoints;// = FrustumPoints(PV); - use view-frustum as PSR
+    std::vector <Point> psrPoints;// = FrustumPoints(PV); - add view-frustum as PSR
     AABB psrAABB =AABB(Point(-2000.0,-100,-1300.0), Point(2000.0,1300.0,1300.0) );
     std::vector <Point> aabbPoints = AABBPoints(psrAABB);
     psrPoints.insert(psrPoints.end(),aabbPoints.begin(),aabbPoints.end()); /*JOIN - better solution, convex hull*/
