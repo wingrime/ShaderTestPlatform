@@ -636,15 +636,6 @@ SVec4 operator/(const SVec4 &v1, float v2)
 }
 
 
-Point AABB::Center()
-{
-    return Point((max_point.x - min_point.x)/2.0  ,(max_point.y-min_point.y)/2.0,(max_point.z-min_point.z)/2.0);
-}
-Point operator+(const Point& v1,const Point& v){
-return (Point(v1.x + v.x,
-              v1.y + v.y,
-              v1.z + v.z));
-}
 
 Point operator-(const Point& v1,const Point& v2){
 return (Point(v1.x - v2.x,
@@ -656,6 +647,10 @@ return (Point(-v1.x,
               -v1.y,
               -v1.z));
 }
-
+Point operator+(const Point& v1,const Point& v){
+return (Point(v1.x + v.x,
+              v1.y + v.y,
+              v1.z + v.z));
+}
 
 

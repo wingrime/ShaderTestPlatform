@@ -3,6 +3,7 @@
 #pragma once
 #include <vector>
 #include "mat_math.h"
+#include "AABB.h"
 class SMat4x4;
 class SProg;
 

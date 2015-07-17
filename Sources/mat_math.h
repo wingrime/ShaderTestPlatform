@@ -254,15 +254,7 @@ struct Line {
     Point p1;
     Point p2;
 };
-class AABB {
-public:
-    AABB() :min_point(),max_point() {}
-    AABB(Point min_p,Point max_p) :min_point(min_p),max_point(max_p) {}
-    Point Center();
-    /*data*/
-    Point min_point;
-    Point max_point;
-};
+
 class SVec2 {
 public:
     SVec2(float x,float y);
