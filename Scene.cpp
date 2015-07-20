@@ -374,7 +374,7 @@ int SScene::UpdateScene(float dt) {
     main_pass_shader->SetUniform("shadowMVPB2",Bias*d_shadowmap_cam[2].getViewProjectMatrix());
     main_pass_shader->SetUniform("shadowMVPB3",Bias*d_shadowmap_cam[3].getViewProjectMatrix());
     /*Set primary shader direction*/
-     main_pass_shader->SetUniform("main_light_dir",w_sky->GetSunDirection());
+     main_pass_shader->SetUniform("sunLightDirectionVector",w_sky->GetSunDirection());
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
 

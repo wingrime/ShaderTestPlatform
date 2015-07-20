@@ -2,7 +2,7 @@
 /* Base Lighting Shader */
 layout(location = 0) out vec4 dstColor;
 const float pi = 3.14159;
-uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,0.0);
+uniform vec4 sunLightDirectionVector = vec4(0.0,1.0,0.0,0.0);
 
 uniform mat4 matrixProjection;
 uniform mat4 matrixModel;
@@ -313,7 +313,7 @@ void main()
         /*
         Directional Light not translable, so set w to 0.0;
         */
-        vec4 sunDirectionalLightWS = vec4(main_light_dir.xyz,0.0);
+        vec4 sunDirectionalLightWS = vec4(sunLightDirectionVector.xyz,0.0);
         vec3 lp = (matrixView*sunDirectionalLightWS).xyz;
 
 
