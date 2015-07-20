@@ -377,6 +377,15 @@ int SScene::UpdateScene(float dt) {
      main_pass_shader->SetUniform("main_light_dir",w_sky->GetSunDirection());
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
+
+    if (d_play) {
+        cam.setViewMatrix(rec.Get());
+        if (rec.Empty())
+            //d_play = false;
+            rec.Rewind();
+    }
+    else
+        rec.Add(cam.getViewMatrix());
     return 0;
 
 }
@@ -391,6 +400,16 @@ int SScene::debugSetDebugRenderOutputFlag(bool flag)
 {
     debugRenderOutputFlag = flag;
 }
+Recorder SScene::getRec() const
+{
+    return rec;
+}
+
+void SScene::setRec(const Recorder &value)
+{
+    rec = value;
+}
+
 
 
 

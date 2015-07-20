@@ -152,7 +152,12 @@ public:
     std::shared_ptr<RBO> debugFinalRenderOutput;
     bool debugRenderOutputFlag = false;
 
+    Recorder rec;
+    bool d_play = false;
 
+
+    Recorder getRec() const;
+    void setRec(const Recorder &value);
 };
 class MainScene :public Singltone<SScene>  ,public SScene{
 public:

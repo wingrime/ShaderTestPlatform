@@ -145,6 +145,23 @@ int DebugUI::InitDebugCommands()
         sc->toggleBrightPass(false);
 
     }));
+    d_console_cmd_handler->AddCommand("record", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        sc->rec.Begin();
+
+    }));
+    d_console_cmd_handler->AddCommand("end", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        sc->rec.End();
+
+    }));
+    d_console_cmd_handler->AddCommand("play", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        sc->rec.End();
+        sc->d_play = true;
+
+    }));
+    d_console_cmd_handler->AddCommand("save_rec", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        sc->rec.Save(args[1]);
+    }));
 
     d_console_cmd_handler->AddCommand("goto", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;

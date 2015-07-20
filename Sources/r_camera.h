@@ -7,7 +7,38 @@
 #include <cereal/archives/binary.hpp>
 /*inhertance, can't avoid*/
 #include "r_projmat.h"
+//TODO: fine time sampling
+class Recorder {
+public:
+    Recorder();
+    int Erase();
+    int Begin();
+    int End();
+    int Add(const SMat4x4& s); /*new sample*/
 
+    bool Empty();
+
+    int Save(const std::string &fname);
+    //open
+    int Rewind();
+    const SMat4x4 Get();
+private:
+    std::vector<SMat4x4> r;
+    bool d_recordEnabled = 0;
+    SMat4x4 d_lastSample;
+    std::vector<SMat4x4>::iterator d_sampleIterator;
+    /*serialize support */
+    friend class cereal::access;
+    template <class Archive>
+    void serialize( Archive & ar )
+    {
+        ar(
+
+            CEREAL_NVP(r)
+        );
+    }
+
+};
 class SCamera {
 public:
 
