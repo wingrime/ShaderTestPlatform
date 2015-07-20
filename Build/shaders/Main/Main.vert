@@ -23,6 +23,7 @@ out vec2 UvMS;
 out vec3 NormalMS;
 out vec3 PositionMS;
 out vec3 NormalCS;
+out mat4 invMatrixProjection;
 flat out vec3 LightCS;
 
 
@@ -35,7 +36,7 @@ void main(void)
     /*perform lerp for vertex normal*/
     /*fixup UV coordinates ?*/
     UvMS = vec2(1.0,-1.0)*UV;
-
+    invMatrixProjection = inverse(matrixProjection);
     NormalCS = ((MV*vec4(normal,0.0)).xyz);
     PositionCS = (MV*vec4(position,1.0)).xyz;
     LightCS  =( MV*main_light_dir).xyz;

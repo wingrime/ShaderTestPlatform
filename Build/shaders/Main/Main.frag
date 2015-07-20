@@ -23,6 +23,7 @@ in vec2 UvMS;
 in vec3 NormalCS;
 in vec3 NormalMS;
 in vec3 PositionMS;
+in mat4 invMatrixProjection;
 
 /* Source texture */
 uniform sampler2D samplerAlbedo;
@@ -274,7 +275,7 @@ void main()
 	//not general way for light with dir 0,1,0
 	//normal way length(light_dir - o_pos_v)
 	/*slowest sol*/
-    vec4 view_space = inverse(matrixProjection)*gl_FragCoord;
+    vec4 view_space = invMatrixProjection*gl_FragCoord;
 	view_space.xyz /= view_space.w; // ?
 
 	float d =  1.0-view_space.z;//((2*far*near) /((2.0*gl_FragCoord.z-1.0)*(far-near)-(far+near)));// far-near;
