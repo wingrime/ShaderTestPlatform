@@ -5,7 +5,7 @@ uniform mat4 view;
 
 uniform mat4 MVP;
 uniform mat4 MV;
-uniform vec4 main_light_dir = vec4(0.0,1.0,0.0,1.0);
+uniform vec4 sunLightDirectionVector = vec4(0.0,1.0,0.0,1.0);
 
 uniform mat4 matrixShadowMapProjection;
 uniform mat4 matrixShadowMapView;
@@ -39,7 +39,7 @@ void main(void)
     invMatrixProjection = inverse(matrixProjection);
     NormalCS = ((MV*vec4(normal,0.0)).xyz);
     PositionCS = (MV*vec4(position,1.0)).xyz;
-    LightCS  =( MV*main_light_dir).xyz;
+    LightCS  =( MV*sunLightDirectionVector).xyz;
 
     gl_Position  = MVP*vec4(position,1.0);
 }

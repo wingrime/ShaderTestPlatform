@@ -10,7 +10,7 @@ UIConsole::UIConsole(RectSizeInt &v, std::shared_ptr<AbstractCommandHandler> cmd
     :d_cmd_handler(cmd_h)
 {
 
-    fnt = ft.Construct(20);
+    fnt = ft.Construct(18);
     v_port = v;
 }
 

@@ -27,15 +27,15 @@ struct CObjV3 {
 //        ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(z));
 //    }
 
-    bool operator<(const CObjV3& p) const {
-        if (x != p.x )
-            return (x < p.x);
-        if (y != p.y )
-            return (y < p.y);
+    //bool operator<(const CObjV3& p) const {
+    //    if (x != p.x )
+    //        return (x < p.x);
+    //    if (y != p.y )
+    //        return (y < p.y);
 
-        return (z < p.z);
+    //     return (z < p.z);
 
-    };
+   // };
     bool operator!=(const CObjV3& p) const {
         if (x != p.x )
             return true;
@@ -51,17 +51,17 @@ struct CObjV2 {
     float u;
     float v;
     /*serialize support */
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar(CEREAL_NVP(u),CEREAL_NVP(v));
-    }
-    bool operator<(const CObjV2& p) const {
-        if (u != p.u )
-            return (u < p.u);
-        return (v < p.v);
-    };
+    //friend class cereal::access;
+    //template <class Archive>
+    //void serialize( Archive & ar )
+    //{
+    //    ar(CEREAL_NVP(u),CEREAL_NVP(v));
+    //}
+    //bool operator<(const CObjV2& p) const {
+    //    if (u != p.u )
+    //        return (u < p.u);
+    //    return (v < p.v);
+    //};
     bool operator!=(const CObjV2& p) const {
         if (u != p.u )
             return true;
@@ -86,21 +86,30 @@ struct CObjVertexN {
     CObjV3 n;
     CObjV2 tc;
         /*serialize support */
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar(CEREAL_NVP(p),CEREAL_NVP(n),CEREAL_NVP(tc));
-    }
+    //friend class cereal::access;
+    //template <class Archive>
+   // void serialize( Archive & ar )
+    //{
+     //   ar(CEREAL_NVP(p),CEREAL_NVP(n),CEREAL_NVP(tc));
+   // }
 
-    bool operator<(const CObjVertexN& o) const {
+   // bool operator<(const CObjVertexN& o) const {
+   //     if (p != o.p )
+   //         return (p < o.p );
+   //     if (n != o.n )
+   //         return (n < o.n );
+   //    // if (tc != o.tc )
+   //      return (tc < o.tc );
+    //};
+    bool operator==(const CObjVertexN& o) const {
         if (p != o.p )
-            return (p < o.p );
+            return false;
         if (n != o.n )
-            return (n < o.n );
-       // if (tc != o.tc )
-         return (tc < o.tc );
-    };
+            return false;
+        if (tc != o.tc )
+            return false;
+         return true;
+    }
 
 };
 

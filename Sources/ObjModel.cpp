@@ -24,6 +24,34 @@
 #include "Log.h"
 #include "ObjParser.h"
 #include "ErrorCodes.h"
+template <class T>
+inline void hash_combine(std::size_t & seed, const T & v)
+{
+  std::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+namespace std
+{
+    template <>
+    struct hash<CObjVertexN>
+    {
+        size_t operator()(const CObjVertexN& k) const
+        {
+            // Compute individual hash values for two data members and combine them using XOR and bit shifting
+            //return ((hash<float>()(k.n.x) ^ (hash<float>()(k.n.y) << 1)  ) >> 1);
+            std::size_t seed = 0;
+            hash_combine(seed, k.n.x);
+            hash_combine(seed, k.n.y);
+            hash_combine(seed, k.n.z);
+            hash_combine(seed, k.p.x);
+            hash_combine(seed, k.p.y);
+            hash_combine(seed, k.p.z);
+            hash_combine(seed, k.tc.u);
+            hash_combine(seed, k.tc.v);
+            return seed;
+        }
+    };
+}
 std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 {
     LOGV(string_format("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d ",d_inmesh->name.c_str(),d_inmesh->m_name.c_str(),d_inmesh->id, d_inmesh->vn.size()));
@@ -34,11 +62,11 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
     mesh->id = d_inmesh->id;
     unsigned int current_index = 0;
 
-    std::map<CObjVertexN, unsigned int  > vn_map;
+    std::unordered_map<CObjVertexN, unsigned int  > vn_map;
 
 
     for( auto it = std::begin(d_inmesh->vn); it != std::end(d_inmesh->vn); ++it) {
-        std::map<CObjVertexN, unsigned int  >::const_iterator k = vn_map.find(*it);
+        auto k = vn_map.find(*it);
         if (k == vn_map.end()) {
         /* if there is no index, then add new index*/
             vn_map[*it] = current_index;
@@ -91,6 +119,7 @@ SObjModel::SObjModel(const std::string&  fname)
     for (auto it = submesh_set.begin(); it != submesh_set.end();++it) {
         MeshIndexer idx(*it);
         auto res = std::shared_ptr<CObjSubmesh>(idx.Do());
+        (*it)->vn.clear();
         total_triangles += res->vn.size();
         d_sm.push_back(res);
         (*it).reset();
@@ -220,8 +249,8 @@ void SObjModel::BindVAOs() {
             glGenBuffers ( 1, &temp_vbo );
             glGenBuffers(1, &temp_ibo);
 
-            MASSERT(submesh->vn.empty());
-            MASSERT(submesh->indexes.empty());
+            //MASSERT(submesh->vn.empty());
+           // MASSERT(submesh->indexes.empty());
             //gl 4.5 without EXT
             glNamedBufferDataEXT(temp_vbo,submesh->vn.size() *sizeof(CObjVertexN), submesh->vn.data(), GL_STATIC_DRAW);
             glNamedBufferDataEXT(temp_ibo,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
