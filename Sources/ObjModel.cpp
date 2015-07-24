@@ -130,12 +130,12 @@ SObjModel::SObjModel(const std::string&  fname)
     LOGV("Load materials");
 
     {
-        auto mtlrefs = parser.getMTLs();
+        std::vector<std::string> mtlrefs = parser.getMTLs();
         if (!mtlrefs.empty())
         {
             MTLParser mtl_p(mtlrefs[0]);
             d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
-            mtl_p.SaveToJSON("materials.json");
+            mtl_p.SaveToJSON((mtlrefs[0])+std::string(".json"));
         }
     }
 
