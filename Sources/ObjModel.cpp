@@ -60,6 +60,7 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
     mesh->m_name = d_inmesh->m_name;
     mesh->name = d_inmesh->name;
     mesh->id = d_inmesh->id;
+     mesh->m_dir = d_inmesh->m_dir;
     unsigned int current_index = 0;
 
     std::unordered_map<CObjVertexN, unsigned int  > vn_map;
@@ -134,6 +135,7 @@ SObjModel::SObjModel(const std::string&  fname)
         {
             MTLParser mtl_p(mtlrefs[0]);
             d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
+            mtl_p.SaveToJSON("materials.json");
         }
     }
 
@@ -192,27 +194,27 @@ void SObjModel::LoadTextures() {
                                    material->map_bump.c_str(),
                                    material->map_d.c_str()));
                 d_materails[submesh->m_name].name_hash = material->name_hash;
-                d_materails[submesh->m_name].diffuse =  new STexture(diffuse);
+                d_materails[submesh->m_name].diffuse =  new STexture(submesh->m_dir+diffuse);
                 d_textures[diffuse].reset( d_materails[submesh->m_name].diffuse);
                 if (!d_textures[diffuse]->IsReady) {
-                   LOGE(string_format("OBJ:Diffuse texture load failed %s",diffuse.c_str()));
+                   LOGE(string_format("OBJ:Diffuse texture load failed %s",(submesh->m_dir+diffuse).c_str()));
                 }
             }
 
             std::string &bump = material->map_bump;
             if (d_textures.find(bump) == d_textures.end()) {
-                d_materails[submesh->m_name].bump =  new STexture(bump,false);
+                d_materails[submesh->m_name].bump =  new STexture(submesh->m_dir+bump,false);
                 d_textures[bump].reset(d_materails[submesh->m_name].bump);
                 if (!d_textures[bump]->IsReady) {
-                  LOGE(string_format("OBJ:Bump texture load failed %s",bump.c_str()));
+                  LOGE(string_format("OBJ:Bump texture load failed %s",(submesh->m_dir+bump).c_str()));
                 }
             }
             std::string &alpha = material->map_d;
             if (d_textures.find(alpha) == d_textures.end()) {
-                d_materails[submesh->m_name].alpha = new STexture(alpha);
+                d_materails[submesh->m_name].alpha = new STexture(submesh->m_dir+alpha);
                 d_textures[alpha].reset(d_materails[submesh->m_name].alpha);
                 if (!d_textures[alpha]->IsReady) {
-                   LOGE(string_format("OBJ:Alpha mask texture load failed %s",alpha.c_str()));
+                   LOGE(string_format("OBJ:Alpha mask texture load failed %s",(submesh->m_dir+alpha).c_str()));
                 }
             }
 

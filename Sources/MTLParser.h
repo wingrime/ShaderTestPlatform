@@ -56,6 +56,7 @@ class MTLParser {
 public:
      MTLParser(const std::string& fname);
      std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > &GetMaterials();
+     int SaveToJSON(const std::string &filejs);
 
 private:
     std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;

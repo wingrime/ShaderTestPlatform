@@ -2,6 +2,11 @@
 #include "string_format.h"
 #include "Log.h"
 #include <fstream>
+/*serialization*/
+#include <cereal/types/map.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
 MTLParser::MTLParser(const std::string& fname) {
     std::ifstream tst;
     std::hash<std::string> hash_fn;
@@ -64,6 +69,17 @@ MTLParser::MTLParser(const std::string& fname) {
 std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > &MTLParser::GetMaterials()
 {
     return d_materials;
+}
+
+int MTLParser::SaveToJSON(const std::string& filejs)
+{
+    std::ofstream os(filejs);
+   {
+       /*use raii */
+       cereal::JSONOutputArchive archive( os);
+       archive( CEREAL_NVP( d_materials));
+   }
+    return 0;
 }
 std::string MTLParser::ParseNEWMTL(const std::string& str) {
     char buf[90];

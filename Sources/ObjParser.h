@@ -116,6 +116,7 @@ struct CObjVertexN {
 struct CObjSubmesh {
     std::string name; /* submesh name*/
     std::string m_name; /* material name*/
+    std::string m_dir; /* model working dir*/
     std::vector<CObjVertexN> vn; /* vertex list with normals*/
     std::vector<unsigned int> indexes; /*indexed mesh*/
     unsigned int id;/* number of submesh in obj*/

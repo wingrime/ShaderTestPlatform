@@ -242,10 +242,18 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
     std::vector<CObjV3> d_gln; /*list of normals*/
     bool d_normals = false; /*is normals used */
     tst.open(fname);
+    std::string dir;
+    const size_t last_fslash_i = fname.rfind('/');
+    //const size_t last_lslash_i = fname.rfind('\\');
+    //const size_t last_slash = std::max(last_fslash_i,last_lslash_i);
+    if (std::string::npos != last_fslash_i ) {
+        dir = fname.substr(0,last_fslash_i) + '\\';
+    }
+    std::cout << "model dir:"<< dir << std::endl;
     if (tst) {
 
         for( std::string line; getline( tst, line ); ) {
-            //std::cout << "Parsing line "<< line << std::endl;
+
             auto &subm =  (d_sm.back());
             if (!line.find("vt") ){
                 d_gltc.push_back(ParseVt(line));
@@ -257,6 +265,7 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                     std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
                     s->name = ParseO(line);
                     s->id  = sm_id++;
+                    s->m_dir = dir;
                     d_sm.push_back(s);
 
             } else if (!line.find("s")) {
@@ -272,13 +281,14 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                     else
                         s->name = subm->name + std::string("_mat_") + mtl;
                     s->m_name = mtl;
+                    s->m_dir = dir;
                     s->id  = sm_id++;
                     d_sm.push_back(s);
                 } else
                     subm->m_name = mtl;
 
             } else if (!line.find("mtllib")) {
-                d_mtllibs.push_back(ParseMTLLIB(line));
+                d_mtllibs.push_back(dir+ParseMTLLIB(line));
             } else if (!line.find("f")) {
                 CObjFaceI fi = ParseF(line);
                 if (d_normals){
@@ -298,7 +308,9 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
                 std::shared_ptr<CObjSubmesh> s(new CObjSubmesh());
                 s->id  = sm_id++;
                 s->name = ParseG(line);
+                s->m_dir = dir;
                 d_sm.push_back(s);
+
                 //d_normals = true;
             } else if (!line.find("#")) {
                 // comment
