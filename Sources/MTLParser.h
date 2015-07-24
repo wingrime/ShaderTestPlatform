@@ -26,19 +26,10 @@ struct CMTLColor {
 struct CMTLMaterial {
     /*name hash for fast comparsion*/
     std::size_t name_hash;
-    CMTLColor Ka; /* ambient color   */
-    CMTLColor Kd; /* diffuse color   */
-    CMTLColor Ks; /* specular color  */
-    CMTLColor Ke; /* emmission color */
-    CMTLColor Tf; /* transmission filter color */
-    float     Ns = 0.0;  /* specular coeff*/
-    float     Ni = 0.0; /* IOR */
-    float     d = 0.0; /*dissolve (transpernt) */
-    int illum = 0;   /*illumination model */
+
 
     std::string map_Ka; /*ambient map */
     std::string map_Kd; /*diffuse map*/
-    std::string map_Ns; /*Specular shinnes map*/
     std::string map_d; /*alpha mask*/
     std::string map_bump; /*bump */
 
@@ -47,8 +38,7 @@ struct CMTLMaterial {
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar( CEREAL_NVP(Ka),CEREAL_NVP(Kd),CEREAL_NVP(Ks),CEREAL_NVP(Ke),CEREAL_NVP(Tf),CEREAL_NVP(Ns),CEREAL_NVP(Ni),CEREAL_NVP(d), CEREAL_NVP(illum),
-            CEREAL_NVP(map_Ka),CEREAL_NVP(map_Kd),CEREAL_NVP(map_Ns),CEREAL_NVP(map_d),CEREAL_NVP(map_bump));
+        ar(CEREAL_NVP(map_Ka),CEREAL_NVP(map_Kd),CEREAL_NVP(map_d),CEREAL_NVP(map_bump));
     }
 };
 
