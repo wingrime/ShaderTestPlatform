@@ -76,7 +76,7 @@ class SObjModel {
 
         std::unordered_map<std::string, std::unique_ptr<STexture> > d_textures;
         std::unordered_map<std::string, Material> d_materails;
-        std::unordered_map<std::string, std::shared_ptr<SMaterial> > d_materials;
+        std::unordered_map<std::string,SMaterial > d_materials;
 
         /*https://devtalk.nvidia.com/default/topic/561172/gldrawarrays-without-vao-for-procedural-geometry-using-gl_vertexid-doesn-t-work-in-debug-context/ */
         unsigned int d_emptyVAO;

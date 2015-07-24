@@ -18,17 +18,16 @@ MTLParser::MTLParser(const std::string& fname) {
             if (!line.find("newmtl") ){
                     mtln = ParseNEWMTL(line);
                     if (d_materials.count(mtln) == 0 ) {/* all materials are unique*/
-                        d_materials[mtln] = std::unique_ptr<SMaterial>(new SMaterial());
-                        d_materials[mtln]->name_hash = hash_fn(mtln);
+                        d_materials[mtln].name_hash = hash_fn(mtln);
                     }
             } else if (line.find("map_Ka" ) != std::string::npos) {
-                    d_materials[mtln]->map_Ka = Parsemap_Ka(line);
+                    d_materials[mtln].map_Ka = Parsemap_Ka(line);
             } else if (line.find("map_Kd") != std::string::npos) {
-                    d_materials[mtln]->albedoTexFileName = Parsemap_Kd(line);
+                    d_materials[mtln].albedoTexFileName = Parsemap_Kd(line);
             } else if (line.find("map_bump")!= std::string::npos ) {
-                    d_materials[mtln]->bumpMapTexFileName = Parsemap_bump(line);
+                    d_materials[mtln].bumpMapTexFileName = Parsemap_bump(line);
             } else if (line.find("map_d")!= std::string::npos ) {
-                    d_materials[mtln]->alphaMaskTexFileName = Parsemap_d(line);
+                    d_materials[mtln].alphaMaskTexFileName = Parsemap_d(line);
 
             }
         }
@@ -40,14 +39,14 @@ MTLParser::MTLParser(const std::string& fname) {
 
 
     if (d_materials.empty()) {
-         LOGE("Add empty default material\n");
-        d_materials["default"] = (std::unique_ptr<SMaterial>(new SMaterial()));
+       //  LOGE("Add empty default material\n");
+       // d_materials["default"];
     }
 
 
 }
 
-std::unordered_map<std::string, std::shared_ptr<SMaterial> > &MTLParser::GetMaterials()
+std::unordered_map<std::string, SMaterial> &MTLParser::GetMaterials()
 {
     return d_materials;
 }

@@ -187,13 +187,13 @@ void SObjModel::LoadTextures() {
             auto &material = d_materials[submesh->m_name];
 
 
-            std::string &diffuse = material->albedoTexFileName;
+            std::string &diffuse = material.albedoTexFileName;
             if (d_textures.find(diffuse) == d_textures.end()) {
                 LOGV(string_format("material %s Diffuse %s Bump %s Alpha %s",submesh->m_name.c_str(),
-                                   material->albedoTexFileName.c_str(),
-                                   material->bumpMapTexFileName.c_str(),
-                                   material->alphaMaskTexFileName.c_str()));
-                d_materails[submesh->m_name].name_hash = material->name_hash;
+                                   material.albedoTexFileName.c_str(),
+                                   material.bumpMapTexFileName.c_str(),
+                                   material.alphaMaskTexFileName.c_str()));
+                d_materails[submesh->m_name].name_hash = material.name_hash;
                 d_materails[submesh->m_name].diffuse =  new STexture(submesh->m_dir+diffuse);
                 d_textures[diffuse].reset( d_materails[submesh->m_name].diffuse);
                 if (!d_textures[diffuse]->IsReady) {
@@ -201,7 +201,7 @@ void SObjModel::LoadTextures() {
                 }
             }
 
-            std::string &bump = material->bumpMapTexFileName;
+            std::string &bump = material.bumpMapTexFileName;
             if (d_textures.find(bump) == d_textures.end()) {
                 d_materails[submesh->m_name].bump =  new STexture(submesh->m_dir+bump,false);
                 d_textures[bump].reset(d_materails[submesh->m_name].bump);
@@ -209,7 +209,7 @@ void SObjModel::LoadTextures() {
                   LOGE(string_format("OBJ:Bump texture load failed %s",(submesh->m_dir+bump).c_str()));
                 }
             }
-            std::string &alpha = material->alphaMaskTexFileName;
+            std::string &alpha = material.alphaMaskTexFileName;
             if (d_textures.find(alpha) == d_textures.end()) {
                 d_materails[submesh->m_name].alpha = new STexture(submesh->m_dir+alpha);
                 d_textures[alpha].reset(d_materails[submesh->m_name].alpha);
