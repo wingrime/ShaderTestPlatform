@@ -23,7 +23,7 @@ struct CMTLColor {
     }
 };
 
-struct CMTLMaterial {
+struct SMaterial {
     /*name hash for fast comparsion*/
     std::size_t name_hash;
 
@@ -45,11 +45,11 @@ struct CMTLMaterial {
 class MTLParser {
 public:
      MTLParser(const std::string& fname);
-     std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > &GetMaterials();
+     std::unordered_map<std::string, std::shared_ptr<SMaterial> > &GetMaterials();
      int SaveToJSON(const std::string &filejs);
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<CMTLMaterial> > d_materials;
+    std::unordered_map<std::string, std::shared_ptr<SMaterial> > d_materials;
     float Parsed(const std::string &v_desc);
      std::string ParseNEWMTL(const std::string &str);
      float ParseNs(const std::string &v_desc);
