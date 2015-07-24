@@ -169,6 +169,12 @@ int DebugUI::InitDebugCommands()
         sc->cam.goPosition(vect);
         sc->cam.rotEuler(SVec4(0,0,0,0));
     }));
+    d_console_cmd_handler->AddCommand("scale", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        const std::vector < std::string >& args = *arg_list;
+        float val_f = std::stof(args[1]);
+        std::shared_ptr<SObjModel> m = sc->d_render_list[0];
+        m->SetModelMat(SMat4x4().Scale(val_f));
+    }));
 
     d_console_cmd_handler->AddCommand("rot_x", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
