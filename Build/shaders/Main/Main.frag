@@ -345,7 +345,9 @@ void main()
 		SH[c].b = texelFetch(samplerEnvSH, ivec2(c,3u),0).r;
         }
         //vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(MV_n)*vec4(normalize(d_normal),1.0)).xyz);
-        vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(MV)*vec4(normalize(reflect(v,n)),1.0) ).xyz);
+        //error
+        vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(matrixView)*vec4(normalize(reflect(v,n)),1.0) ).xyz);
+        //ambient_spectral_harmonics =clamp(ambient_spectral_harmonics,0.0,1000.0);
 
 
 	if (dbg_out == DBG_OUT_FULL)
