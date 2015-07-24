@@ -24,11 +24,11 @@ MTLParser::MTLParser(const std::string& fname) {
             } else if (line.find("map_Ka" ) != std::string::npos) {
                     d_materials[mtln]->map_Ka = Parsemap_Ka(line);
             } else if (line.find("map_Kd") != std::string::npos) {
-                    d_materials[mtln]->map_Kd = Parsemap_Kd(line);
+                    d_materials[mtln]->albedoTexFileName = Parsemap_Kd(line);
             } else if (line.find("map_bump")!= std::string::npos ) {
-                    d_materials[mtln]->map_bump = Parsemap_bump(line);
+                    d_materials[mtln]->bumpMapTexFileName = Parsemap_bump(line);
             } else if (line.find("map_d")!= std::string::npos ) {
-                    d_materials[mtln]->map_d = Parsemap_d(line);
+                    d_materials[mtln]->alphaMaskTexFileName = Parsemap_d(line);
 
             }
         }

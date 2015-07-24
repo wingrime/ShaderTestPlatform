@@ -15,16 +15,16 @@ struct SMaterial {
 
 
     std::string map_Ka; /*ambient map */
-    std::string map_Kd; /*diffuse map*/
-    std::string map_d; /*alpha mask*/
-    std::string map_bump; /*bump */
+    std::string albedoTexFileName; /*diffuse map*/
+    std::string alphaMaskTexFileName; /*alpha mask*/
+    std::string bumpMapTexFileName; /*bump */
 
     /*serialize support */
     friend class cereal::access;
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar(CEREAL_NVP(map_Ka),CEREAL_NVP(map_Kd),CEREAL_NVP(map_d),CEREAL_NVP(map_bump));
+        ar(CEREAL_NVP(map_Ka),CEREAL_NVP(albedoTexFileName),CEREAL_NVP(alphaMaskTexFileName),CEREAL_NVP(bumpMapTexFileName));
     }
 };
 
