@@ -149,17 +149,17 @@ SObjModel::SObjModel(const std::string&  fname)
 void SObjModel::SetModelMat(const SMat4x4& m){
 	model = m;
 }
-void SObjModel::BindTextures(Material * m) {
-    if (m->alpha && m->alpha->IsReady)
-        m->alpha->Bind(2);
+void SObjModel::BindTextures(SMaterial * m) {
+    if (m->alphaMaskTex && m->alphaMaskTex->IsReady)
+        m->alphaMaskTex->Bind(2);
     else
         texDiffuse->Bind(2);
-    if (m->diffuse && m->diffuse->IsReady)
-        m->diffuse->Bind(0);
+    if (m->albedoTex && m->albedoTex->IsReady)
+        m->albedoTex->Bind(0);
     else
         texDiffuse->Bind(0);
-    if (m->bump && m->bump->IsReady)
-        m->bump->Bind(1);
+    if (m->bumpMapTex && m->bumpMapTex->IsReady)
+        m->bumpMapTex->Bind(1);
     else
         texNormal->Bind(1);
 }
@@ -193,9 +193,9 @@ void SObjModel::LoadTextures() {
                                    material.albedoTexFileName.c_str(),
                                    material.bumpMapTexFileName.c_str(),
                                    material.alphaMaskTexFileName.c_str()));
-                d_materails[submesh->m_name].name_hash = material.name_hash;
-                d_materails[submesh->m_name].diffuse =  new STexture(submesh->m_dir+diffuse);
-                d_textures[diffuse].reset( d_materails[submesh->m_name].diffuse);
+
+                d_materials[submesh->m_name].albedoTex =  new STexture(submesh->m_dir+diffuse);
+                d_textures[diffuse].reset( d_materials[submesh->m_name].albedoTex);
                 if (!d_textures[diffuse]->IsReady) {
                    LOGE(string_format("OBJ:Diffuse texture load failed %s",(submesh->m_dir+diffuse).c_str()));
                 }
@@ -203,16 +203,16 @@ void SObjModel::LoadTextures() {
 
             std::string &bump = material.bumpMapTexFileName;
             if (d_textures.find(bump) == d_textures.end()) {
-                d_materails[submesh->m_name].bump =  new STexture(submesh->m_dir+bump,false);
-                d_textures[bump].reset(d_materails[submesh->m_name].bump);
+                d_materials[submesh->m_name].bumpMapTex =  new STexture(submesh->m_dir+bump,false);
+                d_textures[bump].reset(d_materials[submesh->m_name].bumpMapTex);
                 if (!d_textures[bump]->IsReady) {
                   LOGE(string_format("OBJ:Bump texture load failed %s",(submesh->m_dir+bump).c_str()));
                 }
             }
             std::string &alpha = material.alphaMaskTexFileName;
             if (d_textures.find(alpha) == d_textures.end()) {
-                d_materails[submesh->m_name].alpha = new STexture(submesh->m_dir+alpha);
-                d_textures[alpha].reset(d_materails[submesh->m_name].alpha);
+                d_materials[submesh->m_name].alphaMaskTex = new STexture(submesh->m_dir+alpha);
+                d_textures[alpha].reset(d_materials[submesh->m_name].alphaMaskTex);
                 if (!d_textures[alpha]->IsReady) {
                    LOGE(string_format("OBJ:Alpha mask texture load failed %s",(submesh->m_dir+alpha).c_str()));
                 }
@@ -303,7 +303,7 @@ void SObjModel::Render(RenderContext& r) {
         std::size_t last_hash = -1;
         for (auto it = d_sm.begin(); it != d_sm.end();++it) {
             auto &submesh =  (*it);
-            Material m = d_materails[submesh->m_name];
+            SMaterial m = d_materials[submesh->m_name];
             //glBindVertexArray ( submesh_idx[submesh->id].vao );
 
             if (last_hash != m.name_hash){

@@ -55,7 +55,7 @@ class SObjModel {
         void SetModelMat(const SMat4x4& m);
     private:
         /*Utils*/
-        void BindTextures(Material *m);
+        void BindTextures(SMaterial *m);
         void LoadTextures();
         void BindVAOs ();
 
@@ -75,7 +75,6 @@ class SObjModel {
         std::unordered_map<unsigned int , SubMeshIDs > submesh_idx;
 
         std::unordered_map<std::string, std::unique_ptr<STexture> > d_textures;
-        std::unordered_map<std::string, Material> d_materails;
         std::unordered_map<std::string,SMaterial > d_materials;
 
         /*https://devtalk.nvidia.com/default/topic/561172/gldrawarrays-without-vao-for-procedural-geometry-using-gl_vertexid-doesn-t-work-in-debug-context/ */

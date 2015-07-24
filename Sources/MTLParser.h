@@ -9,15 +9,23 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
+
+class STexture;
+
 struct SMaterial {
     /*name hash for fast comparsion*/
     std::size_t name_hash;
 
 
-    std::string map_Ka; /*ambient map */
+    std::string map_Ka; /*ambient map */ /* OBSOLUTE*/
     std::string albedoTexFileName; /*diffuse map*/
     std::string alphaMaskTexFileName; /*alpha mask*/
     std::string bumpMapTexFileName; /*bump */
+
+    STexture * albedoTex;
+    STexture *bumpMapTex;
+    STexture *alphaMaskTex;
+
 
     /*serialize support */
     friend class cereal::access;
