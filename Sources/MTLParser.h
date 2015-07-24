@@ -9,20 +9,6 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
-
-struct CMTLColor {
-    float r;
-    float g;
-    float b;
-    /*serialize support */
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar(CEREAL_NVP(r),CEREAL_NVP(g),CEREAL_NVP(b));
-    }
-};
-
 struct SMaterial {
     /*name hash for fast comparsion*/
     std::size_t name_hash;
@@ -55,14 +41,9 @@ private:
      float ParseNs(const std::string &v_desc);
      float ParseNi(const std::string &v_desc);
      int Parseillum(const std::string &v_desc);
-     CMTLColor ParseKa(const std::string &v_desc);
      std::string Parsemap_bump(const std::string &str);
-     CMTLColor ParseKd(const std::string &v_desc);
      std::string Parsemap_d(const std::string &str);
-     CMTLColor ParseKs(const std::string &v_desc);
-     CMTLColor ParseKe(const std::string &v_desc);
-     CMTLColor ParseTf(const std::string &v_desc);
-     std::string Parsemap_Ka(const std::string &str);
+      std::string Parsemap_Ka(const std::string &str);
      std::string Parsemap_Kd(const std::string &str);
 };
 
