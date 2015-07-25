@@ -18,3 +18,4 @@ class FileBuffer :public AbstractBuffer{
 
 };
 
+bool CheckFileExists(std::string fileName);

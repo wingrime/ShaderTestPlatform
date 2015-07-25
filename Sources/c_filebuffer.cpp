@@ -36,3 +36,8 @@ std::string FileBuffer::getPath()
     return d_path;
 }
 
+bool CheckFileExists(std::string fileName)
+{
+    std::ifstream infile(fileName);
+    return infile.good();
+}
