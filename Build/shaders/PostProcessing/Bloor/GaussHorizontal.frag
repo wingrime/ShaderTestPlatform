@@ -1,7 +1,7 @@
 #version 330
 uniform vec4 vp; /* viewport conf*/
 layout(location = 0) out vec4 color;
-in vec2 uv;
+noperspective in vec2 uv;
 uniform sampler2D texSRC1;
 uniform sampler2D texSRC2;
 

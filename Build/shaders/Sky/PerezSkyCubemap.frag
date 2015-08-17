@@ -1,5 +1,5 @@
 /* Base Lighting Shader */
-#version 430
+#version 330
 layout(location = 0) out vec4 dstColor;
 const float pi = 3.14159;
 //from ShaderFastMathLib

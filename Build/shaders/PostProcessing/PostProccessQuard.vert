@@ -1,7 +1,7 @@
 #version 330
 /* PP shaders project AS-IS*/
 in vec2 vCord;
-out vec2 uv;
+noperspective out vec2 uv;
 
 void main(void)
 {
