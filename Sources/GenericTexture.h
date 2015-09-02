@@ -13,6 +13,7 @@ public:
         TEX_LINERAL
     };
     virtual int Bind(unsigned int sampler) const = 0;
+    virtual int setInterpolationMode(InterpolationType t) = 0;
     unsigned int inline getGLId() const {
         return d_glTexID;
     }
