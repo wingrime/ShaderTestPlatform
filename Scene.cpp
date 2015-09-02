@@ -707,7 +707,6 @@ int SScene::Render() {
     if (!d_first_render ) {
         d_first_render = true;
         RenderCubemap();
-       //  RenderShadowMap( *rtShadowMap);
     }
     rtime.Begin();
         /*On request mode*/
@@ -731,9 +730,9 @@ int SScene::Render() {
     if (d_toggle_brightpass ) {
         pp_stage_hdr_bloom->DrawRBO(false);
         BlurKawase();
-        } else {
-            pp_stage_hdr_blur_vert2->Clean();
-        }
+    } else {
+        pp_stage_hdr_blur_vert2->Clean();
+    }
         /*SSAO*/
     if (d_toggle_ssao)
     {
@@ -741,8 +740,9 @@ int SScene::Render() {
         pp_stage_ssao->Draw();
         pp_stage_ssao_blur_hor->DrawRBO(false);
         pp_stage_ssao_blur_vert->DrawRBO(false);
-            /*normaly do tonemap and, if debug enabled set required buffer*/
+
     }
+    /*normaly do tonemap and, if debug enabled set required buffer*/
     if (debugRenderOutputFlag) {
         rtSCREEN->Bind(true);
         postProcessDebugOutput->setTexSrc1(debugFinalRenderOutput->texIMG(0));
