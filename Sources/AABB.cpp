@@ -103,7 +103,7 @@ AABB FrustrumSize(const SMat4x4& r) {
 
     return a;
 }
-Point TransformPoint(const Point &in, const SMat4x4 &sm_mvp) {
+const Point TransformPoint(const Point &in, const SMat4x4 &sm_mvp) {
     SVec4 v = sm_mvp*SVec4(in.x,in.y,in.z,1.0);
     v = v / v.w;
     v.w = 1.0;
