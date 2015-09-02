@@ -6,18 +6,21 @@
 #include "GenericTexture.h"
 
 SPostProcess::SPostProcess(SShader *prog, int w, int h,
-                           const std::shared_ptr<SGenericTexture> &texSRC1,
-                           const std::shared_ptr<SGenericTexture> &texSRC2,
-                           const std::shared_ptr<SGenericTexture> &texSRC3,
-                           const std::shared_ptr<SGenericTexture> &texSRC4)
+                           const SGenericTexture* texSRC1,
+                           const SGenericTexture *texSRC2,
+                           const SGenericTexture* texSRC3,
+                           const SGenericTexture* texSRC4)
 
     :p_prog(prog)
 {
-
+    for (int i = 0 ; i < SRC_TEXTURES_MAX ; i++){
+        d_texSRC[i] = 0;
+    }
     d_texSRC[0] = texSRC1;
     d_texSRC[1] = texSRC2;
     d_texSRC[2] = texSRC3;
     d_texSRC[3] = texSRC4;
+
     InitQuard();
     InitUniforms(RectSizeInt(w,h));
 
@@ -25,13 +28,16 @@ SPostProcess::SPostProcess(SShader *prog, int w, int h,
 
 }
 
-SPostProcess::SPostProcess(SShader *prog,  std::shared_ptr<RBO> resultRBO,
-                                           std::shared_ptr<RBO> srcRBO1,
-                                           std::shared_ptr<RBO> srcRBO2,
-                                           std::shared_ptr<RBO> srcRBO3,
-                                           std::shared_ptr<RBO> srcRBO4)
+SPostProcess::SPostProcess(SShader *prog,  RBO * resultRBO,
+                                           RBO * srcRBO1,
+                                           RBO * srcRBO2,
+                                           RBO * srcRBO3,
+                                           RBO * srcRBO4)
 :p_prog(prog),d_resultRBO(resultRBO)
 {
+    for (int i = 0 ; i < SRC_TEXTURES_MAX ; i++){
+        d_texSRC[i] = 0;
+    }
     d_RBO[0] = srcRBO1;
     d_RBO[1] = srcRBO2;
     d_RBO[2] = srcRBO3;
@@ -98,19 +104,19 @@ SShader *SPostProcess::getShader()
     return p_prog;
 }
 
-std::shared_ptr<SGenericTexture> SPostProcess::texSRC(int id)
+const SGenericTexture* SPostProcess::texSRC(int id)
 {
     return d_texSRC[id];
 
 }
 
-std::shared_ptr<RBO> SPostProcess::getResultRBO()
+RBO * SPostProcess::getResultRBO()
 {
     return d_resultRBO;
 
 }
 
-int SPostProcess::setTexSrc1(std::shared_ptr<SGenericTexture> r)
+int SPostProcess::setTexSrc1(SGenericTexture* r)
 {
     d_texSRC[0] = r;
     return 0;

@@ -19,40 +19,40 @@ class SShader;
 class SPostProcess {
 public:
     /*refactoring in process*/
-    SPostProcess (SShader *prog, int w, int h, const std::shared_ptr<SGenericTexture>& texSRC1, \
-                                               const std::shared_ptr<SGenericTexture>& texSRC2, \
-                                               const std::shared_ptr<SGenericTexture>& texSRC3,
-                                               const std::shared_ptr<SGenericTexture>& texSRC4);
+    SPostProcess (SShader *prog, int w, int h, const SGenericTexture* texSRC1, \
+                                               const SGenericTexture* texSRC2, \
+                                               const SGenericTexture* texSRC3,
+                                               const SGenericTexture* texSRC4);
 
-    SPostProcess(SShader *prog,int w, int h,   const std::shared_ptr<SGenericTexture> &texSRC1,
-                                               const std::shared_ptr<SGenericTexture> &texSRC2,
-                                               const std::shared_ptr<SGenericTexture> &texSRC3)
+    SPostProcess(SShader *prog,int w, int h,   const SGenericTexture* texSRC1,
+                                               const SGenericTexture* texSRC2,
+                                               const SGenericTexture* texSRC3)
                     :SPostProcess(prog,w,h,texSRC1,texSRC2, texSRC3,0) {}
-    SPostProcess(SShader *prog,int w, int h,   const std::shared_ptr<SGenericTexture> &texSRC1,
-                                               const std::shared_ptr<SGenericTexture> &texSRC2)
+    SPostProcess(SShader *prog,int w, int h,    const SGenericTexture* texSRC1,
+                                                const SGenericTexture* texSRC2)
                     :SPostProcess(prog,w,h,texSRC1,texSRC2, 0,0) {}
-    SPostProcess(SShader *prog,int w, int h,   const std::shared_ptr<SGenericTexture> &texSRC1)
+    SPostProcess(SShader *prog,int w, int h,    const SGenericTexture* texSRC1)
                      :SPostProcess(prog,w,h,texSRC1, 0, 0,0) {}
     SPostProcess(SShader *prog,int w, int h) :SPostProcess(prog,w,h, 0, 0, 0,0) {}
     /*new interface*/
-    SPostProcess (SShader *prog, std::shared_ptr<RBO> resultRBO,
-                  std::shared_ptr<RBO> srcRBO1,
-                  std::shared_ptr<RBO> srcRBO2,
-                  std::shared_ptr<RBO> srcRBO3,
-                  std::shared_ptr<RBO> srcRBO4
+    SPostProcess (SShader *prog, RBO * resultRBO,
+                  RBO * srcRBO1,
+                  RBO * srcRBO2,
+                  RBO * srcRBO3,
+                  RBO * srcRBO4
                   );
 
-    SPostProcess (SShader *prog, std::shared_ptr<RBO> resultRBO,
-                  std::shared_ptr<RBO> srcRBO1)
+    SPostProcess (SShader *prog, RBO * resultRBO,
+                  RBO * srcRBO1)
                 :SPostProcess(prog,resultRBO,srcRBO1,0,0,0) {}
-    SPostProcess (SShader *prog,std::shared_ptr<RBO> resultRBO,
-                  std::shared_ptr<RBO> srcRBO1,
-                  std::shared_ptr<RBO> srcRBO2)
+    SPostProcess (SShader *prog,RBO * resultRBO,
+                  RBO * srcRBO1,
+                  RBO * srcRBO2)
                 :SPostProcess(prog,resultRBO,srcRBO1,srcRBO2,0,0) {}
-    SPostProcess (SShader *prog,std::shared_ptr<RBO> resultRBO,
-                  std::shared_ptr<RBO> srcRBO1,
-                  std::shared_ptr<RBO> srcRBO2,
-                  std::shared_ptr<RBO> srcRBO3)
+    SPostProcess (SShader *prog,RBO * resultRBO,
+                  RBO * srcRBO1,
+                  RBO * srcRBO2,
+                  RBO * srcRBO3)
                 :SPostProcess(prog,resultRBO,srcRBO1,srcRBO2,srcRBO3,0) {}
 
     SPostProcess(const SPostProcess&) = delete;
@@ -64,12 +64,12 @@ public:
 
     SShader * getShader();
 
-    std::shared_ptr<SGenericTexture> texSRC(int id);
+    const SGenericTexture *texSRC(int id);
 
 
-    std::shared_ptr<RBO> getResultRBO();
+    RBO * getResultRBO();
 
-    int setTexSrc1(std::shared_ptr<SGenericTexture> r);
+    int setTexSrc1(SGenericTexture * r);
 private:
     /*working shader */
     SShader * p_prog;
@@ -82,12 +82,12 @@ private:
 
     constexpr static int SRC_TEXTURES_MAX = 4;
 
-    std::shared_ptr<SGenericTexture> d_texSRC[SRC_TEXTURES_MAX];
+    const SGenericTexture*  d_texSRC[SRC_TEXTURES_MAX];
 
     /*Result RBO*/
-    std::shared_ptr<RBO> d_resultRBO;
+    RBO * d_resultRBO;
     /*SRC RBO*/
-    std::shared_ptr<RBO> d_RBO[SRC_TEXTURES_MAX];
+    RBO * d_RBO[SRC_TEXTURES_MAX];
 
 
 
