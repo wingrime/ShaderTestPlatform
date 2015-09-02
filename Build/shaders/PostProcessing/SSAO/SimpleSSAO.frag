@@ -100,11 +100,11 @@ void main ()
 	}
 
 	
-	occ_depthf = clamp((occ_depthf / Samples) - ssaoLevelClamp,0,1.0);	
+	occ_depthf = clamp(clamp(occ_depthf / Samples,0.0,1.0) - ssaoLevelClamp*1.0,0.0,1.0);	
 
 	
-	color = vec4 (vec3(1-occ_depthf),1.0);
-	//DEPTH TO NORMAL TEST
+	color = vec4 (vec3(1.0-occ_depthf),1.0);
+    //DEPTH TO NORMAL TEST
 	//color = vec4(n,1.0);
 	//color = vec4(vec3(depth),1.0);
 }
