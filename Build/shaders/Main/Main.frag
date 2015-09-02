@@ -31,7 +31,7 @@ uniform sampler2D samplerNormalMap;
 uniform sampler2D samplerAlphaMap;
 uniform sampler2D samplerEnvSH;
 uniform sampler2D samplerRandomNoise;
-uniform sampler2DArray samplerShadowMap;
+uniform  sampler2DArray samplerShadowMap;
 uniform samplerCube samplerEnvCubeMap;
 
 uniform float lightIntensity = 1.0;
@@ -58,7 +58,11 @@ uniform float materialBRDFressnel = 0.04 ;/*fressnel*/
 #define DBG_OUT_GAMMA 10
 #define DBG_OUT_REFLECT 11
 #define DBG_OUT_SH 12
-uniform int dbg_out = 0;
+#define DBG_OUT_LIGHT 13
+const int dbg_out = 0;
+
+//#define LOW_CONFIG
+
 uniform mat4 shadowMVPB0;
 uniform mat4 shadowMVPB1;
 uniform mat4 shadowMVPB2;
@@ -197,6 +201,20 @@ float LinearizeDepth(float depthNDC)
   float f = 7000.0; // camera z far
   return (2.0 * n) / (f + n - depthNDC * (f - n));	
 }
+float shadowFactorSingleSample(sampler2DArray samplerShadowMap,vec3 shadowMapFragmentPosition,
+                                         float shadowBias,int shadowMapSlice) {
+                                         
+    shadowMapFragmentPosition.z -= shadowBias ;
+    if (  clamp(shadowMapFragmentPosition,1.0,0.0) != shadowMapFragmentPosition ) {
+        float sample = step(texture(samplerShadowMap,vec3(shadowMapFragmentPosition.xy ,shadowMapSlice)).r,shadowMapFragmentPosition.z);
+        if (sample == 1.0)
+            return 0.0;
+        else
+            return 1.0;
+    }
+    return 0.0;
+    
+}
 float shadowFactorRotatedPossionSampling(sampler2D samplerRandomNoise,sampler2DArray samplerShadowMap,vec3 shadowMapFragmentPosition,
                                          float shadowBias,float shadowPenumbra, vec2 textureCoordinatsModelSpace,
                                          int shadowMapSamples,int shadowMapSlice) {
@@ -239,19 +257,28 @@ float shadowFactorRotatedPossionSampling(sampler2D samplerRandomNoise,sampler2DA
     vec2 randomFromTexture = normalize(-1.0+2.0*texture(samplerRandomNoise, textureCoordinatsModelSpace * 10.0).gb);
     float shadowPenumbraDisp = 1.0/shadowPenumbra;
     float shadowFactor;
-    if (  clamp(shadowMapFragmentPosition,1.0,0.0) != shadowMapFragmentPosition) {
-        vec4 shadowMapSample;
-        for (int i=0;i<shadowMapSamples;i+=4) {
-            vec2 shadowMapSampleTextureCoordiants[4];
-            for (int j = 0;j < 4;j++)
-                shadowMapSampleTextureCoordiants[j] = shadowMapFragmentPosition.xy + vec2(reflect(poissonDisk[i+j],randomFromTexture)*shadowPenumbraDisp);
-            shadowMapSample.x = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[0],shadowMapSlice)).r,shadowMapFragmentPosition.z);
-            shadowMapSample.y = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[1],shadowMapSlice)).r,shadowMapFragmentPosition.z);
-            shadowMapSample.z = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[2],shadowMapSlice)).r,shadowMapFragmentPosition.z);
-            shadowMapSample.w = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[3],shadowMapSlice)).r,shadowMapFragmentPosition.z);
-            shadowFactor += dot (shadowMapSample,vec4(1.0));
+    
+    if (  clamp(shadowMapFragmentPosition,1.0,0.0) != shadowMapFragmentPosition ) {
+        //float shadowPreTest = step(texture(samplerShadowMap,vec3(shadowMapFragmentPosition.xy ,shadowMapSlice)).r,shadowMapFragmentPosition.z);
+        //if (shadowPreTest == 1.0)
+        {
+            vec4 shadowMapSample;
+            for (int i=0;i<shadowMapSamples;i+=4) {
+                vec2 shadowMapSampleTextureCoordiants[4];
+                for (int j = 0;j < 4;j++)
+                    shadowMapSampleTextureCoordiants[j] = shadowMapFragmentPosition.xy + vec2(reflect(poissonDisk[i*4+j],randomFromTexture)*shadowPenumbraDisp);
+            
+                shadowMapSample.x = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[0],shadowMapSlice)).r,shadowMapFragmentPosition.z);
+                shadowMapSample.y = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[1],shadowMapSlice)).r,shadowMapFragmentPosition.z);
+                shadowMapSample.z = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[2],shadowMapSlice)).r,shadowMapFragmentPosition.z);
+                shadowMapSample.w = step(texture(samplerShadowMap,vec3(shadowMapSampleTextureCoordiants[3],shadowMapSlice)).r,shadowMapFragmentPosition.z);
+                shadowFactor += dot (shadowMapSample,vec4(1.0));
+            }
+            shadowFactor = clamp(1.0 - ( (1.0 / float(shadowMapSamples)) * shadowFactor),0.0,1.0);
         }
-        shadowFactor = 1.0 - ( (1.0 / float(shadowMapSamples)) * shadowFactor);
+        //else
+        //    shadowFactor = 1.0;
+        
     }
     else
         shadowFactor = 0.0;
@@ -260,7 +287,11 @@ float shadowFactorRotatedPossionSampling(sampler2D samplerRandomNoise,sampler2DA
 void main() 
 {
         /*loading maps*/
+#ifdef LOW_CONFIG
+        float fragmentTransperacy = 1.0;
+#else
         float fragmentTransperacy = texture(samplerAlphaMap,UvMS).r;
+#endif
         vec3  fragmentNormalTextureSpace = 2.0*(texture( samplerNormalMap,UvMS).rgb)-1.0;
         vec3  diffColor = texture(samplerAlbedo,UvMS).rgb;
 
@@ -320,39 +351,40 @@ void main()
         vec3 n = normalize(d_normal);
         vec3 v  = normalize(-PositionCS);
         // vec3 l  = normalize( lp - PositionCS); /*point light */
-	vec3 l = normalize (lp.xyz); /* directional light */
-	vec3 h = normalize(v+l);
+        vec3 l = normalize (lp.xyz); /* directional light */
+        vec3 h = normalize(v+l);
 
         const vec3 specColor =  vec3(1.0);//vec3(1.0f,0.71f,0.29f);
-
+        float shadow;
         float diff = lambert (n,l);
 
-        const int shadowMapSamples = 8;
-        float shadow = shadowFactorRotatedPossionSampling(samplerRandomNoise, samplerShadowMap,sm_pos.xyz, shadowEps,shadowPenumbra,UvMS,shadowMapSamples,slice_sel );
-        if (diff < 0.001) { /*machine EPSILON*/
-		shadow = 0.0;
-		//diffColor = vec3(1.0,0.0,0.0);
-	}
+        #if  defined(LOW_CONFIG)
+            shadow = shadowFactorSingleSample(samplerShadowMap,sm_pos.xyz,shadowEps,slice_sel);
+        #else
+            const int shadowMapSamples = 16; 
+             shadow = shadowFactorRotatedPossionSampling(samplerRandomNoise, samplerShadowMap,sm_pos.xyz, shadowEps,shadowPenumbra,UvMS,shadowMapSamples,slice_sel );
+        #endif
+       
 	//spec = binn_phong(n,h,l,2.0,diffColor,specColor)*lightIntensity*10;
 	vec3 spec =ggx_full_t(n,h,l,v,materialBRDFAlpha,materialBRDFressnel,diffColor,specColor)*lightIntensity;
 
-
+    
 	/*SH bands load*/
+    #ifdef LOW_CONFIG
+    vec3 ambient_spectral_harmonics = vec3(0.0);
+    #else
 	vec3  SH[9];
 	for (int c = 0 ; c < 9; c++) {
 		SH[c].r = texelFetch(samplerEnvSH, ivec2(c,1u),0).r;
 		SH[c].g = texelFetch(samplerEnvSH, ivec2(c,2u),0).r;
 		SH[c].b = texelFetch(samplerEnvSH, ivec2(c,3u),0).r;
         }
-        //vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(MV_n)*vec4(normalize(d_normal),1.0)).xyz);
-        //error
-        vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(matrixView)*vec4(normalize(reflect(v,n)),1.0) ).xyz);
-        //ambient_spectral_harmonics =clamp(ambient_spectral_harmonics,0.0,1000.0);
-
+        vec3 ambient_spectral_harmonics = appplySHamonics(SH,(transpose(matrixView)*vec4(normalize(reflect(v,n)),1.0) ).xyz)*shIntensity;
+    #endif
 
 	if (dbg_out == DBG_OUT_FULL)
-                dstColor = vec4((shadow)*(spec)+(ambient_spectral_harmonics)*shIntensity*diffColor,fragmentTransperacy);
-	else if (dbg_out ==  DBG_OUT_ALBEDO)
+        dstColor = vec4((shadow)*(spec)+(ambient_spectral_harmonics)*diffColor,fragmentTransperacy);
+    else if (dbg_out ==  DBG_OUT_ALBEDO)
 		dstColor = dstColor = vec4(vec3(diff),1.0);
 	else if (dbg_out ==  DBG_OUT_DIFFUSE)
 		dstColor =  vec4(diff*diffColor,1.0);
