@@ -32,7 +32,7 @@ std::string RBO::getName()
     return d_name;
 }
 
-std::shared_ptr<SRBOTexture> RBO::texIMG(int n)
+SGenericTexture* RBO::texIMG(int n)
 {
     if (n <0 || n > 3)
         return 0;
@@ -41,7 +41,7 @@ std::shared_ptr<SRBOTexture> RBO::texIMG(int n)
 }
 
 
-std::shared_ptr<SRBOTexture> RBO::texDEPTH()
+SGenericTexture* RBO::texDEPTH()
 {
     return d_texDEPTH;
 }
@@ -83,7 +83,7 @@ int RBO::attachRBOTextures()
 
     int buffers = 0;
     for (int i = 0 ; i < MAX_COLOR_ATTACHMENTS; i++) {
-        if (d_texIMG[i] != nullptr) {
+        if (d_texIMG[i]) {
             glFramebufferTexture(GL_FRAMEBUFFER,    GL_COLOR_ATTACHMENT0+i,  d_texIMG[i]->getGLId(), 0);
             buffers++;
         }
@@ -171,27 +171,31 @@ bool RBO::isDepthOnlyType(RBO::RBOType t)
     return (t == RBO::RBO_DEPTH_ARRAY_ONLY || t == RBO::RBO_DEPTH_ONLY);
 }
 
-std::vector<std::shared_ptr<RBO> >  RBO::debugGetRenderOutputList()
+std::vector<RBO* >  RBO::debugGetRenderOutputList()
 {
     return RBO::debugRenderOutputList;
 }
 
 int RBO::debugRegisterSelf()
 {
-    RBO::debugRenderOutputList.push_back(std::shared_ptr<RBO>(this));
+    RBO::debugRenderOutputList.push_back(this);
     return 0;
 }
 /* Constructor from ptr's*/
 RBO::RBO(std::string name, int w, int h, RBOType _type,
-        std::shared_ptr<SRBOTexture> _texIMG,
-        std::shared_ptr<SRBOTexture> _texIMG1,
-        std::shared_ptr<SRBOTexture> _texIMG2,
-        std::shared_ptr<SRBOTexture> _texDEPTH)
+        SRBOTexture * _texIMG,
+        SRBOTexture * _texIMG1,
+        SRBOTexture * _texIMG2,
+        SRBOTexture * _texDEPTH)
 :d_name(name),d_w(w),d_h(h), d_type(_type) ,d_texDEPTH(_texDEPTH)
  {
+    for(int i = 0 ; i < MAX_COLOR_ATTACHMENTS;i++)
+        d_texIMG[i] = 0;
+    d_texDEPTH = 0;
     d_texIMG[0] = _texIMG;
     d_texIMG[1] = _texIMG1;
     d_texIMG[2] = _texIMG2;
+
     unsigned int mip = 1;
 
     if (d_w > 128, d_h > 128 )
@@ -202,12 +206,12 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
         return;
     }
 
-    if (d_texIMG[0] == nullptr) {
-            d_texIMG[0].reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(d_type),mip ));
+    if (!d_texIMG[0]) {
+            d_texIMG[0] = (new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(d_type),mip ));
 
     }
-    if (d_texDEPTH == nullptr) {
-            d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type),mip ));
+    if (!d_texDEPTH) {
+            d_texDEPTH = (new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(d_type),mip ));
     }
 
     d_isMSAA = d_texIMG[0]->IsMSAA() ;
@@ -220,6 +224,10 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
 RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
     :d_name(name),d_w(def_w),d_h(def_h),d_type(type)
 {
+    for (int i = 0 ; i < MAX_COLOR_ATTACHMENTS; i++) {
+        d_texIMG[i] = 0;
+     }
+    d_texDEPTH = 0;
     debugRegisterSelf();
     /*automatic mip level detection TODO*/
     unsigned int mip = 1;
@@ -236,9 +244,9 @@ RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
         MASSERT( d_w % 2 != 0); /*should be power of two*/
     }
     if (!isDepthOnlyType(type)) {
-        d_texIMG[0].reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
+        d_texIMG[0] = (new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedRBOTextueTypeFromRBOType(type),mip ));
     }
-    d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(type),mip));
+    d_texDEPTH = (new SRBOTexture(RectSizeInt(d_w,d_h),RBO::getRelatedDepthRBOTextueTypeFromRBOType(type),mip));
     if (!isDepthOnlyType(type)) {
         d_isMSAA = d_texIMG[0]->IsMSAA() ;
     }
@@ -262,6 +270,10 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
     MASSERT(SRBOTexture::isDepthType(t2_type));
     MASSERT(t0_s <= 0);
 
+    for(int i = 0 ; i < MAX_COLOR_ATTACHMENTS;i++)
+        d_texIMG[i] = 0;
+    d_texDEPTH = 0;
+
     SRBOTexture::RTType tex_type[MAX_COLOR_ATTACHMENTS];
     int tex_size_mul[MAX_COLOR_ATTACHMENTS];
 
@@ -279,14 +291,14 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
         mip = 2;
 
     if (!isDepthOnlyType(type))
-        d_texIMG[0].reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s),t0_type,mip));
+        d_texIMG[0] = (new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s),t0_type,mip));
     /*depth*/
-    d_texDEPTH.reset(new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s), SRBOTexture::getRelatedDepthType(t0_type) ,mip));
+    d_texDEPTH = (new SRBOTexture(RectSizeInt(d_w/t0_s,d_h/t0_s), SRBOTexture::getRelatedDepthType(t0_type) ,mip));
 
     for (int i = 1 ; i < MAX_COLOR_ATTACHMENTS; i++) {
         if (tex_type[i] != SRBOTexture::RTType::RT_NONE) {
             MASSERT(tex_size_mul[i] <= 0);
-            d_texIMG[i].reset(new SRBOTexture(RectSizeInt(d_w/tex_size_mul[i],d_h/tex_size_mul[i]),tex_type[i],mip));
+            d_texIMG[i] = (new SRBOTexture(RectSizeInt(d_w/tex_size_mul[i],d_h/tex_size_mul[i]),tex_type[i],mip));
         }
     }
 
@@ -322,4 +334,4 @@ int RBO::ResolveMSAA(const RBO &dst)
       return 0;
 }
 /*shared list for debug */
-std::vector< std::shared_ptr <RBO> > RBO::debugRenderOutputList = std::vector< std::shared_ptr <RBO> >();
+std::vector<  RBO*  > RBO::debugRenderOutputList = std::vector< RBO* >();

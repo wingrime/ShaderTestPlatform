@@ -12,7 +12,8 @@ class RBO {
 
 public:
     enum RBOType {
-    RBO_SCREEN = 0,
+    RBO_NONE = 0,
+    RBO_SCREEN,
     RBO_CUBEMAP,
     RBO_FLOAT,
     RBO_RGBA,
@@ -25,16 +26,18 @@ public:
     };
 
 	/*base constructor*/
-    RBO(std::string name,int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
-                                               std::shared_ptr<SRBOTexture> texIMG1,\
-                                               std::shared_ptr<SRBOTexture> texIMG2,\
-                                               std::shared_ptr<SRBOTexture> texDEPTH);
+    RBO(std::string name,int w, int h,RBOType type, \
+                                               SRBOTexture * texIMG, \
+                                               SRBOTexture * texIMG1,\
+                                               SRBOTexture * texIMG2,\
+                                               SRBOTexture * texDEPTH);
 
-    RBO(std::string name,int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG, \
-                                               std::shared_ptr<SRBOTexture> texDEPTH)
+    RBO(std::string name,int w, int h,RBOType type, \
+                                               SRBOTexture * texIMG, \
+                                               SRBOTexture * texDEPTH)
 
-        : RBO(name , w, h , type , texIMG,nullptr,nullptr, texDEPTH ){}
-    RBO(std::string name,int w, int h,RBOType type, std::shared_ptr<SRBOTexture> texIMG ) :RBO(name,w, h , type , texIMG, nullptr ){}
+        : RBO(name , w, h , type , texIMG,0,0, texDEPTH ){}
+    RBO(std::string name,int w, int h,RBOType type, SRBOTexture * texIMG ) :RBO(name,w, h , type , texIMG, 0 ){}
 
     RBO(std::string name,int def_w, int def_h,RBOType type);
 
@@ -58,8 +61,8 @@ public:
 
 
 
-    std::shared_ptr<SRBOTexture> texIMG(int n); /*color attachment 0*/
-    std::shared_ptr<SRBOTexture> texDEPTH();
+    SGenericTexture*  texIMG(int n); /*color attachment 0*/
+    SGenericTexture* texDEPTH();
 
     /*Request size*/
     SVec2 getSize();
@@ -79,9 +82,9 @@ private:
 
     int d_buffers = 0;
 
-    std::shared_ptr<SRBOTexture> d_texIMG[MAX_COLOR_ATTACHMENTS]; /*color attachments*/
+    SRBOTexture * d_texIMG[MAX_COLOR_ATTACHMENTS]; /*color attachments*/
 
-    std::shared_ptr<SRBOTexture> d_texDEPTH;
+    SRBOTexture * d_texDEPTH;
 
     RBOType d_type;
 
@@ -94,10 +97,10 @@ private:
     static bool isDepthOnlyType(RBOType t);
     /*debug API to RBOList*/
 public:
-    static std::vector<std::shared_ptr<RBO> > debugGetRenderOutputList();
+    static std::vector<RBO * > debugGetRenderOutputList();
 private:
     int debugRegisterSelf();
-    static std::vector< std::shared_ptr <RBO> > debugRenderOutputList;
+    static std::vector< RBO * > debugRenderOutputList;
 
 
 };
