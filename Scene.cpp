@@ -216,16 +216,6 @@ SScene::SScene(RectSizeInt v)
     rtSSAOHorBlurResult = lookupStageRBO(horSSAOBlurStage.stageName);
     //pp_prog_hdr_blur_kawase = lookupStageShader(horSSAOBlurStage.stageName);
 
-    RenderPipelineStageConfig volumetricStage ;
-    volumetricStage.stageName = std::string("volumeTest");
-    volumetricStage.bufferSize = RectSizeInt(h,w);
-    volumetricStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
-    volumetricStage.fragmentShaderFileName= std::string("PostProcessing/Volumetric/Test.frag");
-    volumetricStage.rboType = RBO::RBO_RGBA;
-    volumetricStage.isPostProcess = false;
-    initStage(&volumetricStage);
-    rtVolumetric = lookupStageRBO(volumetricStage.stageName);
-    SShader * volumetricShader = lookupStageShader(volumetricStage.stageName);
 
     RenderPipelineStageConfig cubemapStage ;
     cubemapStage.stageName = std::string("cubemap");
@@ -286,9 +276,6 @@ SScene::SScene(RectSizeInt v)
     pp_stage_hdr_lum_log = (new SPostProcess(loglumShader ,rtHDRLogLum,rtHDRScene));
 
     pp_stage_hdr_lum_key = (new SPostProcess(lumkeyShader ,rtHDRLumKey,rtHDRLogLum,rtHDRLumKey));
-
-    /* img depth | shadow depth | shadow world pos*/
-    pp_stage_volumetric = (new SPostProcess(volumetricShader ,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(2)));
 
     shaderViewAsIs = new SShader("PostProcessing/PostProccessQuard.vert","PostProcessing/View/AsIs.frag");
 
@@ -723,72 +710,47 @@ int SScene::Render() {
        //  RenderShadowMap( *rtShadowMap);
     }
     rtime.Begin();
-    if (dbg_ui.d_v_sel_current == DebugUI::V_DIRECT) {        
-        RenderDirect( *mainRenderTonemapPass);
-
-    } else {
         /*On request mode*/
-        glCullFace(GL_FRONT);
-        RenderShadowMap( *rtShadowMap);
-        glCullFace(GL_BACK);
-        RenderPrepass( *prePass);
-        if (d_toggle_MSAA) {
-            RenderDirect( *mainRenderPassMSAA);
-            rtHDRScene_MSAA->ResolveMSAA(*rtHDRScene);
+    glCullFace(GL_FRONT);
+    RenderShadowMap( *rtShadowMap);
+    glCullFace(GL_BACK);
+    RenderPrepass( *prePass);
+    if (d_toggle_MSAA) {
+        RenderDirect( *mainRenderPassMSAA);
+        rtHDRScene_MSAA->ResolveMSAA(*rtHDRScene);
         } else {
             RenderDirect( *mainRenderPass);
         }
-    }
     rtime.End();
     pp_time.Begin();
     ui_pass.Bind();
 
-    /*Bloom + SSAO + RenderShadowMap*/
-    if (dbg_ui.d_v_sel_current == DebugUI::V_NORMAL) {
         /*LumKEY*/
-        pp_stage_hdr_lum_log->DrawRBO(false);
-        pp_stage_hdr_lum_key->DrawRBO(false);
-        if (d_toggle_brightpass ) {
-
+    pp_stage_hdr_lum_log->DrawRBO(false);
+    pp_stage_hdr_lum_key->DrawRBO(false);
+    if (d_toggle_brightpass ) {
         pp_stage_hdr_bloom->DrawRBO(false);
         BlurKawase();
         } else {
             pp_stage_hdr_blur_vert2->Clean();
         }
         /*SSAO*/
-        if (d_toggle_ssao)
-        {
-            rtSSAOVertBlurResult->Bind(false);
-            pp_stage_ssao->Draw();
-            pp_stage_ssao_blur_hor->DrawRBO(false);
-            pp_stage_ssao_blur_vert->DrawRBO(false);
+    if (d_toggle_ssao)
+    {
+        rtSSAOVertBlurResult->Bind(false);
+        pp_stage_ssao->Draw();
+        pp_stage_ssao_blur_hor->DrawRBO(false);
+        pp_stage_ssao_blur_vert->DrawRBO(false);
             /*normaly do tonemap and, if debug enabled set required buffer*/
-        }
-
-        if (debugRenderOutputFlag) {
-            rtSCREEN->Bind(true);
-            postProcessDebugOutput->setTexSrc1(debugFinalRenderOutput->texIMG(0));
-            postProcessDebugOutput->Draw();
-            }
-        else
-            pp_stage_hdr_tonemap->DrawRBO(false);
-
-    } else if (dbg_ui.d_v_sel_current == DebugUI::V_SHADOW_MAP) {
-        rtSCREEN->Bind(true); 
-        RenderShadowMap( *rtSCREEN);
-    } else if (dbg_ui.d_v_sel_current == DebugUI::V_VOLUMETRIC) {
-        rtSCREEN->Bind(true); 
-
-        pp_stage_volumetric->getShader()->SetUniform("matrixShadowMapProjection",d_shadowmap_cam[0].getProjMatrix());
-        pp_stage_volumetric->getShader()->SetUniform("matrixShadowMapView",d_shadowmap_cam[0].getViewMatrix());
-        pp_stage_volumetric->getShader()->SetUniform("cam_proj_matrix",cam.getProjMatrix());
-        pp_stage_volumetric->getShader()->SetUniform("cam_view_matrix",cam.getViewMatrix());
-        pp_stage_volumetric->Draw();
     }
-    else if (dbg_ui.d_v_sel_current == DebugUI::V_CUBEMAPTEST ) {
+    if (debugRenderOutputFlag) {
         rtSCREEN->Bind(true);
-        pp_stage_hdr_lum_log->Draw();
+        postProcessDebugOutput->setTexSrc1(debugFinalRenderOutput->texIMG(0));
+        postProcessDebugOutput->Draw();
     }
+    else
+        pp_stage_hdr_tonemap->DrawRBO(false);
+
     pp_time.End();
     ui_time.Begin();
     dbg_ui.Draw();
