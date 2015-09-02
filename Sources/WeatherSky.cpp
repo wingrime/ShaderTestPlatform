@@ -73,8 +73,8 @@ SWeatherSky::SWeatherSky() {
     sky_dome_prog = new SShader("Sky/PerezSky.vert","Sky/PerezSky.frag");
     sky_dome_cubemap_prog = new SShader("Sky/PerezSkyCubemap.vert","Sky/PerezSkyCubemap.frag","Sky/PerezSkyCubemap.geom");
 
-    sky_dome_model->ConfigureProgram( *sky_dome_prog);
-    sky_dome_model->ConfigureProgram( *sky_dome_cubemap_prog);
+    sky_dome_model->ConfigureProgram( sky_dome_prog);
+    sky_dome_model->ConfigureProgram( sky_dome_cubemap_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
 
     sky_dome_prog->SetUniform("sky_turbidity",sky_turbidity);

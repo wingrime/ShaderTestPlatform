@@ -23,8 +23,47 @@
 #include "DebugUI.h"
 #include "WeatherSky.h"
 
+struct RenderPipelineStageConfig {
+    /* pipline stage name */
+    std::string stageName;
+    /* stage buffer size*/
+    RectSizeInt bufferSize;
+    /* stage render output type*/
+    RBO::RBOType rboType;
+    /* shaders */
+    std::string vertexShaderFileName;
+    std::string fragmentShaderFileName;
+    std::string geoShaderFileName;
+    /*stage submit rules*/
+    bool isPostProcess;
+    std::string ppFeedStage1;
+    std::string ppFeedStage2;
+    std::string ppFeedStage3;
+    std::string ppFeedStage4;
+
+};
+struct RenderPipelineStageRuntime {
+    RenderPipelineStageConfig stageConfig;
+    SShader * stageShader;
+    RBO * stageRBO;
+    SPostProcess * postProcess; //* used only with postprocess stages
+
+};
+
 class SScene {
 public:
+    /* new code for render stages*/
+    RenderPipelineStageRuntime *initStage(RenderPipelineStageConfig *pipelineStage);
+    RBO *lookupStageRBO(const std::string & stageName);
+    SShader *lookupStageShader(const std::string & stageName);
+    int renderPipelineLink() ;// resolve names,
+
+private:
+    std::vector<SShader *> d_pipelineShaders;
+    std::vector<RenderPipelineStageRuntime* >d_pipelineRuntime;
+    std::unordered_map<std::string, int> d_pipelineLookupMap;
+public:
+
     friend class DebugUI;
     SScene(RectSizeInt v);
     ~SScene();
@@ -41,49 +80,49 @@ public:
 
     SCamera cam;
     SCamera d_shadowmap_cam[4];
-    std::shared_ptr<SPostProcess> pp_stage_ssao;
-    std::shared_ptr<SPostProcess> pp_stage_ssao_blur_hor;
-    std::shared_ptr<SPostProcess> pp_stage_ssao_blur_vert;
+    SPostProcess * pp_stage_ssao;
+    SPostProcess * pp_stage_ssao_blur_hor;
+    SPostProcess * pp_stage_ssao_blur_vert;
 
-    std::shared_ptr<SPostProcess> pp_stage_hdr_bloom;
-    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_hor;
-    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_vert;
+    SPostProcess * pp_stage_hdr_bloom;
+    SPostProcess * pp_stage_hdr_blur_hor;
+    SPostProcess * pp_stage_hdr_blur_vert;
 
     /*for ping pong bloor*/
-    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_hor2;
-    std::shared_ptr<SPostProcess> pp_stage_hdr_blur_vert2;
+    SPostProcess * pp_stage_hdr_blur_hor2;
+    SPostProcess * pp_stage_hdr_blur_vert2;
 
-    std::shared_ptr<SPostProcess> pp_stage_hdr_tonemap;
+    SPostProcess * pp_stage_hdr_tonemap;
 
     /*lumenance key*/
-    std::shared_ptr<SPostProcess> pp_stage_hdr_lum_key;
-    std::shared_ptr<SPostProcess> pp_stage_hdr_lum_log;
+    SPostProcess * pp_stage_hdr_lum_key;
+    SPostProcess * pp_stage_hdr_lum_log;
     /*debug output*/
-    std::shared_ptr<SPostProcess> postProcessDebugOutput;
+    SPostProcess * postProcessDebugOutput;
 
 
-    std::shared_ptr<SPostProcess> pp_stage_volumetric;
-    std::shared_ptr<RBO> rtSCREEN;
-    std::shared_ptr<RBO> rtPrepass;
-    std::shared_ptr<RBO> rtHDRScene;
-    std::shared_ptr<RBO> rtHDRScene_MSAA;
-    std::shared_ptr<RBO> rtSSAOHorBlurResult;
-    std::shared_ptr<RBO> rtShadowMap;
-    std::shared_ptr<RBO> rtSSAOVertBlurResult;
-    std::shared_ptr<RBO> rtHDRBloomResult;
-    std::shared_ptr<RBO> rtHDRHorBlurResult;
-    std::shared_ptr<RBO> rtHDRVertBlurResult;
-    std::shared_ptr<RBO> rtHDRLogLum; /*Downsample input for total lum calculation*/
-    std::shared_ptr<RBO> rtHDRLumKey; /* Out 1x1 texture with lum*/
+    SPostProcess * pp_stage_volumetric;
+    RBO * rtSCREEN;
+    RBO * rtPrepass;
+    RBO * rtHDRScene;
+    RBO * rtHDRScene_MSAA;
+    RBO * rtSSAOHorBlurResult;
+    RBO * rtShadowMap;
+    RBO * rtSSAOVertBlurResult;
+    RBO * rtHDRBloomResult;
+    RBO * rtHDRHorBlurResult;
+    RBO * rtHDRVertBlurResult;
+    RBO * rtHDRLogLum; /*Downsample input for total lum calculation*/
+    RBO * rtHDRLumKey; /* Out 1x1 texture with lum*/
 
-    std::shared_ptr<RBO> rtVolumetric;
+    RBO * rtVolumetric;
 
 
-    std::shared_ptr<RBO> rtCubemap;
+    RBO * rtCubemap;
 
-    std::shared_ptr<SRBOTexture> rtConvoledCubemap;
+    SRBOTexture * texConvoledCubemap;
 
-    std::shared_ptr<STexture> texRandom;
+    STexture * texRandom;
 
     SPerfMan rtime;
     SPerfMan ui_time;
@@ -103,24 +142,28 @@ private:
     bool d_first_render;
 
     /* prepass prog*/
-    std::shared_ptr<SShader> prepass_prog;
-    /* main prog*/
-    std::shared_ptr<SShader> main_pass_shader;
-    /*shadow prog*/
-    std::shared_ptr<SShader> cam_prog;
+    SShader *  prepass_prog;
 
-    std::shared_ptr<SShader> pp_prog_hdr_blur_kawase;
 
-    std::shared_ptr<SShader> pp_prog_hdr_tonemap; /* final tonemap*/
+   SShader * pp_prog_hdr_blur_kawase;
 
-    std::shared_ptr<SShader> cubemap_prog_generator;
+    SShader* pp_prog_hdr_tonemap; /* final tonemap*/
 
-    std::shared_ptr<SShader> shaderViewAsIs;
+    SShader * cubemap_prog_generator;
 
-    int RenderDirect(const RBO& v);
+    SShader * shaderViewAsIs;
+
+    /*shortcuts for stages*/
+    RenderPipelineStageRuntime * mainRenderPass;
+    RenderPipelineStageRuntime * mainRenderPassMSAA;
+    RenderPipelineStageRuntime * mainRenderTonemapPass;
+    RenderPipelineStageRuntime * shadowMapPass;
+    RenderPipelineStageRuntime * prePass;
+
+    int RenderDirect(const RenderPipelineStageRuntime &runtime);
     int RenderShadowMap(const RBO& v);
     int RenderCubemap();
-    int RenderPrepass(const RBO& v);
+    int RenderPrepass(const RenderPipelineStageRuntime &runtime);
     int BlurKawase();
 
 private:
@@ -146,10 +189,10 @@ public:
     AABB cameraFrustrumAABB[4];
     AABB cameraTransformFrustrumAABB[4];
 
-    int debugSetFinalRenderOutput(std::shared_ptr<RBO> r);
+    int debugSetFinalRenderOutput(RBO * r);
     int debugSetDebugRenderOutputFlag(bool flag);
 
-    std::shared_ptr<RBO> debugFinalRenderOutput;
+    RBO * debugFinalRenderOutput;
     bool debugRenderOutputFlag = false;
 
     Recorder rec;

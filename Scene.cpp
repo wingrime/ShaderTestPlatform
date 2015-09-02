@@ -21,110 +21,289 @@
 #include "r_sprog.h"
 
 
+
+RenderPipelineStageRuntime * SScene::initStage(RenderPipelineStageConfig *pipelineStage)
+{
+    /*TODO: add RBO with many out buffers*/
+    RBO * nRBO = new RBO(pipelineStage->stageName,pipelineStage->bufferSize.w,pipelineStage->bufferSize.h,pipelineStage->rboType);
+    SShader * nShader = new SShader(pipelineStage->vertexShaderFileName,pipelineStage->fragmentShaderFileName,pipelineStage->geoShaderFileName);
+
+    RenderPipelineStageRuntime * nRuntime =  new RenderPipelineStageRuntime;
+    nRuntime->stageConfig = *pipelineStage;
+    nRuntime->stageRBO = nRBO;
+    nRuntime->stageShader = nShader;
+
+    d_pipelineRuntime.push_back(nRuntime);
+    int runtimeId = d_pipelineRuntime.size() - 1;
+    d_pipelineLookupMap[pipelineStage->stageName]  = runtimeId;
+    return nRuntime;
+}
+/*Todo handle errors*/
+RBO *SScene::lookupStageRBO(const std::string &stageName)
+{
+    int idRuntime = d_pipelineLookupMap[stageName];
+    return d_pipelineRuntime[idRuntime]->stageRBO;
+}
+
+SShader *SScene::lookupStageShader(const std::string &stageName)
+{
+    int idRuntime = d_pipelineLookupMap[stageName];
+    return d_pipelineRuntime[idRuntime]->stageShader;
+}
+
+int SScene::renderPipelineLink()
+{
+     for (auto& rt : d_pipelineRuntime ) {
+         if (rt->stageConfig.isPostProcess == true) {
+           const std::string &feed1 =  rt->stageConfig.ppFeedStage1;
+           const std::string &feed2 =  rt->stageConfig.ppFeedStage2;
+           const std::string &feed3 =  rt->stageConfig.ppFeedStage3;
+           const std::string &feed4 =  rt->stageConfig.ppFeedStage4;
+
+           RBO*  feed1Stage = (d_pipelineRuntime[d_pipelineLookupMap[feed1]])->stageRBO;
+           RBO*  feed2Stage = (d_pipelineRuntime[d_pipelineLookupMap[feed2]])->stageRBO;
+           RBO*  feed3Stage = (d_pipelineRuntime[d_pipelineLookupMap[feed3]])->stageRBO;
+           RBO*  feed4Stage = (d_pipelineRuntime[d_pipelineLookupMap[feed4]])->stageRBO;
+
+           /*TODO:check for strages*/
+
+           rt->postProcess = new SPostProcess(rt->stageShader,rt->stageRBO, \
+                                              feed1Stage,feed2Stage,feed3Stage,feed4Stage);
+
+         }
+     }
+    return 0;
+}
+
 SScene::SScene(RectSizeInt v)
-    :rtSCREEN(new RBO(std::string("rtSCREEN"), v.w,v.h,RBO::RBO_SCREEN))
-    ,cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
+    :cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
     //,cam(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1.0f,100.0,-100.0,-100.0))
 
     ,step(0.0f)
     ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
-    
-    ,rtShadowMap(new RBO(std::string("ShadowMap"),v.w,v.h, RBO::RBO_DEPTH_ARRAY_ONLY))
-    ,rtPrepass(new RBO(std::string("DepthPrePass"),v.w/2,v.h/2, RBO::RBO_RGBA))
-    ,rtHDRScene_MSAA(new RBO(std::string("HDR Mainpass MSAA"),v.w,v.h ,RBO::RBO_MSAA,SRBOTexture::RT_TEXTURE_MSAA,1,
-                                                   SRBOTexture::RT_NONE,1,
-                                                   SRBOTexture::RT_NONE, 1 ))
-    ,rtHDRScene(new RBO(std::string("HDR Mainpass"),v.w,v.h ,RBO::RBO_FLOAT,SRBOTexture::RT_TEXTURE_FLOAT,1,
-                                                   SRBOTexture::RT_NONE,1,
-                                                   SRBOTexture::RT_NONE, 1 ))
-    ,rtHDRBloomResult( new RBO(std::string("rtHDRBloomResult"),v.w/2,v.h/2, RBO::RBO_FLOAT_RED)) /* is it better HDR */
-    ,rtHDRHorBlurResult(new RBO(std::string("rtHDRHorBlurResult"),v.w/4,v.h/4, RBO::RBO_FLOAT_RED))
-    ,rtHDRVertBlurResult(new RBO(std::string("rtHDRVertBlurResult"),v.w/4,v.h/4, RBO::RBO_FLOAT_RED))
-    ,rtSSAOVertBlurResult( new RBO(std::string("rtSSAOVertBlurResult"),v.w/2,v.h/2, RBO::RBO_RED))
-    ,rtSSAOHorBlurResult(new RBO(std::string("rtSSAOHorBlurResult"),v.w/2,v.h/2, RBO::RBO_RED))
-    ,rtVolumetric(new RBO(std::string("rtVolumetric"),v.w,v.h, RBO::RBO_RGBA))
     ,w_sky(new SWeatherSky())
-    ,rtCubemap(new RBO(std::string("rtCubemap"),512, 512, RBO::RBO_CUBEMAP))
-   ,rtConvoledCubemap(new SRBOTexture(RectSizeInt(10,4),SRBOTexture::RT_TEXTURE_FLOAT_RED))
-    ,rtHDRLogLum(new RBO(std::string("rtHDRLogLum"),16,16,RBO::RBO_FLOAT)) /*Downsampled source for lumeneace*/
-    ,rtHDRLumKey(new RBO(std::string("rtHDRLumKey"),1,1,RBO::RBO_FLOAT)) /*Lum key out*/
+
     ,dbg_ui(this,v)
     
 {
-    /*load configuration*/
-    int w = rtHDRScene->getSize().w;
-    int h = rtHDRScene->getSize().h;
-    /*bloom shaders */
 
-    texRandom.reset(new STexture("noise.png"));
+    /*scene noise*/
+    texRandom = new STexture("noise.png");
     texRandom->setInterpolationMode(STexture::InterpolationType::TEX_NEAREST);
 
-    pp_prog_hdr_tonemap.reset(new SShader("PostProcessing/PostProccessQuard.vert",\
-                                      "PostProcessing/Tonemap/Filmic.frag"));
+    texConvoledCubemap = new SRBOTexture(RectSizeInt(10,4),SRBOTexture::RT_TEXTURE_FLOAT_RED);
+    texConvoledCubemap->setInterpolationMode(STexture::InterpolationType::TEX_NEAREST);
+    /*load configuration*/
+    int w = v.w;
+    int h = v.h;
+    RenderPipelineStageConfig shadowMapStage;
+    shadowMapStage.stageName = std::string("Shadowmap");
+    shadowMapStage.bufferSize = RectSizeInt(h,w);
+    shadowMapStage.fragmentShaderFileName = std::string("Shadow/Cascade.frag");
+    shadowMapStage.geoShaderFileName = std::string("Shadow/Cascade.geom");
+    shadowMapStage.vertexShaderFileName = std::string("Shadow/Cascade.vert");
+    shadowMapStage.rboType = RBO::RBO_DEPTH_ARRAY_ONLY;
+    shadowMapPass = initStage(&shadowMapStage);
+    /*short path*/
 
-    pp_prog_hdr_blur_kawase.reset(new SShader("PostProcessing/PostProccessQuard.vert",\
-                                          "PostProcessing/Bloor/Kawase.frag"));
+    rtShadowMap = lookupStageRBO(shadowMapStage.stageName);
 
-    pp_stage_ssao.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
-                                                  "PostProcessing/SSAO/SimpleSSAO.frag") \
-                                      ,w/2,h/2,rtPrepass->texIMG(0),rtPrepass->texDEPTH(),texRandom));
+    RenderPipelineStageConfig depthPrePassStage;
+    depthPrePassStage.stageName = std::string("DepthPrePass");
+    depthPrePassStage.bufferSize = RectSizeInt(h/2,w/2);
+    depthPrePassStage.fragmentShaderFileName = std::string("DepthNormalPrepass/DepthNormalPrepass.frag");
+    depthPrePassStage.vertexShaderFileName = std::string("DepthNormalPrepass/DepthNormalPrepass.vert");
+    depthPrePassStage.rboType = RBO::RBO_RGBA;
+    depthPrePassStage.isPostProcess = false;
+    prePass = initStage(&depthPrePassStage);
+    /*short path*/
 
-    pp_stage_ssao_blur_hor.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
-                                                          "PostProcessing/Bloor/GaussHorizontal.frag"),\
-                                              rtSSAOHorBlurResult,rtSSAOVertBlurResult));
-    pp_stage_ssao_blur_vert.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", \
-                                                            "PostProcessing/Bloor/GaussVertical.frag"),\
-                                                rtSSAOVertBlurResult,rtSSAOHorBlurResult));
+    rtPrepass = lookupStageRBO(depthPrePassStage.stageName);
+        //pp_stage_hdr_tonemap = new SPostProcess(pp_prog_hdr_tonemap,rtSCREEN,rtHDRVertBlurResult,rtHDRScene,rtHDRLumKey,rtSSAOVertBlurResult);
+    RenderPipelineStageConfig tonemapStage;
+    tonemapStage.stageName = std::string("Tonemap");
+    tonemapStage.bufferSize = RectSizeInt(h,w);
+    tonemapStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    tonemapStage.fragmentShaderFileName= std::string("PostProcessing/Tonemap/Filmic.frag");
+    tonemapStage.ppFeedStage1 = std::string("vertBlurHDR");
+    tonemapStage.ppFeedStage2 = std::string("Main");
+    tonemapStage.ppFeedStage3 = std::string("lumkey");
+    tonemapStage.ppFeedStage4 = std::string("ssaoVertBlur");
+    tonemapStage.isPostProcess = true;
+    tonemapStage.rboType = RBO::RBO_SCREEN;
+    mainRenderTonemapPass =initStage(&tonemapStage);
+    /*short path*/
+    pp_prog_hdr_tonemap = lookupStageShader(tonemapStage.stageName);
+    rtSCREEN = lookupStageRBO(tonemapStage.stageName);
 
-    pp_stage_hdr_bloom.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert",\
-                                                       "PostProcessing/Bloom/Clamp.frag" ),\
-                                                rtHDRBloomResult,rtHDRScene,rtHDRLumKey));
-    pp_stage_hdr_blur_hor.reset(new SPostProcess(pp_prog_hdr_blur_kawase.get(), rtHDRHorBlurResult ,rtHDRBloomResult));
-    pp_stage_hdr_blur_vert.reset(new SPostProcess(pp_prog_hdr_blur_kawase.get(), rtHDRVertBlurResult ,rtHDRHorBlurResult));
+
+    /*Main*/
+    RenderPipelineStageConfig mainStage;
+    mainStage.stageName = std::string("Main");
+    mainStage.bufferSize = RectSizeInt(h,w);
+    mainStage.vertexShaderFileName = std::string("Main/Main.vert");
+    mainStage.fragmentShaderFileName= std::string("Main/Main.frag");
+    mainStage.rboType = RBO::RBO_FLOAT;
+    mainStage.isPostProcess = false;
+    mainRenderPass = initStage(&mainStage);
+    rtHDRScene = lookupStageRBO(mainStage.stageName);
+    /*Main MSAA*/
+    RenderPipelineStageConfig mainStageMSAA;
+    mainStageMSAA.stageName = std::string("MainMSAA");
+    mainStageMSAA.bufferSize = RectSizeInt(h,w);
+    mainStageMSAA.vertexShaderFileName = std::string("Main/Main.vert"); // TODO: shortcut? switch !
+    mainStageMSAA.fragmentShaderFileName= std::string("Main/Main.frag");
+    mainStageMSAA.rboType = RBO::RBO_MSAA;
+    mainStageMSAA.isPostProcess = false;
+    mainRenderPassMSAA = initStage(&mainStageMSAA);
+    rtHDRScene_MSAA = lookupStageRBO(mainStageMSAA.stageName);
+
+    RenderPipelineStageConfig bloomStage ;
+    bloomStage.stageName = std::string("Bloom");
+    bloomStage.bufferSize = RectSizeInt(h/2,w/2);
+    bloomStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    bloomStage.fragmentShaderFileName= std::string("PostProcessing/Bloom/Clamp.frag" );
+    bloomStage.rboType = RBO::RBO_FLOAT_RED;
+    bloomStage.isPostProcess = false;
+    initStage(&bloomStage);
+    rtHDRBloomResult = lookupStageRBO(bloomStage.stageName);
+    SShader * bloomShader = lookupStageShader(bloomStage.stageName);
+
+    RenderPipelineStageConfig horBlurStage ;
+    horBlurStage.stageName = std::string("horBlur");
+    horBlurStage.bufferSize = RectSizeInt(h/4,w/4);
+    horBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    horBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/GaussHorizontalFixedTap16.frag" );
+    horBlurStage.rboType = RBO::RBO_FLOAT_RED;
+    horBlurStage.isPostProcess = false;
+    initStage(&horBlurStage);
+    rtHDRHorBlurResult = lookupStageRBO(horBlurStage.stageName);
+    SShader * horBlurShader = lookupStageShader(horBlurStage.stageName);
+
+    RenderPipelineStageConfig vertBlurStage ;
+    vertBlurStage.stageName = std::string("vertBlurHDR");
+    vertBlurStage.bufferSize = RectSizeInt(h/4,w/4);
+    vertBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    vertBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/GaussVerticalFixedTap16.frag");
+    vertBlurStage.rboType = RBO::RBO_FLOAT_RED;
+    vertBlurStage.isPostProcess = false;
+    initStage(&vertBlurStage);
+    rtHDRVertBlurResult = lookupStageRBO(vertBlurStage.stageName);
+    SShader * vertBlurShader = lookupStageShader(vertBlurStage.stageName);
+
+
+    RenderPipelineStageConfig vertSSAOBlurStage ;
+    vertSSAOBlurStage.stageName = std::string("ssaoVertBlur");
+    vertSSAOBlurStage.bufferSize = RectSizeInt(h/2,w/2);
+    vertSSAOBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    vertSSAOBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/Kawase.frag");
+    vertSSAOBlurStage.rboType = RBO::RBO_RED;
+    vertSSAOBlurStage.isPostProcess = false;
+    initStage(&vertSSAOBlurStage);
+    rtSSAOVertBlurResult = lookupStageRBO(vertSSAOBlurStage.stageName);
+    pp_prog_hdr_blur_kawase = lookupStageShader(vertSSAOBlurStage.stageName);
+
+    RenderPipelineStageConfig horSSAOBlurStage ;
+    horSSAOBlurStage.stageName = std::string("ssaoHorBlur");
+    horSSAOBlurStage.bufferSize = RectSizeInt(h/2,w/2);
+    horSSAOBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    horSSAOBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/Kawase.frag");
+    horSSAOBlurStage.rboType = RBO::RBO_RED;
+    horSSAOBlurStage.isPostProcess = false;
+    initStage(&horSSAOBlurStage);
+    rtSSAOHorBlurResult = lookupStageRBO(horSSAOBlurStage.stageName);
+    //pp_prog_hdr_blur_kawase = lookupStageShader(horSSAOBlurStage.stageName);
+
+    RenderPipelineStageConfig volumetricStage ;
+    volumetricStage.stageName = std::string("volumeTest");
+    volumetricStage.bufferSize = RectSizeInt(h,w);
+    volumetricStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    volumetricStage.fragmentShaderFileName= std::string("PostProcessing/Volumetric/Test.frag");
+    volumetricStage.rboType = RBO::RBO_RGBA;
+    volumetricStage.isPostProcess = false;
+    initStage(&volumetricStage);
+    rtVolumetric = lookupStageRBO(volumetricStage.stageName);
+    SShader * volumetricShader = lookupStageShader(volumetricStage.stageName);
+
+    RenderPipelineStageConfig cubemapStage ;
+    cubemapStage.stageName = std::string("cubemap");
+    cubemapStage.bufferSize = RectSizeInt(512,512);
+    cubemapStage.vertexShaderFileName = std::string("Cubemap/cubemap_gen.vert");
+    cubemapStage.fragmentShaderFileName= std::string("Cubemap/cubemap_gen.frag");
+    cubemapStage.geoShaderFileName = std::string("Cubemap/cubemap_gen.geom");
+    cubemapStage.rboType = RBO::RBO_CUBEMAP;
+    cubemapStage.isPostProcess = false;
+    initStage(&cubemapStage);
+    rtCubemap = lookupStageRBO(cubemapStage.stageName);
+    cubemap_prog_generator = lookupStageShader(cubemapStage.stageName);
+
+
+    RenderPipelineStageConfig loglumStage ;
+    loglumStage.stageName = std::string("loglum");
+    loglumStage.bufferSize = RectSizeInt(16,16);
+    loglumStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    loglumStage.fragmentShaderFileName= std::string("PostProcessing/Tonemap/LumLog.frag");
+    loglumStage.rboType = RBO::RBO_FLOAT;
+    loglumStage.isPostProcess = false;
+    initStage(&loglumStage);
+    rtHDRLogLum = lookupStageRBO(loglumStage.stageName);
+    SShader * loglumShader = lookupStageShader(loglumStage.stageName);
+
+    RenderPipelineStageConfig lumkeyStage ;
+    lumkeyStage.stageName = std::string("lumkey");
+    lumkeyStage.bufferSize = RectSizeInt(1,1);
+    lumkeyStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
+    lumkeyStage.fragmentShaderFileName= std::string("PostProcessing/Tonemap/LumKey.frag");
+    lumkeyStage.rboType = RBO::RBO_FLOAT;
+    lumkeyStage.isPostProcess = false;
+    initStage(&lumkeyStage);
+    rtHDRLumKey = lookupStageRBO(lumkeyStage.stageName);
+    SShader * lumkeyShader = lookupStageShader(lumkeyStage.stageName);
+
+    renderPipelineLink();
+
+    pp_stage_ssao = new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", "PostProcessing/SSAO/SimpleSSAO.frag"),w/2,h/2,rtPrepass->texIMG(0),rtPrepass->texDEPTH(),texRandom);
+
+    //pp_stage_hdr_tonemap = new SPostProcess(pp_prog_hdr_tonemap,rtSCREEN,rtHDRVertBlurResult,rtHDRScene,rtHDRLumKey,rtSSAOVertBlurResult);
+    pp_stage_hdr_tonemap = mainRenderTonemapPass->postProcess; //shoutcut
+
+    pp_stage_ssao_blur_hor = (new SPostProcess(horBlurShader, rtSSAOHorBlurResult,rtSSAOVertBlurResult));
+
+    pp_stage_ssao_blur_vert = (new SPostProcess(vertBlurShader,rtSSAOVertBlurResult,rtSSAOHorBlurResult));
+
+    pp_stage_hdr_bloom = (new SPostProcess(bloomShader, rtHDRBloomResult,rtHDRScene,rtHDRLumKey));
+
+    pp_stage_hdr_blur_hor = (new SPostProcess(pp_prog_hdr_blur_kawase, rtHDRHorBlurResult ,rtHDRBloomResult));
+
+    pp_stage_hdr_blur_vert = (new SPostProcess(pp_prog_hdr_blur_kawase, rtHDRVertBlurResult ,rtHDRHorBlurResult));
     /*ping pong*/
-    pp_stage_hdr_blur_hor2.reset(new SPostProcess(pp_prog_hdr_blur_kawase.get(),rtHDRHorBlurResult ,rtHDRVertBlurResult));
-    pp_stage_hdr_blur_vert2.reset(new SPostProcess(pp_prog_hdr_blur_kawase.get(),rtHDRVertBlurResult,rtHDRHorBlurResult));
+    pp_stage_hdr_blur_hor2 = (new SPostProcess(pp_prog_hdr_blur_kawase,rtHDRHorBlurResult ,rtHDRVertBlurResult));
 
-    pp_stage_hdr_lum_log.reset(new SPostProcess(new SShader ("PostProcessing/PostProccessQuard.vert",\
-                                                         "PostProcessing/Tonemap/LumLog.frag")
-                                            ,rtHDRLogLum,rtHDRScene));
+    pp_stage_hdr_blur_vert2 = (new SPostProcess(pp_prog_hdr_blur_kawase,rtHDRVertBlurResult,rtHDRHorBlurResult));
 
-    pp_stage_hdr_lum_key.reset(new SPostProcess(new SShader ("PostProcessing/PostProccessQuard.vert",\
-                                                        "PostProcessing/Tonemap/LumKey.frag")
-                                          ,rtHDRLumKey,rtHDRLogLum,rtHDRLumKey));
+    pp_stage_hdr_lum_log = (new SPostProcess(loglumShader ,rtHDRLogLum,rtHDRScene));
 
-    /*final tonemap*/
-    pp_stage_hdr_tonemap.reset(new SPostProcess(pp_prog_hdr_tonemap.get(),rtSCREEN,rtHDRVertBlurResult,rtHDRScene,rtHDRLumKey,rtSSAOVertBlurResult));
+    pp_stage_hdr_lum_key = (new SPostProcess(lumkeyShader ,rtHDRLumKey,rtHDRLogLum,rtHDRLumKey));
 
     /* img depth | shadow depth | shadow world pos*/
-    pp_stage_volumetric.reset(new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", \
-                                                        "PostProcessing/Volumetric/Test.frag") \
-                                            ,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(2)));
+    pp_stage_volumetric = (new SPostProcess(volumetricShader ,w,h,rtHDRScene->texDEPTH(),rtShadowMap->texDEPTH(),rtShadowMap->texIMG(2)));
 
-    /*main prog*/
-    main_pass_shader.reset(new SShader("Main/Main.vert","Main/Main.frag"));
+    shaderViewAsIs = new SShader("PostProcessing/PostProccessQuard.vert","PostProcessing/View/AsIs.frag");
 
-    prepass_prog.reset(new SShader("DepthNormalPrepass/DepthNormalPrepass.vert","DepthNormalPrepass/DepthNormalPrepass.frag"));
-
-    cam_prog.reset(new SShader("Shadow/Cascade.vert","Shadow/Cascade.frag","Shadow/Cascade.geom"));
-
-
-    cubemap_prog_generator.reset(new SShader("Cubemap/cubemap_gen.vert","Cubemap/cubemap_gen.frag","Cubemap/cubemap_gen.geom"));
-
-    shaderViewAsIs.reset(new SShader("PostProcessing/PostProccessQuard.vert","PostProcessing/View/AsIs.frag"));
-
-    postProcessDebugOutput.reset(new SPostProcess(shaderViewAsIs.get(),w,h));
-
+    postProcessDebugOutput = (new SPostProcess(shaderViewAsIs,w,h));
 
     rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
+
     rtPrepass->texIMG(0)->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
 
 
     dbg_ui.Init();
 
     UpdateCfgLabel();
+
+
 
 }
 
@@ -146,9 +325,10 @@ int SScene::Reshape(int w, int h) {
 
 int SScene::AddObjectToRender(std::shared_ptr<SObjModel> obj)
 {
-    obj->ConfigureProgram(*main_pass_shader);
-    obj->ConfigureProgram( *(cam_prog));
-    obj->ConfigureProgram( *(cubemap_prog_generator));
+    obj->ConfigureProgram(lookupStageShader("Main"));
+    obj->ConfigureProgram(lookupStageShader("MainMSAA"));
+    obj->ConfigureProgram(lookupStageShader("Shadowmap"));
+    obj->ConfigureProgram(cubemap_prog_generator);
     d_render_list.push_back(obj);
     return 0;
 
@@ -296,7 +476,7 @@ SMat4x4 LookAtMatrix(const SVec4 &forward, const SVec4 &up ) {
 
 }
 int SScene::UpdateScene(float dt) {
-    main_pass_shader->Bind();
+    //this->mainRenderPass->Bind();
     /*shadowmap*/
     SMat4x4 Bias = SMat4x4( 0.5,0.0,0.0,0.0,
                             0.0,0.5,0.0,0.0,
@@ -368,13 +548,17 @@ int SScene::UpdateScene(float dt) {
     d_debugDrawMgr.Update();
 
     */
-
-    main_pass_shader->SetUniform("shadowMVPB0",Bias*d_shadowmap_cam[0].getViewProjectMatrix());
-    main_pass_shader->SetUniform("shadowMVPB1",Bias*d_shadowmap_cam[1].getViewProjectMatrix());
-    main_pass_shader->SetUniform("shadowMVPB2",Bias*d_shadowmap_cam[2].getViewProjectMatrix());
-    main_pass_shader->SetUniform("shadowMVPB3",Bias*d_shadowmap_cam[3].getViewProjectMatrix());
+    SShader * mp;
+    if (this->d_toggle_MSAA)
+        mp = this->mainRenderPassMSAA->stageShader;
+    else
+        mp = this->mainRenderPass->stageShader;
+    mp->SetUniform("shadowMVPB0",Bias*d_shadowmap_cam[0].getViewProjectMatrix());
+    mp->SetUniform("shadowMVPB1",Bias*d_shadowmap_cam[1].getViewProjectMatrix());
+    mp->SetUniform("shadowMVPB2",Bias*d_shadowmap_cam[2].getViewProjectMatrix());
+    mp->SetUniform("shadowMVPB3",Bias*d_shadowmap_cam[3].getViewProjectMatrix());
     /*Set primary shader direction*/
-     main_pass_shader->SetUniform("sunLightDirectionVector",w_sky->GetSunDirection());
+     mp->SetUniform("sunLightDirectionVector",w_sky->GetSunDirection());
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
 
@@ -390,7 +574,7 @@ int SScene::UpdateScene(float dt) {
 
 }
 
-int SScene::debugSetFinalRenderOutput(std::shared_ptr<RBO> r)
+int SScene::debugSetFinalRenderOutput(RBO * r)
 {
     debugFinalRenderOutput = r;
     return 0;
@@ -418,11 +602,12 @@ int inline SScene::RenderShadowMap(const RBO& v) {
     v.Bind(true);
     //incapsulation fail :(
     //todo: incapsulate uniform values to camera!
+    SShader * cam_prog = shadowMapPass->stageShader;
     cam_prog->SetUniform("MVP0",d_shadowmap_cam[0].getProjMatrix()*d_shadowmap_cam[0].getViewMatrix());
     cam_prog->SetUniform("MVP1",d_shadowmap_cam[1].getProjMatrix()*d_shadowmap_cam[1].getViewMatrix());
     cam_prog->SetUniform("MVP2",d_shadowmap_cam[2].getProjMatrix()*d_shadowmap_cam[2].getViewMatrix());
     cam_prog->SetUniform("MVP3",d_shadowmap_cam[3].getProjMatrix()*d_shadowmap_cam[3].getViewMatrix());
-    RenderContext r_ctx(cam_prog.get());
+    RenderContext r_ctx(cam_prog);
     for (auto& r : d_render_list ) {
         r->Render(r_ctx);
     }
@@ -442,7 +627,7 @@ int SScene::RenderCubemap()
     rtCubemap->Bind();
     SMat4x4 pos = SMat4x4().Move(0,-500.0,0.0);
     SMat4x4 cube_projection = SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0));
-    RenderContext r_ctx(cubemap_prog_generator.get() ,pos,cube_projection);
+    RenderContext r_ctx(cubemap_prog_generator,pos,cube_projection);
 
     /*Sky support*/
     RenderContext r_ctx_sky(w_sky->GetSkyCubemapShader() ,pos,cube_projection);
@@ -459,7 +644,7 @@ int SScene::RenderCubemap()
     rtCubemap->texIMG(0)->Bind(1);
     cs.SetUniform("srcCube",1);
     cs.Use();
-    rtConvoledCubemap->BindImage(2);
+    texConvoledCubemap->BindImage(2);
     cs.SetUniform("dstSHBands",2);
 
     cs.SetUniform("dstSamplesTotal",100*100);
@@ -470,11 +655,11 @@ int SScene::RenderCubemap()
 
 }
 
-int SScene::RenderPrepass(const RBO &v)
+int SScene::RenderPrepass(const RenderPipelineStageRuntime &runtime)
 {
-    v.Bind(true);
+    runtime.stageRBO->Bind(true);
     /*submit geometry for prepass*/
-    RenderContext r_ctx_prepass(prepass_prog.get() ,cam.getViewMatrix(),cam.getProjMatrix());
+    RenderContext r_ctx_prepass(runtime.stageShader,cam.getViewMatrix(),cam.getProjMatrix());
     for (auto& r : d_render_list ) {
         r->Render(r_ctx_prepass);
     }
@@ -485,31 +670,31 @@ int SScene::BlurKawase()
 {
     float factor = d_cfg[6];
     int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("blurSize");
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)0.0);
-    pp_stage_hdr_blur_hor->DrawRBO(false);
     pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*1.0));
+    pp_stage_hdr_blur_hor->DrawRBO(false);
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*2.0));
     pp_stage_hdr_blur_vert->DrawRBO(false);
 
     /*ping pong 1*/
     pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*2.0));
     pp_stage_hdr_blur_hor2->DrawRBO(false);
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*2.0));
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*3.0));
     pp_stage_hdr_blur_vert2->DrawRBO(false);
     /*ping pong 2*/
     pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*3.0));
     pp_stage_hdr_blur_hor2->DrawRBO(false);
-    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*3.0));
+    pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*4.0));
     pp_stage_hdr_blur_vert2->DrawRBO(false);
     return 0;
 }
-int inline SScene::RenderDirect(const RBO& v) {
-    v.Bind(true);    
-        RenderContext r_ctx(main_pass_shader.get() ,cam.getViewMatrix(), cam.getProjMatrix() ,
+int inline SScene::RenderDirect(const RenderPipelineStageRuntime &runtime) {
+    runtime.stageRBO->Bind(true);
+        RenderContext r_ctx(runtime.stageShader ,cam.getViewMatrix(), cam.getProjMatrix() ,
                             rtShadowMap->texDEPTH(),
                             rtShadowMap->texIMG(1),
                             rtCubemap->texIMG(0),
                             rtShadowMap->texIMG(0),
-                            rtConvoledCubemap,
+                            texConvoledCubemap,
                             texRandom);
         for (auto& r : d_render_list ) {
             r->Render(r_ctx);
@@ -539,19 +724,19 @@ int SScene::Render() {
     }
     rtime.Begin();
     if (dbg_ui.d_v_sel_current == DebugUI::V_DIRECT) {        
-        RenderDirect( *rtSCREEN);
+        RenderDirect( *mainRenderTonemapPass);
 
     } else {
         /*On request mode*/
         glCullFace(GL_FRONT);
         RenderShadowMap( *rtShadowMap);
         glCullFace(GL_BACK);
-        RenderPrepass( *rtPrepass);
+        RenderPrepass( *prePass);
         if (d_toggle_MSAA) {
-            RenderDirect( *rtHDRScene_MSAA);
+            RenderDirect( *mainRenderPassMSAA);
             rtHDRScene_MSAA->ResolveMSAA(*rtHDRScene);
         } else {
-            RenderDirect( *rtHDRScene);
+            RenderDirect( *mainRenderPass);
         }
     }
     rtime.End();
@@ -647,7 +832,8 @@ int SScene::UpdateCfgLabel() {
     pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
     pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])));
 
-    main_pass_shader->SetUniform("lightIntensity",d_cfg[14]);
+    //FIXME
+    //main_pass_shader->SetUniform("lightIntensity",d_cfg[14]);
 
     return ESUCCESS;
 }

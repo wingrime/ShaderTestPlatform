@@ -32,7 +32,7 @@ struct SMaterial {
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar(CEREAL_NVP(map_Ka),CEREAL_NVP(albedoTexFileName),CEREAL_NVP(alphaMaskTexFileName),CEREAL_NVP(bumpMapTexFileName));
+        ar(CEREAL_NVP(name_hash),CEREAL_NVP(map_Ka),CEREAL_NVP(albedoTexFileName),CEREAL_NVP(alphaMaskTexFileName),CEREAL_NVP(bumpMapTexFileName));
     }
 };
 

@@ -7,8 +7,9 @@ class RenderPass {
 public:
     /*Render State */
     enum PassDepthMode {
-        NEVER  = 0,
-        LESS_OR_EQUAL = 1
+        LESS_OR_EQUAL = 0,
+        NEVER  = 1
+
         /*add when required*/
     } ;
     enum PassToggle {

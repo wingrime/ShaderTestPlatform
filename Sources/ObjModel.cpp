@@ -24,6 +24,13 @@
 #include "Log.h"
 #include "ObjParser.h"
 #include "ErrorCodes.h"
+
+
+#include <cereal/types/map.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
+
 template <class T>
 inline void hash_combine(std::size_t & seed, const T & v)
 {
@@ -85,22 +92,22 @@ std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
 
 }
 
-int SObjModel::ConfigureProgram(SShader& sprog){
+int SObjModel::ConfigureProgram(SShader* sprog){
     if (!IsReady)
         return EFAIL;
-    sprog.SetUniform("matrixModel",model);
+    sprog->SetUniform("matrixModel",model);
 
-    sprog.SetUniform("samplerAlbedo",0);
-    sprog.SetUniform("samplerNormalMap",1);
-    sprog.SetUniform("samplerAlphaMap",2);
+    sprog->SetUniform("samplerAlbedo",0);
+    sprog->SetUniform("samplerNormalMap",1);
+    sprog->SetUniform("samplerAlphaMap",2);
 
-    sprog.SetUniform("samplerShadowMap",5);
-    sprog.SetUniform("samplerTex1",6);
-    sprog.SetUniform("samplerEnvCubeMap",7);
-    sprog.SetUniform("samplerTex2",8);
-    sprog.SetUniform("samplerEnvSH",9);
-    sprog.SetUniform("samplerRandomNoise",10);
-    sprog.Bind();
+    sprog->SetUniform("samplerShadowMap",5);
+    sprog->SetUniform("samplerTex1",6);
+    sprog->SetUniform("samplerEnvCubeMap",7);
+    sprog->SetUniform("samplerTex2",8);
+    sprog->SetUniform("samplerEnvSH",9);
+    sprog->SetUniform("samplerRandomNoise",10);
+    sprog->Bind();
 
     return 0;
 }
@@ -128,14 +135,26 @@ SObjModel::SObjModel(const std::string&  fname)
     LOGV(string_format("Mesh information: Submesh count:%d, Total mesh triangles:%d", d_sm.size(), total_triangles ));
 
     LOGV("Load materials");
+    std::vector<std::string> mtlrefs = parser.getMTLs();
 
+    if (!mtlrefs.empty())
     {
-        std::vector<std::string> mtlrefs = parser.getMTLs();
-        if (!mtlrefs.empty())
-        {
+        std::string json_fname = std::string(mtlrefs[0]+std::string(".json"));
+
+        //if (CheckFileExists(json_fname)) {
+        if (false) {
+        /* Load */
+            std::ifstream ifs(json_fname);
+            {
+                cereal::JSONInputArchive arch(ifs);
+                arch(d_materials);
+            }
+
+        } else {
             MTLParser mtl_p(mtlrefs[0]);
             d_materials = mtl_p.GetMaterials(); //OMG copy!! FIX ME
-            mtl_p.SaveToJSON((mtlrefs[0])+std::string(".json"));
+            mtl_p.SaveToJSON(json_fname);
+
         }
     }
 

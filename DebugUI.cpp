@@ -38,13 +38,13 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("r_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[2]);
-        sc->main_pass_shader->SetUniform(args[1],val_f);
+        sc->mainRenderPassMSAA->stageShader->SetUniform(args[1],val_f);
 
     }));
     d_console_cmd_handler->AddCommand("r_set_i", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         const std::vector < std::string >& args = *arg_list;
         int val_f = std::stoi(args[2]);
-        sc->main_pass_shader->SetUniform(args[1],val_f);
+        sc->mainRenderPassMSAA->stageShader->SetUniform(args[1],val_f);
 
     }));
        d_console_cmd_handler->AddCommand("sky_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -252,9 +252,10 @@ int DebugUI::InitDebugCommands()
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
         std::shared_ptr<SObjModel> m =  std::shared_ptr<SObjModel>(new SObjModel(args[1]));
-        m->ConfigureProgram( *(sc->main_pass_shader));
-        m->ConfigureProgram( *(sc->cam_prog));
-        m->ConfigureProgram( *(sc->cubemap_prog_generator));\
+        m->ConfigureProgram(sc->lookupStageShader("Main"));
+        m->ConfigureProgram(sc->lookupStageShader("MainMSAA"));
+        m->ConfigureProgram(sc->lookupStageShader("Shadowmap"));
+        m->ConfigureProgram( (sc->cubemap_prog_generator));\
         sc->d_render_list[0] = m;
         sc->regenerateEnvCubeMap();
 
@@ -263,7 +264,6 @@ int DebugUI::InitDebugCommands()
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
         std::shared_ptr<SObjModel> m =  std::shared_ptr<SObjModel>(new SObjModel(args[1]));
-        m->ConfigureProgram( *(sc->main_pass_shader));
 
         sc->AddObjectToRender(m);
         sc->regenerateEnvCubeMap();
@@ -303,6 +303,11 @@ int DebugUI::downViewItem() {
 
 int DebugUI::DrawGUI()
 {
+    SShader *mp;
+    if (sc->d_toggle_MSAA)
+        mp = sc->mainRenderPassMSAA->stageShader;
+    else
+         mp = sc->mainRenderPass->stageShader;
     /*imgui new debug interface */
     bool test;
     static bool config_wnd = true;
@@ -431,22 +436,22 @@ int DebugUI::DrawGUI()
     {
         ImGui::Text("Bias");
         if (ImGui::SliderFloat("Bias", &shadowBias, 0.0f,25.0f)) {
-            sc->main_pass_shader->SetUniform("shadowEps", 0.0001f*shadowBias);
+            mp->SetUniform("shadowEps", 0.0001f*shadowBias);
         }
         if (ImGui::SliderFloat("Penumbra", &shadowPenumbra, 0.0f,2200.0f)) {
-            sc->main_pass_shader->SetUniform("shadowPenumbra", shadowPenumbra);
+           mp->SetUniform("shadowPenumbra", shadowPenumbra);
         }
         if (ImGui::SliderFloat("shadowEpsMult", &shadowEpsMult,0.0f,25.0f)) {
-            sc->main_pass_shader->SetUniform("shadowEpsMult", 0.0001f*shadowEpsMult);
+            mp->SetUniform("shadowEpsMult", 0.0001f*shadowEpsMult);
         }
         if (ImGui::Button("Reset Shadows"))
         {
             shadowBias = 1.0;
             shadowPenumbra = 1500.0;
             shadowEpsMult = 1.0;
-            sc->main_pass_shader->SetUniform("shadowEps",0.0001f*shadowBias);
-            sc->main_pass_shader->SetUniform("shadowEpsMult",0.0001f*shadowEpsMult);
-            sc->main_pass_shader->SetUniform("shadowPenumbra",shadowPenumbra);
+            mp->SetUniform("shadowEps",0.0001f*shadowBias);
+            mp->SetUniform("shadowEpsMult",0.0001f*shadowEpsMult);
+            mp->SetUniform("shadowPenumbra",shadowPenumbra);
         }
     }
     static float WeatherLocalTime = 1.0;
@@ -485,16 +490,16 @@ int DebugUI::DrawGUI()
 
     if (ImGui::CollapsingHeader("Lighting")) {
         if (ImGui::SliderFloat("shIntensity", &shIntensity, 0.0f, 20.2f)) {
-            sc->main_pass_shader->SetUniform("shIntensity",shIntensity);
+            mp->SetUniform("shIntensity",shIntensity);
         }
         if (ImGui::SliderFloat("materialBRDFAlpha", &materialBRDFAlpha, 0.0f, 1.0f)) {
-            sc->main_pass_shader->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
+            mp->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
         }
         if (ImGui::SliderFloat("materialBRDFressnel", &materialBRDFressnel, 0.0f, 1.0f)) {
-            sc->main_pass_shader->SetUniform("materialBRDFressnel",materialBRDFressnel);
+            mp->SetUniform("materialBRDFressnel",materialBRDFressnel);
         }
         if (ImGui::SliderFloat("lightIntensity", &lightIntensity, 0.0f, 100.0f)) {
-            sc->main_pass_shader->SetUniform("lightIntensity",lightIntensity);
+            mp->SetUniform("lightIntensity",lightIntensity);
         }
 
 
@@ -504,10 +509,10 @@ int DebugUI::DrawGUI()
             materialBRDFAlpha = 0.4;
             materialBRDFressnel = 0.04;
             lightIntensity = 1.0;
-            sc->main_pass_shader->SetUniform("shIntensity",shIntensity);
-            sc->main_pass_shader->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
-            sc->main_pass_shader->SetUniform("materialBRDFressnel",materialBRDFressnel);
-            sc->main_pass_shader->SetUniform("lightIntensity",lightIntensity);
+            mp->SetUniform("shIntensity",shIntensity);
+            mp->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
+            mp->SetUniform("materialBRDFressnel",materialBRDFressnel);
+            mp->SetUniform("lightIntensity",lightIntensity);
 
 
          }

@@ -46,7 +46,7 @@ class SObjModel {
     public: 
         SObjModel(const std::string& fname);
         void Render(RenderContext& r);
-        int ConfigureProgram(SShader& sprog);
+        int ConfigureProgram(SShader *sprog);
 
         ~SObjModel();
 

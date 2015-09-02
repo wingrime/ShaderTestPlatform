@@ -16,6 +16,9 @@ class RenderContext {
         RenderContext(SShader* _s)
             :shader(_s)
         {
+            for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                d_RBOTexture[i] = 0;
+            }
             initUniforms();
         }
         RenderContext(SShader* _s, const SMat4x4& _V, const SMat4x4 &_P)
@@ -23,37 +26,49 @@ class RenderContext {
             d_V(_V),
             d_P(_P)
          {
+            for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                d_RBOTexture[i] = 0;
+            }
             initUniforms();
         }
         RenderContext(SShader* s,const SMat4x4& _V, const SMat4x4& _P,
-                      std::shared_ptr<SGenericTexture> tex0)
+                      SGenericTexture* tex0)
             :shader(s),
             d_V(_V),
             d_P(_P)
         {
+            for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                d_RBOTexture[i] = 0;
+            }
             d_RBOTexture[0] = tex0;
             initUniforms();
         }
         RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                             std::shared_ptr<SGenericTexture> tex0,
-                             std::shared_ptr<SGenericTexture> tex1)
+                             SGenericTexture* tex0,
+                             SGenericTexture* tex1)
                      :shader(s),
                      d_V(_V),
                      d_P(_P)
                  {
+                    for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                         d_RBOTexture[i] = 0;
+                        }
                      d_RBOTexture[0] = tex0;
                      d_RBOTexture[1] = tex1;
                      initUniforms();
 
         }
         RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                             std::shared_ptr<SGenericTexture> tex0,
-                             std::shared_ptr<SGenericTexture> tex1,
-                             std::shared_ptr<SGenericTexture> tex2)
+                             SGenericTexture* tex0,
+                             SGenericTexture* tex1,
+                             SGenericTexture* tex2)
                      :shader(s),
                      d_V(_V),
                      d_P(_P)
                  {
+            for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                d_RBOTexture[i] = 0;
+            }
                      d_RBOTexture[0] = tex0;
                      d_RBOTexture[1] = tex1;
                      d_RBOTexture[2] = tex2;
@@ -61,14 +76,17 @@ class RenderContext {
 
         }
         RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                    std::shared_ptr<SGenericTexture> tex0,
-                    std::shared_ptr<SGenericTexture> tex1,
-                    std::shared_ptr<SGenericTexture> tex2,
-                    std::shared_ptr<SGenericTexture> tex3)
+                    SGenericTexture* tex0,
+                    SGenericTexture* tex1,
+                    SGenericTexture* tex2,
+                    SGenericTexture* tex3)
             :shader(s),
             d_V(_V),
             d_P(_P)
         {
+            for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                d_RBOTexture[i] = 0;
+            }
             d_RBOTexture[0] = tex0;
             d_RBOTexture[1] = tex1;
             d_RBOTexture[2] = tex2;
@@ -77,15 +95,18 @@ class RenderContext {
 
         }
         RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                    std::shared_ptr<SGenericTexture> tex0,
-                    std::shared_ptr<SGenericTexture> tex1,
-                    std::shared_ptr<SGenericTexture> tex2,
-                    std::shared_ptr<SGenericTexture> tex3,
-                    std::shared_ptr<SGenericTexture> tex4)
+                    SGenericTexture* tex0,
+                    SGenericTexture* tex1,
+                    SGenericTexture* tex2,
+                    SGenericTexture* tex3,
+                    SGenericTexture* tex4)
             :shader(s),
             d_V(_V),
             d_P(_P)
         {
+            for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                d_RBOTexture[i] = 0;
+            }
             d_RBOTexture[0] = tex0;
             d_RBOTexture[1] = tex1;
             d_RBOTexture[2] = tex2;
@@ -95,16 +116,19 @@ class RenderContext {
 
         }
         RenderContext(SShader* s, const SMat4x4& _V, const SMat4x4& _P,
-                    std::shared_ptr<SGenericTexture> tex0,
-                    std::shared_ptr<SGenericTexture> tex1,
-                    std::shared_ptr<SGenericTexture> tex2,
-                    std::shared_ptr<SGenericTexture> tex3,
-                    std::shared_ptr<SGenericTexture> tex4,
-                    std::shared_ptr<SGenericTexture> tex5)
+                    SGenericTexture* tex0,
+                    SGenericTexture* tex1,
+                    SGenericTexture* tex2,
+                    SGenericTexture* tex3,
+                    SGenericTexture* tex4,
+                    SGenericTexture* tex5)
             :shader(s),
             d_V(_V),
             d_P(_P)
         {
+            for (int i =0 ; i< MAX_RBO_TEXTURES;i++) {
+                d_RBOTexture[i] = 0;
+            }
             d_RBOTexture[0] = tex0;
             d_RBOTexture[1] = tex1;
             d_RBOTexture[2] = tex2;
@@ -119,7 +143,7 @@ class RenderContext {
         const SMat4x4 d_V;
         const SMat4x4 d_P;
         static constexpr int MAX_RBO_TEXTURES = 6;
-        std::shared_ptr<SGenericTexture> d_RBOTexture[MAX_RBO_TEXTURES];
+        SGenericTexture* d_RBOTexture[MAX_RBO_TEXTURES];
         /**/
         inline int initUniforms() {
             d_viewMatrixLoc = shader->getUniformLocation("matrixView");
