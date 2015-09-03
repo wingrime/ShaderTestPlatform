@@ -249,7 +249,6 @@ CObjMeshParser::CObjMeshParser(const std::string& fname)
     if (std::string::npos != last_fslash_i ) {
         dir = fname.substr(0,last_fslash_i) + '\\';
     }
-    std::cout << "model dir:"<< dir << std::endl;
     if (tst) {
 
         for( std::string line; getline( tst, line ); ) {
