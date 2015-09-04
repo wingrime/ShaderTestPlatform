@@ -93,8 +93,6 @@ int UIConsole::HandleCommand(const std::string &cmd)
         Msg("Invalid cmd handler\n");
         return EFAIL;
     }
-
-
     d_cmd_handler->HandleCommand(cmd);
     Msg(">");
     return 0;

@@ -7,10 +7,10 @@ class DebugUI {
 public:
 
         RectSizeInt v;
-
-        UIConsole *con;
-        UIConsoleErrorHandler *err_con;
         ConsoleCommandHandler *d_console_cmd_handler;
+        UIConsoleErrorHandler *err_con;
+        UIConsole *con;
+
 
     DebugUI(SScene *_s, RectSizeInt &v);
     int Draw();

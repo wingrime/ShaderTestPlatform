@@ -8,9 +8,10 @@
 #include "MAssert.h"
 DebugUI::DebugUI(SScene *_s, RectSizeInt &_v)
     :v(_v)
-    ,con(new UIConsole(v,  d_console_cmd_handler ))
-    ,err_con(new UIConsoleErrorHandler(con))
     ,d_console_cmd_handler(new ConsoleCommandHandler())
+    ,err_con(new UIConsoleErrorHandler(con))
+    ,con(new UIConsole(v,  d_console_cmd_handler ))
+
     ,fps_label(new UILabel(v,0.85,0.1))
     ,v_sel_label(new UILabel(v,0.75, 0.6))
     ,sc(_s)

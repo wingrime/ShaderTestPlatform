@@ -42,7 +42,7 @@ private:
     std::string d_console_input;
     std::string d_output_cache;
 
-    std::shared_ptr<AbstractCommandHandler> d_cmd_handler;
+    AbstractCommandHandler* d_cmd_handler;
 };
 
 
