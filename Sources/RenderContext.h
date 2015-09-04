@@ -5,6 +5,7 @@
 #include "GenericTexture.h"
 #include "r_projmat.h"
 #include "r_camera.h"
+#include "ErrorCodes.h"
 /*
 Static object for storage current render context set:
 Current Shader,
@@ -151,6 +152,7 @@ class RenderContext {
             d_modelMatrixLoc = shader->getUniformLocation("matrixModel");
             d_uniformMVP = shader->getUniformLocation("MVP");
             d_uniformMV = shader->getUniformLocation("MV");
+            return ESUCCESS;
         }
         /*located uniform storage*/
         int d_viewMatrixLoc;

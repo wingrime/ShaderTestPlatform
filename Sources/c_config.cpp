@@ -15,7 +15,7 @@ Config::Config(const std::string& fname) {
         return;
         }
     IsReady = true;
-};
+}
 
 Config::~Config() {
     delete raw;

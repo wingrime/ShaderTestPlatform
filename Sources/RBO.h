@@ -71,10 +71,11 @@ public:
     bool IsReady = false;
     RBOType getType();
 private:
+    std::string d_name;
+    RBOType d_type;
     static constexpr int MAX_COLOR_ATTACHMENTS = 3;
     int d_w;
     int d_h;
-    std::string d_name;
     GLuint depthrenderbuffer = 0;
     GLuint d_fbo = 0;
 
@@ -86,7 +87,6 @@ private:
 
     SRBOTexture * d_texDEPTH;
 
-    RBOType d_type;
 
     void initDepthRenderBuffer() ;
 

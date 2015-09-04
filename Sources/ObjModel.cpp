@@ -247,7 +247,7 @@ void SObjModel::LoadTextures() {
 
 void SObjModel::BindVAOs() {
     /* load descriptor*/
-    unsigned int temp_vao;
+    //unsigned int temp_vao;
     unsigned int temp_vbo;
     unsigned int temp_ibo;
     /*

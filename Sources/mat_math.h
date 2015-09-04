@@ -230,7 +230,7 @@ struct Point2d  {
 };
 /* intger rectangle size in D2*/
 struct RectSizeInt  {
-    RectSizeInt(int _h,int _w) :h(_h),w(_h) {}
+    RectSizeInt(int _h,int _w) :h(_h),w(_w) {}
     RectSizeInt () :h(0.0),w(0.0) {}
     int h,w;
 };

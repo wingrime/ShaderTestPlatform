@@ -7,9 +7,10 @@ class DebugUI {
 public:
 
         RectSizeInt v;
-        std::shared_ptr<ConsoleCommandHandler> d_console_cmd_handler;
-        UIConsole *con;
 
+        UIConsole *con;
+        UIConsoleErrorHandler *err_con;
+        ConsoleCommandHandler *d_console_cmd_handler;
 
     DebugUI(SScene *_s, RectSizeInt &v);
     int Draw();
@@ -19,12 +20,12 @@ public:
     bool d_toggle_cfg_view = true;
 
 
-    UIConsoleErrorHandler *err_con;
+
 
     /*on screen UI shold be rid from there*/
     int UpdateCfgLabel();
     int UpdateViewSelLabel();
-    inline int Init() { UpdateViewSelLabel();InitDebugCommands();}
+    inline int Init() { UpdateViewSelLabel();InitDebugCommands();return ESUCCESS;}
     int upViewItem();
     int downViewItem();
 

@@ -19,14 +19,29 @@ SRBOTexture::RTType SRBOTexture::getRelatedDepthType(SRBOTexture::RTType t)
     switch (t) {
         case SRBOTexture::RT_SCREEN:
             return RT_SCREEN_DEPTH;
+        case SRBOTexture::RT_NONE:
+            return RT_NONE;
+        case SRBOTexture::RT_TEXTURE_DEPTH:
+            MASSERT(true);/* nonsence*/
+            return RT_TEXTURE_DEPTH;
+        case SRBOTexture::RT_SCREEN_DEPTH:
+            MASSERT(true);/* nonsence*/
+            return RT_SCREEN_DEPTH;
+        case SRBOTexture::RT_TEXTURE_DEPTH_MSAA:
+        case SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP:
+            MASSERT(true);/* nonsence*/
+            return RT_TEXTURE_DEPTH;
+        case SRBOTexture::RT_TEXTURE_DEPTH_ARRAY:
+            MASSERT(true);/* nonsence*/
+            return RT_TEXTURE_DEPTH_ARRAY;
+
         case SRBOTexture::RT_TEXTURE_CUBEMAP:
             return RT_TEXTURE_DEPTH_CUBEMAP;
         case SRBOTexture::RT_TEXTURE_MSAA:
             return RT_TEXTURE_DEPTH_MSAA;
         case SRBOTexture::RT_TEXTURE_RED:
-            return RT_TEXTURE_DEPTH;
         case SRBOTexture::RT_TEXTURE_FLOAT:
-            return RT_TEXTURE_DEPTH;
+        case SRBOTexture::RT_TEXTURE_FLOAT_RED:
         case SRBOTexture::RT_TEXTURE_RGBA:
             return RT_TEXTURE_DEPTH;
     }
@@ -48,6 +63,9 @@ bool SRBOTexture::isDepthType(SRBOTexture::RTType t)
 unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
 {
     switch (t) {
+        case SRBOTexture::RT_NONE:
+            MASSERT(true);/*you do something wrong*/
+            return 0;
         case SRBOTexture::RT_SCREEN:
             return GL_RGBA8;
         case SRBOTexture::RT_TEXTURE_CUBEMAP:
@@ -62,6 +80,8 @@ unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
             return GL_RGBA8;
         case SRBOTexture::RT_TEXTURE_FLOAT_RED:
             return GL_R32F;
+        case SRBOTexture::RT_SCREEN_DEPTH: /*??*/
+            return GL_DEPTH_COMPONENT32;
         case SRBOTexture::RT_TEXTURE_DEPTH:
             return GL_DEPTH_COMPONENT32;
         case SRBOTexture::RT_TEXTURE_DEPTH_CUBEMAP:
@@ -72,6 +92,7 @@ unsigned int SRBOTexture::getRelatedGLType(SRBOTexture::RTType t)
             return GL_DEPTH_COMPONENT32;
     }
     MASSERT (true) /* Unknown types should halt*/
+    return EFAIL;
 }
 int SRBOTexture::Bind(unsigned int sampler) const {
     if (IsReady) {
@@ -101,7 +122,7 @@ int SRBOTexture::Bind(unsigned int sampler) const {
 int SRBOTexture::BindImage(unsigned int unit)
 {
     glBindImageTexture(unit, d_glTexID, 0,GL_TRUE, 0, GL_READ_WRITE, SRBOTexture::getRelatedGLType(type));
-
+    return ESUCCESS;
 }
 
 int SRBOTexture::setInterpolationMode(SRBOTexture::InterpolationType t)

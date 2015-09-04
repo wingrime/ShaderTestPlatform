@@ -23,16 +23,13 @@ public:
     int LogV(const std::string& s);
     void SetCallback(std::function<void(Log::Verbosity v,const std::string& s)> callback );
 private:
-    Verbosity v;
     std::string log_file;
     std::ofstream d_logfile_stream;
+    Verbosity v;
     std::function<void (Log::Verbosity, const std::string &)> d_callback;
 
 };
-class MainLog :public Singltone<MainLog>  ,public Log{
-public:
-    MainLog() :Log ("Main.log") , Singltone(this) {}
-};
-#define LOGW(a) (MainLog::GetInstance()->LogW(a))
-#define LOGE(a) (MainLog::GetInstance()->LogE(a))
-#define LOGV(a) (MainLog::GetInstance()->LogV(a))
+#define MainLog Singltone<Log>
+#define LOGW(a) (Singltone<Log>::GetInstance()->LogW(a))
+#define LOGE(a) (Singltone<Log>::GetInstance()->LogE(a))
+#define LOGV(a) (Singltone<Log>::GetInstance()->LogV(a))

@@ -20,8 +20,5 @@ public:
 private:
     FileBuffer *raw;
 };
+#define MainConfig Singltone<Config>
 
-class MainConfig :public Singltone<MainConfig>  ,public Config {
-public:
-    MainConfig() :Config("config.json") , Singltone(this){}
-};

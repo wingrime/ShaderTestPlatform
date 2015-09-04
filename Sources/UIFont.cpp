@@ -4,6 +4,7 @@
 #include "mat_math.h"
 #include "r_shader.h"
 #include "Log.h"
+#include "ErrorCodes.h"
 
 UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz) {
 
@@ -105,7 +106,7 @@ int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp
     float y = sy - (y_uv-0.5)*2;
 
     float start_x = x;
-    float start_y = y;
+    //float start_y = y;
     /*should be moved to state*/
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -187,5 +188,6 @@ UIFont *UIFontFactory::Construct( unsigned const int sz) {
 int UIFontFactory::Release(UIFont *fnt)
 {
     delete fnt;
+    return ESUCCESS;
 
 }

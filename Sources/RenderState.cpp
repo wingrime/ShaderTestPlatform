@@ -1,4 +1,5 @@
 #include "RenderState.h"
+#include "ErrorCodes.h"
 RenderPass::RenderPass(PassDepthMode mode, PassToggle test,PassToggle multisample):d_depth_mode(mode),
                                                                                    d_depth_test(test),
                                                                                    d_multisample(multisample) {}
@@ -20,5 +21,5 @@ int  RenderPass::Bind() {
         glEnable( GL_MULTISAMPLE );
     else if (d_multisample == PassToggle::DISABLED )
         glDisable( GL_MULTISAMPLE );
-
+    return ESUCCESS;
 }

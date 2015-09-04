@@ -1,5 +1,6 @@
 #include "DebugDraw.h"
 #include "r_shader.h"
+#include "ErrorCodes.h"
 DebugDraw::DebugDraw()
 {
     d_prog = new  SProg("Debug/Lines.vert","Debug/Lines.frag");
@@ -41,6 +42,7 @@ int DebugDraw::AddLine(const Line &p2)
 int DebugDraw::ClearAll()
 {
     d_lines.clear();
+    return ESUCCESS;
 }
 
 int DebugDraw::AddCross(const Point &p1, float sz)
@@ -51,6 +53,7 @@ int DebugDraw::AddCross(const Point &p1, float sz)
     AddLine(l_x);
     AddLine(l_y);
     AddLine(l_z);
+    return ESUCCESS;
 }
 
 int DebugDraw::Render(const SMat4x4& MVP)
@@ -64,6 +67,7 @@ int DebugDraw::Render(const SMat4x4& MVP)
         glBindVertexArray ( 0 );
 
     }
+    return ESUCCESS;
 }
 
 int DebugDraw::Update()
@@ -80,6 +84,7 @@ int DebugDraw::Update()
         glBufferSubData(GL_ARRAY_BUFFER, 0,d_lines.size()*sizeof(Line), d_lines.data());
         glBindVertexArray ( 0 );
     }
+    return ESUCCESS;
 }
 
 int DebugDraw::AddCameraFrustrum(const SMat4x4 &PV)
@@ -124,15 +129,12 @@ int DebugDraw::AddCameraFrustrum(const SMat4x4 &PV)
     AddLine(Point(f2),Point(b2));
     AddLine(Point(f3),Point(b3));
     AddLine(Point(f4),Point(b4));
+    return ESUCCESS;
 
 }
 
 int DebugDraw::AddAABB(const AABB &a)
 {
-
-    Point min_p = a.min_point;
-    Point max_p = a.max_point;
-
 
     AddLine(a.max_point,Point(a.max_point.x,a.min_point.y,a.max_point.z));
     AddLine(a.max_point,Point(a.max_point.x,a.max_point.y,a.min_point.z));
@@ -153,4 +155,5 @@ int DebugDraw::AddAABB(const AABB &a)
     AddLine(Point(a.min_point.x,a.max_point.y,a.max_point.z),Point(a.min_point.x,a.min_point.y,a.max_point.z));
 
     AddLine(Point(a.max_point.x,a.min_point.y,a.min_point.z),Point(a.max_point.x,a.max_point.y,a.min_point.z));
+    return ESUCCESS;
 }

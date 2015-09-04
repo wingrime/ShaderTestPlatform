@@ -9,7 +9,7 @@
 
 class AbstractCommandHandler {
 public:
-    virtual int HandleCommand(const std::string& cmd){return EFAIL;};
+    virtual int HandleCommand(const std::string& cmd) = 0;
 };
 class BaseCommand
 {

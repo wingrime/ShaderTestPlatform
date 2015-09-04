@@ -44,7 +44,7 @@ public:
 
     SCamera(const SMat4x4& view,const SMat4x4& proj) :proj(proj) ,view(view) {}
     SCamera() :SCamera(SMat4x4(), SMat4x4()) {}
-    SCamera(const SCamera& sc) :view(sc.view), proj(sc.proj) {}
+    SCamera(const SCamera& sc) :proj(sc.proj),view(sc.view) {}
 
 
     inline __attribute__((always_inline)) SMat4x4  getViewMatrix() const {return view;}
@@ -72,9 +72,9 @@ public:
 private:
     SMat4x4 buildViewMatrix();
 
-
-    SMat4x4 view;
     SMat4x4 proj;
+    SMat4x4 view;
+
   
 
 

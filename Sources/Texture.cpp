@@ -8,11 +8,15 @@ unsigned int STexture::resolveGLType(STexture::TextureType t, bool sRGB)
     switch (t) {
         case STexture::TEX_RGB:
             return sRGB?GL_SRGB8:GL_RGB8;
-        //case STextur::TEX_RGBA:
-        //    return sRGB?GL_SRGB8:GL_RGB8;
+        case STexture::TEX_RGBA:
+            return sRGB?GL_SRGB8_ALPHA8:GL_RGBA8;
+        case STexture::TEX_R:
+            MASSERT(true); /* no idea what how it translate*/
+            return EFAIL;
 
     }
     MASSERT (true) /* Unknown types should halt*/
+    return EFAIL;
 }
 
 int STexture::Bind(unsigned int sampler) const {
@@ -53,6 +57,7 @@ int STexture::setInterpolationMode(SGenericTexture::InterpolationType t)
 int STexture::BindImage(unsigned int unit)
 {
     glBindImageTexture(unit, d_glTexID, 0,GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+    return ESUCCESS;
 }
 int STexture::ConfigureTexture(const BorderType t) const {
         if (t == TEX_REPEAT) {

@@ -77,13 +77,14 @@ int SScene::renderPipelineLink()
 
 SScene::SScene(RectSizeInt v)
     :cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
+    ,w_sky(new SWeatherSky())
     //,cam(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1.0f,100.0,-100.0,-100.0))
 
     ,step(0.0f)
     ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
-    ,w_sky(new SWeatherSky())
+
 
     ,dbg_ui(this,v)
     
@@ -325,17 +326,20 @@ int SScene::toggleBrightPass(bool b)
 {
     d_toggle_brightpass = b;
     pp_stage_hdr_tonemap->getShader()->SetUniform("b_brightPass",(int) d_toggle_brightpass);
+    return ESUCCESS;
 }
 
 int SScene::toggleMSAA(bool b)
 {
     d_toggle_MSAA = b;
+    return ESUCCESS;
 }
 
 int SScene::toggleSSAO(bool b)
 {
     d_toggle_ssao = b;
     pp_stage_hdr_tonemap->getShader()->SetUniform("b_SSAO",(int) d_toggle_ssao);
+    return ESUCCESS;
 }
 
 int SScene::regenerateEnvCubeMap()
@@ -465,13 +469,14 @@ SMat4x4 LookAtMatrix(const SVec4 &forward, const SVec4 &up ) {
 int SScene::UpdateScene(float dt) {
     //this->mainRenderPass->Bind();
     /*shadowmap*/
+    UNUSED(dt);
     SMat4x4 Bias = SMat4x4( 0.5,0.0,0.0,0.0,
                             0.0,0.5,0.0,0.0,
                             0.0,0.0,0.5,0.0,
                             0.5,0.5,0.5,1.0).Transpose(); //small todo
 
     /*fit AABB*/
-    float shadowCascadeDiv[] = { 100.0,290.0, 840.0, 2420.0,7000.0};
+    //float shadowCascadeDiv[] = { 100.0,290.0, 840.0, 2420.0,7000.0};
 
     SMat4x4 PV = cam.getViewProjectMatrix();
     std::vector <Point> psrPoints;// = FrustumPoints(PV); - add view-frustum as PSR
@@ -483,7 +488,8 @@ int SScene::UpdateScene(float dt) {
     SVec4 cam_up = SVec4(0.0,1.0,0.0,1.0);
     SVec4 sunDirection = w_sky->GetSunDirection();
     SMat4x4 shadowMapViewMatrix = LookAtMatrix(sunDirection,cam_up); /*new basis*/
-    int min_idx = 0;
+    int min_idx;
+    UNUSED(min_idx);
     int max_idx = 0;
     int i = 0;
     float max_z = std::numeric_limits<float>::min();
@@ -520,21 +526,19 @@ int SScene::UpdateScene(float dt) {
         SMat4x4 shadowPostPerspectiveScale = PSRFocusSMSTransformMatrix(PSRProjectionPointSet(psrPoints,shadowMapPVMatrix));
 
         shadowMapFinalProjectionMatrix[i] = shadowPostPerspectiveScale*shadowMapProjectionMatrix;
-    }
 
-    for (int i = 0; i < 4; i++ ){
         d_shadowmap_cam[i].setViewMatrix(shadowMapViewMatrix*SMat4x4().Move(-pos));
         d_shadowmap_cam[i].setProjMatrix(shadowMapFinalProjectionMatrix[i]);
     }
 
-    /*
+
     d_debugDrawMgr.ClearAll();
     d_debugDrawMgr.AddCross(pos,200);
     d_debugDrawMgr.AddAABB(psrAABB);
     d_debugDrawMgr.AddCameraFrustrum(d_shadowmap_cam[0].getViewProjectMatrix());
     d_debugDrawMgr.Update();
 
-    */
+
     SShader * mp;
     if (this->d_toggle_MSAA)
         mp = this->mainRenderPassMSAA->stageShader;
@@ -570,6 +574,7 @@ int SScene::debugSetFinalRenderOutput(RBO * r)
 int SScene::debugSetDebugRenderOutputFlag(bool flag)
 {
     debugRenderOutputFlag = flag;
+    return ESUCCESS;
 }
 Recorder SScene::getRec() const
 {
@@ -639,6 +644,7 @@ int SScene::RenderCubemap()
 
     cs.Dispatch(100,1 ,1);
     cs.Barrier();
+    return ESUCCESS;
 
 }
 

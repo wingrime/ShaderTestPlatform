@@ -62,8 +62,8 @@ private:
     std::vector<SShader *> d_pipelineShaders;
     std::vector<RenderPipelineStageRuntime* >d_pipelineRuntime;
     std::unordered_map<std::string, int> d_pipelineLookupMap;
-public:
 
+public:
     friend class DebugUI;
     SScene(RectSizeInt v);
     ~SScene();
@@ -75,10 +75,11 @@ public:
 
     int AddObjectToRender(std::shared_ptr <SObjModel> obj);
 
-
-    std::shared_ptr<SWeatherSky> w_sky;
-
     SCamera cam;
+    std::shared_ptr<SWeatherSky> w_sky;
+private:
+    float step;
+public:
     SCamera d_shadowmap_cam[4];
     SPostProcess * pp_stage_ssao;
     SPostProcess * pp_stage_ssao_blur_hor;
@@ -138,7 +139,6 @@ public:
 
 
 private:
-    float step;
     bool d_first_render;
 
     /* prepass prog*/
@@ -202,7 +202,4 @@ public:
     Recorder getRec() const;
     void setRec(const Recorder &value);
 };
-class MainScene :public Singltone<SScene>  ,public SScene{
-public:
-    MainScene(RectSizeInt t) :SScene (t), Singltone(this){}
-};
+#define MainScene Singltone<SScene>

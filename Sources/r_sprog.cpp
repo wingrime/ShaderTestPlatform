@@ -47,6 +47,7 @@ std::list<SShader *> SShader::s_d_shaders_enum = std::list<SShader *> ();
 int SShader::RegisterEnum()
 {
     SShader::s_d_shaders_enum.push_back(this);
+    return ESUCCESS;
 }
 
 

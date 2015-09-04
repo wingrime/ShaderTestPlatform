@@ -43,10 +43,11 @@ public:
 
     int setInterpolationMode(InterpolationType t);
 
+    RTType type;
     RectSizeInt d_s;
 
     bool IsReady = false;
-    RTType type;
+
     /*serialize support */
     friend class cereal::access;
     template <class Archive>

@@ -5,6 +5,7 @@
 #include <memory>
 #include <ostream>
 #include <fstream>
+#include "ErrorCodes.h"
 int SCamera::Reflect() const{
     printf("camera: %f %f %f <_> %f %f %f\n", xPos,yPos,zPos, xRot,yRot,zRot);
     return 0;
@@ -119,17 +120,20 @@ Recorder::Recorder()
 int Recorder::Erase()
 {
     r.clear();
+    return ESUCCESS;
 }
 
 int Recorder::Begin()
 {
     d_recordEnabled = true;
+    return ESUCCESS;
 }
 
 int Recorder::End()
 {
     d_recordEnabled = false;
     d_sampleIterator = r.end();
+    return ESUCCESS;
 }
 
 int Recorder::Add(const SMat4x4 &s)
@@ -137,6 +141,7 @@ int Recorder::Add(const SMat4x4 &s)
     if (d_recordEnabled)
         r.push_back(SMat4x4(s));
     d_sampleIterator = r.end();
+    return ESUCCESS;
 }
 
 bool Recorder::Empty()
@@ -153,11 +158,13 @@ int Recorder::Save(const std::string &fname)
        cereal::JSONOutputArchive archive( os);
        archive( CEREAL_NVP( r));
    }
+    return ESUCCESS;
 }
 
 int Recorder::Rewind()
 {
     d_sampleIterator = r.end();
+    return ESUCCESS;
 }
 
 const SMat4x4 Recorder::Get()

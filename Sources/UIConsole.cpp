@@ -6,7 +6,7 @@ int UIConsole::HandleExitConsole() {
     RebuildOut();
     return 0;
 }
-UIConsole::UIConsole(RectSizeInt &v, std::shared_ptr<AbstractCommandHandler> cmd_h)
+UIConsole::UIConsole(RectSizeInt &v, AbstractCommandHandler *cmd_h)
     :d_cmd_handler(cmd_h)
 {
 

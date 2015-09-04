@@ -51,6 +51,8 @@ SVec4::SVec4(const std::string& str){
     const char *s = str.c_str();
     int c = sscanf(s, " %f,%f,%f,%f ",
             &x,&y,&z,&w);
+    MASSERT(c != 4);
+
     //if (c != 4 )
         // better error handling
         //throw VectorError(std::string("Unable construct vector from string:")+str);
@@ -112,7 +114,7 @@ void SVec4::Abs()
 
 
 SMat4x4::~SMat4x4(){
-};
+}
 
 
 SMat4x4 SMat4x4::operator+(const SMat4x4& i) const {
@@ -197,6 +199,7 @@ SMat4x4::SMat4x4(const std::string &str) {
             &a21,&a22,&a23,&a24,
             &a31,&a32,&a33,&a34,
             &a41,&a42,&a43,&a44);
+    MASSERT(c!=16);
    // if (c != 16 )
    //     throw MatrixError(std::string("Unable construct matrix from string:")+str);
     //better error handing

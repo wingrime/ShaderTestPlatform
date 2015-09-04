@@ -14,7 +14,7 @@ class RBO;
 
 class UIConsole {
 public:
-    UIConsole(RectSizeInt& v, std::shared_ptr<AbstractCommandHandler> cmd_h);
+    UIConsole(RectSizeInt& v, AbstractCommandHandler* cmd_h);
     ~UIConsole();
     /*Draw console*/
     void Draw();

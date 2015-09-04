@@ -1,8 +1,10 @@
 #include "r_cprog.h"
 #include "ErrorCodes.h"
 #include "Log.h"
+#include "MAssert.h"
 
 SSBuffer::SSBuffer(int sz) {
+    UNUSED(sz);/*not impl*/
     glGenBuffers(1, &d_ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER,d_ssbo);
 }
@@ -78,6 +80,7 @@ int SCProg::LookupUniformLocation(const std::string &name) {
 int SCProg::Use()
 {
     glUseProgram      ( d_program );
+    return ESUCCESS;
 }
 int SCProg::Dispatch(int numg_x , int numg_y , int numg_z) {
     glUseProgram(d_program);

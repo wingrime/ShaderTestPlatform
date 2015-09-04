@@ -52,7 +52,7 @@ void display ()
    g_frameNumber ++;
 
     SScene * sc = MainScene::GetInstance();
-    auto start = std::chrono::steady_clock::now();
+    //auto start = std::chrono::steady_clock::now();
     imGuiRender();
     sc->Render();
 
@@ -63,9 +63,6 @@ void display ()
      ///ImGui::End();
     sc->dbg_ui.DrawGUI();
     ImGui::Render();
-
-
-
 
     if (g_scriptCallFrequency) {
         if ((g_frameNumber % g_scriptCallFrequency) == 0)
@@ -93,8 +90,10 @@ void reshape ( int w, int h )
 
 void key ( unsigned char key, int x, int y )
 {
+    UNUSED(x);
+    UNUSED(y);
     SScene * sc = MainScene::GetInstance();
-    static int fullscreen = 0;
+    //static int fullscreen = 0;
     static int console_mode = 0;
     if (console_mode) {
         if (key == 27)
@@ -172,7 +171,10 @@ void mouse_move (  int x , int y) {
     sc->cam.rotEulerX(toRad(y_rm));
 }
 void special(int key, int x, int y){
-    SScene * sc = MainScene::GetInstance();
+    UNUSED(x);
+    UNUSED(y);
+    UNUSED(key);
+    //SScene * sc = MainScene::GetInstance();
 
     //if (key == GLUT_KEY_DOWN) sc->dbg_ui.downCfgItem();
     //else if (key == GLUT_KEY_UP) sc->dbg_ui.upCfgItem();
@@ -223,6 +225,11 @@ void APIENTRY openglCallbackFunction(GLenum source,
                                            const void* userParam){
  
  /* todo find  where it was called */
+    UNUSED(source);
+    UNUSED(type);
+    UNUSED(id);
+    UNUSED(userParam);
+    UNUSED(length);
     static Log gl_log("gl_log.log");
     if (severity  != GL_DEBUG_SEVERITY_NOTIFICATION)
    {
@@ -242,11 +249,11 @@ int initLuaBindings(sel::State& state)
         Env() {}
         /*basic log*/
        // state.OpenLib(
-        int loge(std::string msg) {LOGE(msg);}
-        int logw(std::string msg) {LOGW(msg);}
-        int logv(std::string msg) {LOGV(msg);}
-        int  fwd(double a) {MainScene::GetInstance()->cam.goForward(a);}
-        int setUpdateCallFrequency(int f) {g_scriptCallFrequency = f; }
+        int loge(std::string msg) {LOGE(msg);return 0;}
+        int logw(std::string msg) {LOGW(msg);return 0;}
+        int logv(std::string msg) {LOGV(msg);return 0;}
+        int  fwd(double a) {MainScene::GetInstance()->cam.goForward(a);return 0;}
+        int setUpdateCallFrequency(int f) {g_scriptCallFrequency = f; return 0;}
 
     };
     state["Env"].SetClass<Env>("loge",&Env::loge,
@@ -274,6 +281,7 @@ int initHooks() {
     glutKeyboardFunc(key);
     glutSpecialFunc(special);
     glutPassiveMotionFunc(mouse_move_passive);
+    return 0;
 }
 
 
@@ -281,8 +289,10 @@ int initHooks() {
 int main ( int argc, char * argv [] )
 {
     std::ios::sync_with_stdio(false);
-    MainLog log;
-    MainConfig config;
+    /*init singltones*/
+    MainLog main_log;
+    MainConfig main_config;
+    Config * config = MainConfig::GetInstance();
     Log gl_log("gl_log.log");
 
     LOGV("GIT REVISION:"  GIT_SHA1 );
@@ -290,11 +300,11 @@ int main ( int argc, char * argv [] )
     LoadLibraryA("backtrace.dll");
     LOGV("Backtrace dll loaded");
 
+    int h = config->operator []("launch.h").GetInt();
+    int w = config->operator []("launch.w").GetInt();
 
-    int h = config["launch.h"].GetInt();
-    int w = config["launch.w"].GetInt();
-    int ogl_major = config["launch.ogl_major"].GetInt();
-    int ogl_minor = config["launch.ogl_minor"].GetInt();
+    int ogl_major = config->operator []("launch.ogl_major").GetInt();
+    int ogl_minor = config->operator []("launch.ogl_minor").GetInt();
 
     LOGV("Init gl context");
     oglInit(argc,argv,w,h,ogl_major,ogl_minor);
@@ -366,12 +376,12 @@ int main ( int argc, char * argv [] )
     Singltone<sel::State>  g_script_state(&state);
 
 
-    sc->dbg_ui.d_toggle_cfg_view = config["scene.toggle_debug_viewport_cfg"].GetInt();
-    sc->dbg_ui.d_toggle_fps_view = config["scene.toggle_debug_viewport_fps"].GetInt();
+    sc->dbg_ui.d_toggle_cfg_view = config->operator []("scene.toggle_debug_viewport_cfg").GetInt();
+    sc->dbg_ui.d_toggle_fps_view = config->operator []("scene.toggle_debug_viewport_fps").GetInt();
 
 
-    sc->toggleMSAA((bool)config["scene.toggle_msaa"].GetInt());
-    sc->toggleBrightPass((bool)config["scene.toggle_brightpass"].GetInt());
+    sc->toggleMSAA((bool)config->operator []("scene.toggle_msaa").GetInt());
+    sc->toggleBrightPass((bool)config->operator []("scene.toggle_brightpass").GetInt());
 
     /*load models*/
     sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sponza.obj")) );

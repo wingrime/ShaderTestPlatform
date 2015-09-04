@@ -56,6 +56,7 @@ int RBO::Resize(SVec2 new_sz)
     //TODO: full impl
     d_w = new_sz.w;
     d_h = new_sz.h;
+    return ESUCCESS;
 }
 
 RBO::RBOType RBO::getType()
@@ -119,6 +120,8 @@ SRBOTexture::RTType RBO::getRelatedRBOTextueTypeFromRBOType(RBO::RBOType t)
         return SRBOTexture::RTType::RT_TEXTURE_FLOAT;
     case RBOType::RBO_MIXED:
         return SRBOTexture::RTType::RT_NONE;
+    case RBOType::RBO_NONE:
+        return SRBOTexture::RTType::RT_NONE;
     case RBOType::RBO_RED:
         return SRBOTexture::RTType::RT_TEXTURE_RED;
     case RBOType::RBO_RGBA:
@@ -161,6 +164,8 @@ SRBOTexture::RTType RBO::getRelatedDepthRBOTextueTypeFromRBOType(RBO::RBOType t)
         return SRBOTexture::RTType::RT_TEXTURE_DEPTH;
     case RBOType::RBO_DEPTH_ARRAY_ONLY:
         return SRBOTexture::RTType::RT_TEXTURE_DEPTH_ARRAY;
+    case RBOType::RBO_NONE:
+        return SRBOTexture::RTType::RT_NONE;
     }
     MASSERT(true); /*Unknown types should halt*/
     return SRBOTexture::RTType::RT_NONE;
@@ -187,7 +192,7 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
         SRBOTexture * _texIMG1,
         SRBOTexture * _texIMG2,
         SRBOTexture * _texDEPTH)
-:d_name(name),d_w(w),d_h(h), d_type(_type) ,d_texDEPTH(_texDEPTH)
+:d_name(name), d_type(_type),d_w(w),d_h(h) ,d_texDEPTH(_texDEPTH)
  {
     for(int i = 0 ; i < MAX_COLOR_ATTACHMENTS;i++)
         d_texIMG[i] = 0;
@@ -198,7 +203,7 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
 
     unsigned int mip = 1;
 
-    if (d_w > 128, d_h > 128 )
+    if (d_w > 128 && d_h > 128 )
         mip = 4;
     debugRegisterSelf();
     if (d_type == RBO_SCREEN) {
@@ -222,7 +227,7 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
 }
 /*single buffer*/
 RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
-    :d_name(name),d_w(def_w),d_h(def_h),d_type(type)
+    :d_name(name),d_type(type),d_w(def_w),d_h(def_h)
 {
     for (int i = 0 ; i < MAX_COLOR_ATTACHMENTS; i++) {
         d_texIMG[i] = 0;
@@ -231,7 +236,7 @@ RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
     debugRegisterSelf();
     /*automatic mip level detection TODO*/
     unsigned int mip = 1;
-    if (d_w > 256, d_h > 256 )
+    if (d_w > 256 && d_h > 256 )
         mip = 4;
     if (type == RBO_SCREEN) {
         IsReady = true;
@@ -262,7 +267,7 @@ RBO::~RBO()
 }
 /* new constructor*/
 RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, int t0_s, SRBOTexture::RTType t1_type, int t1_s, SRBOTexture::RTType t2_type, int t2_s)
-        :d_name(name),d_w(def_w),d_h(def_h),d_type(type)
+        :d_name(name),d_type(type),d_w(def_w),d_h(def_h)
 {
     MASSERT(t0_type == SRBOTexture::RTType::RT_NONE);
     MASSERT(SRBOTexture::isDepthType(t0_type));
@@ -287,7 +292,7 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
     debugRegisterSelf();
     //TODO: add type check
     unsigned int mip = 1;
-    if (d_w > 128, d_h > 128 )
+    if (d_w > 128 && d_h > 128 )
         mip = 2;
 
     if (!isDepthOnlyType(type))

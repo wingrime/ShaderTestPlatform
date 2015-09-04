@@ -37,13 +37,14 @@ public:
     int Bind(unsigned int sampler) const;
     int setInterpolationMode(InterpolationType t);
     int BindImage(unsigned int unit);
-    int x,y;
+
 
     std::string d_fname;
-
+    TextureType type;      /*serialize support */
+    int x,y;
     bool IsReady = false;
     bool d_issRGB;
-    TextureType type;      /*serialize support */
+
     friend class cereal::access;
     template <class Archive>
     void serialize( Archive & ar )

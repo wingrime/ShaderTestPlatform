@@ -3,6 +3,7 @@
 #include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#include "ErrorCodes.h"
 static GLuint       g_FontTexture = 0;
 static int          g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
 static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
@@ -198,5 +199,5 @@ int imGuiRender()
     if (!g_FontTexture)
         ImGui_CreateDeviceObjects();
 
-
+    return ESUCCESS;
 }
