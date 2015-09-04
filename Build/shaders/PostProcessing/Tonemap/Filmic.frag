@@ -45,29 +45,27 @@ vec3 sRGB_fast(vec3 x) {
 
 vec3 gamma_v3( vec3 c) {
 
-  return sRGB_fast(filmic3(c) / filmic(LW));
+  return sRGB_v3(filmic3(c) / filmic(LW));
 }
 
 void main ()
 {
   vec3 img_color = ( texelFetch(texHDR,ivec2(gl_FragCoord.xy),0)).rgb;
-  vec3 img_bloom;
+  float img_bloom;
   if (b_brightPass == 1)
-    img_bloom =  vec3(( texture(texBLUM,uv)).r);
+    img_bloom =  ( texture(texBLUM,uv)).r;
   else
-    img_bloom = vec3(0.0);
-  vec3 img_ssao;
+    img_bloom = 0.0;
+  float img_ssao;
   if (b_SSAO == 1)
-    img_ssao =  vec3( texture(texSSAO,uv).r);//use single color
+    img_ssao =   texture(texSSAO,uv).r;//use single color
   else
-    img_ssao = vec3(1.0);
-  vec4 lumdata =   (texelFetch(texLumKey,ivec2(1,1),0)).rgba;//use single color
+    img_ssao = 1.0;
+  float lum_key =   (texelFetch(texLumKey,ivec2(1,1),0)).r;
   
-
-  float lum_key = lumdata.r;
   /*bloom + img with gamma correction*/
   float lum_factor = 1.0/(1.0+lum_key*0.5);
-  color = vec4(img_ssao*gamma_v3((img_bloom +img_color)*lum_factor ) ,1.0);
+  color = vec4(gamma_v3((vec3(img_bloom) +img_color)*lum_factor*img_ssao ) ,1.0);
  //color = vec4( img_ssao,1.0);
 //color = vec4( vec3(lum_max),1.0);
 // color = vec4( img_color,1.0);
