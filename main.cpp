@@ -121,9 +121,7 @@ void key ( unsigned char key, int x, int y )
          return;
     }
 
-else if (key == '9' ) sc->dbg_ui.upViewItem();
-else if (key == '0' ) sc->dbg_ui.downViewItem();
-    /*backspace or plus goes to console*/
+/*backspace or plus goes to console*/
 else if (key == 8 || key == 43) {console_mode = 1; sc->dbg_ui.con->Cls(); sc->dbg_ui.con->Msg("Debug console, [ESC] for exit\n"); }
 else
     s_input->HandleInputKey(key);

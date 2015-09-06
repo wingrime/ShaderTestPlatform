@@ -13,7 +13,6 @@ DebugUI::DebugUI(SScene *_s, RectSizeInt &_v)
     ,con(new UIConsole(v,  d_console_cmd_handler ))
 
     ,fps_label(new UILabel(v,0.85,0.1))
-    ,v_sel_label(new UILabel(v,0.75, 0.6))
     ,sc(_s)
 {
     /*Setup error handler*/
@@ -25,9 +24,6 @@ int DebugUI::Draw()
 {
     if (d_toggle_fps_view)
         fps_label->Draw();
-    if (d_toggle_cfg_view) {
-        v_sel_label->Draw();
-    }
     con->Draw();
     return ESUCCESS;
 
@@ -328,26 +324,7 @@ int DebugUI::InitDebugCommands()
 }
 
 
-const inline std::string DebugUI::V_I(int n) {
 
-    const std::string s("[+]");
-    const std::string ns("[ ]");
-    return (n==d_v_sel_current?s:ns);
-}
-
-
-int DebugUI::upViewItem() {
-    if (d_v_sel_current > 0)
-        d_v_sel_current --;
-    UpdateViewSelLabel();
-    return 0;
-}
-int DebugUI::downViewItem() {
-    if (d_v_sel_current < d_v_sel_max )
-        d_v_sel_current++;
-    UpdateViewSelLabel();
-    return 0;
-}
 
 int DebugUI::DrawGUI()
 {
@@ -363,7 +340,7 @@ int DebugUI::DrawGUI()
     static bool cfg_brightpass = false;
     static bool cfg_msaa = true;
     static bool cfg_ssao = true;
-    if (ImGui::Checkbox("Brightpass", &cfg_brightpass)) {
+    if (ImGui::Checkbox("Blum", &cfg_brightpass)) {
         sc->toggleBrightPass(cfg_brightpass);
     }
     ImGui::SameLine(150);
@@ -386,7 +363,7 @@ int DebugUI::DrawGUI()
     static float eyeAdoptSpeed = 0.008;
     if (ImGui::CollapsingHeader("Tonemapping"))
     {
-        ImGui::Text("Tonemapping curve");
+        ImGui::Text("Fimlic curve");
         if (ImGui::SliderFloat("A", &tmc_A, 0.0f, 1.0f)) {
             sc->pp_prog_hdr_tonemap->SetUniform("A",tmc_A);
         }
@@ -628,19 +605,3 @@ int DebugUI::DrawIntrospectionGUI(bool *opened)
 
 }
 
-
-
-int DebugUI::UpdateViewSelLabel() {
-    v_sel_label->setText(std::string("------ViewSel-------\n") +
-            V_I(V_NORMAL) + string_format("Full Render\n",d_v_sel[V_NORMAL]) +
-            V_I(V_BLOOM) + string_format("Bright Pass \n",d_v_sel[V_BLOOM]) +
-            V_I(V_BLOOM_BLEND) + string_format("Bloom Blend \n",d_v_sel[V_BLOOM_BLEND]) +
-             V_I(V_SSAO) + string_format("SSAO Only \n",d_v_sel[V_SSAO]) +
-            V_I(V_DIRECT) + string_format("Direct Render Only \n",d_v_sel[V_DIRECT])  +
-            V_I(V_SHADOW_MAP) + string_format("Shadow Map Only \n",d_v_sel[V_SHADOW_MAP]) +
-             V_I(V_VOLUMETRIC) + string_format("Volumetric Test \n",d_v_sel[V_VOLUMETRIC]) +
-             V_I(V_CUBEMAPTEST) + string_format("LuxKey\n",d_v_sel[V_CUBEMAPTEST])
-            );
-
-    return ESUCCESS;
-}

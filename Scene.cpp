@@ -77,10 +77,6 @@ int SScene::renderPipelineLink()
 
 SScene::SScene(RectSizeInt v)
     :cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
-    ,w_sky(new SWeatherSky())
-    //,cam(SMat4x4(),SOrtoProjectionMatrix(100.0f, 7000.0f,1.0f,100.0,-100.0,-100.0))
-
-    ,step(0.0f)
     ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
@@ -90,6 +86,8 @@ SScene::SScene(RectSizeInt v)
     
 {
 
+    /*Weather system*/
+    w_sky = new SWeatherSky();
     /*scene noise*/
     texRandom = new STexture("noise.png");
     texRandom->setInterpolationMode(STexture::InterpolationType::TEX_NEAREST);
@@ -122,16 +120,15 @@ SScene::SScene(RectSizeInt v)
     /*short path*/
 
     rtPrepass = lookupStageRBO(depthPrePassStage.stageName);
-        //pp_stage_hdr_tonemap = new SPostProcess(pp_prog_hdr_tonemap,rtSCREEN,rtHDRVertBlurResult,rtHDRScene,rtHDRLumKey,rtSSAOVertBlurResult);
     RenderPipelineStageConfig tonemapStage;
     tonemapStage.stageName = std::string("Tonemap");
     tonemapStage.bufferSize = RectSizeInt(h,w);
     tonemapStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
     tonemapStage.fragmentShaderFileName= std::string("PostProcessing/Tonemap/Filmic.frag");
-    tonemapStage.ppFeedStage1 = std::string("vertBlurHDR");
+    tonemapStage.ppFeedStage1 = std::string("BLUM:KAWASE_PONG_PASS");
     tonemapStage.ppFeedStage2 = std::string("Main");
     tonemapStage.ppFeedStage3 = std::string("lumkey");
-    tonemapStage.ppFeedStage4 = std::string("ssaoVertBlur");
+    tonemapStage.ppFeedStage4 = std::string("SSAO:VERTICAL_BLUR_PASS");
     tonemapStage.isPostProcess = true;
     tonemapStage.rboType = RBO::RBO_SCREEN;
     mainRenderTonemapPass =initStage(&tonemapStage);
@@ -173,21 +170,22 @@ SScene::SScene(RectSizeInt v)
     SShader * bloomShader = lookupStageShader(bloomStage.stageName);
 
     RenderPipelineStageConfig horBlurStage ;
-    horBlurStage.stageName = std::string("horBlur");
+    horBlurStage.stageName = std::string("BLUM:KAWASE_PING_PASS");
     horBlurStage.bufferSize = RectSizeInt(h/4,w/4);
     horBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
-    horBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/GaussHorizontalFixedTap16.frag" );
+    horBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/Kawase.frag" );//kawase here
     horBlurStage.rboType = RBO::RBO_FLOAT_RED;
     horBlurStage.isPostProcess = false;
     initStage(&horBlurStage);
     rtHDRHorBlurResult = lookupStageRBO(horBlurStage.stageName);
     SShader * horBlurShader = lookupStageShader(horBlurStage.stageName);
+    pp_prog_hdr_blur_kawase = horBlurShader;
 
     RenderPipelineStageConfig vertBlurStage ;
-    vertBlurStage.stageName = std::string("vertBlurHDR");
+    vertBlurStage.stageName = std::string("BLUM:KAWASE_PONG_PASS");
     vertBlurStage.bufferSize = RectSizeInt(h/4,w/4);
     vertBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
-    vertBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/GaussVerticalFixedTap16.frag");
+    vertBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/Kawase.frag"); //kawase here
     vertBlurStage.rboType = RBO::RBO_FLOAT_RED;
     vertBlurStage.isPostProcess = false;
     initStage(&vertBlurStage);
@@ -196,25 +194,26 @@ SScene::SScene(RectSizeInt v)
 
 
     RenderPipelineStageConfig vertSSAOBlurStage ;
-    vertSSAOBlurStage.stageName = std::string("ssaoVertBlur");
+    vertSSAOBlurStage.stageName = std::string("SSAO:VERTICAL_BLUR_PASS");
     vertSSAOBlurStage.bufferSize = RectSizeInt(h/2,w/2);
     vertSSAOBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
-    vertSSAOBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/Kawase.frag");
+    vertSSAOBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/GaussVerticalFixedTap16.frag");
     vertSSAOBlurStage.rboType = RBO::RBO_RED;
     vertSSAOBlurStage.isPostProcess = false;
     initStage(&vertSSAOBlurStage);
     rtSSAOVertBlurResult = lookupStageRBO(vertSSAOBlurStage.stageName);
-    pp_prog_hdr_blur_kawase = lookupStageShader(vertSSAOBlurStage.stageName);
+    SShader * ssaoVertBlurShader = lookupStageShader(vertSSAOBlurStage.stageName);
 
     RenderPipelineStageConfig horSSAOBlurStage ;
-    horSSAOBlurStage.stageName = std::string("ssaoHorBlur");
+    horSSAOBlurStage.stageName = std::string("SSAO:HORIZONTAL_BLUR_PASS");
     horSSAOBlurStage.bufferSize = RectSizeInt(h/2,w/2);
     horSSAOBlurStage.vertexShaderFileName = std::string("PostProcessing/PostProccessQuard.vert");
-    horSSAOBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/Kawase.frag");
+    horSSAOBlurStage.fragmentShaderFileName= std::string("PostProcessing/Bloor/GaussHorizontalFixedTap16.frag");
     horSSAOBlurStage.rboType = RBO::RBO_RED;
     horSSAOBlurStage.isPostProcess = false;
     initStage(&horSSAOBlurStage);
     rtSSAOHorBlurResult = lookupStageRBO(horSSAOBlurStage.stageName);
+    SShader * ssaoHorBlurShader = lookupStageShader(horSSAOBlurStage.stageName);
     //pp_prog_hdr_blur_kawase = lookupStageShader(horSSAOBlurStage.stageName);
 
 
@@ -255,14 +254,19 @@ SScene::SScene(RectSizeInt v)
 
     renderPipelineLink();
 
+    rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
+
+    rtPrepass->texIMG(0)->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
+
+    rtPrepass->texIMG(0)->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
+
     pp_stage_ssao = new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", "PostProcessing/SSAO/SimpleSSAO.frag"),w/2,h/2,rtPrepass->texIMG(0),rtPrepass->texDEPTH(),texRandom);
 
-    //pp_stage_hdr_tonemap = new SPostProcess(pp_prog_hdr_tonemap,rtSCREEN,rtHDRVertBlurResult,rtHDRScene,rtHDRLumKey,rtSSAOVertBlurResult);
     pp_stage_hdr_tonemap = mainRenderTonemapPass->postProcess; //shoutcut
 
-    pp_stage_ssao_blur_hor = (new SPostProcess(horBlurShader, rtSSAOHorBlurResult,rtSSAOVertBlurResult));
+    pp_stage_ssao_blur_hor = (new SPostProcess(ssaoHorBlurShader, rtSSAOHorBlurResult,rtSSAOVertBlurResult));
 
-    pp_stage_ssao_blur_vert = (new SPostProcess(vertBlurShader,rtSSAOVertBlurResult,rtSSAOHorBlurResult));
+    pp_stage_ssao_blur_vert = (new SPostProcess(ssaoVertBlurShader,rtSSAOVertBlurResult,rtSSAOHorBlurResult));
 
     pp_stage_hdr_bloom = (new SPostProcess(bloomShader, rtHDRBloomResult,rtHDRScene,rtHDRLumKey));
 
@@ -282,17 +286,8 @@ SScene::SScene(RectSizeInt v)
 
     postProcessDebugOutput = (new SPostProcess(shaderViewAsIs,w,h));
 
-    rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
-
-    rtPrepass->texIMG(0)->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
-
-
     dbg_ui.Init();
-
     UpdateCfgLabel();
-
-
-
 }
 
 SScene::~SScene()
@@ -467,7 +462,6 @@ SMat4x4 LookAtMatrix(const SVec4 &forward, const SVec4 &up ) {
 
 }
 int SScene::UpdateScene(float dt) {
-    //this->mainRenderPass->Bind();
     /*shadowmap*/
     UNUSED(dt);
     SMat4x4 Bias = SMat4x4( 0.5,0.0,0.0,0.0,
@@ -586,14 +580,9 @@ void SScene::setRec(const Recorder &value)
     rec = value;
 }
 
-
-
-
-
 int inline SScene::RenderShadowMap(const RBO& v) {
     v.Bind(true);
-    //incapsulation fail :(
-    //todo: incapsulate uniform values to camera!
+
     SShader * cam_prog = shadowMapPass->stageShader;
     cam_prog->SetUniform("MVP0",d_shadowmap_cam[0].getProjMatrix()*d_shadowmap_cam[0].getViewMatrix());
     cam_prog->SetUniform("MVP1",d_shadowmap_cam[1].getProjMatrix()*d_shadowmap_cam[1].getViewMatrix());
@@ -608,9 +597,7 @@ int inline SScene::RenderShadowMap(const RBO& v) {
 
 int SScene::RenderCubemap()
 {
-    //glClearColor(0.0,0.0,0.0,1.0);
-    //glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    //glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+
     if (d_toggle_MSAA)
        msaa_pass.Bind();
     else
@@ -701,7 +688,6 @@ int inline SScene::RenderDirect(const RenderPipelineStageRuntime &runtime) {
 }
 int SScene::Render() {
     auto start = std::chrono::steady_clock::now();
-    step  += 0.002f;
     glClearColor(0.0,0.0,0.0,1.0);
     //glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
@@ -799,9 +785,6 @@ int SScene::UpdateCfgLabel() {
     pp_prog_hdr_tonemap->SetUniform("E",d_cfg[11]);
     pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
     pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])));
-
-    //FIXME
-    //main_pass_shader->SetUniform("lightIntensity",d_cfg[14]);
 
     return ESUCCESS;
 }

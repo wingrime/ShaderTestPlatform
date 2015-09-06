@@ -76,10 +76,8 @@ public:
     int AddObjectToRender(std::shared_ptr <SObjModel> obj);
 
     SCamera cam;
-    std::shared_ptr<SWeatherSky> w_sky;
-private:
-    float step;
-public:
+    SWeatherSky* w_sky;
+
     SCamera d_shadowmap_cam[4];
     SPostProcess * pp_stage_ssao;
     SPostProcess * pp_stage_ssao_blur_hor;

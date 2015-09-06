@@ -25,7 +25,7 @@ public:
     /*on screen UI shold be rid from there*/
     int UpdateCfgLabel();
     int UpdateViewSelLabel();
-    inline int Init() { UpdateViewSelLabel();InitDebugCommands();return ESUCCESS;}
+    inline int Init() {InitDebugCommands();return ESUCCESS;}
     int upViewItem();
     int downViewItem();
 
@@ -45,15 +45,7 @@ public:
         V_MAX,
     };
 
-    /*view selecor*/
-    int d_v_sel_current = 0;
-    int d_v_sel [V_MAX] = {1 };
-    const int d_v_sel_max = V_MAX-1;
-
-    const inline std::string V_I(int n);
-
     std::shared_ptr<UILabel> fps_label;
-    std::shared_ptr<UILabel> v_sel_label;
 
     SScene *sc;
 
