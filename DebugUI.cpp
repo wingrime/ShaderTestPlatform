@@ -7,17 +7,17 @@
 #include <RBO.h>
 #include "MAssert.h"
 DebugUI::DebugUI(SScene *_s, RectSizeInt &_v)
-    :v(_v)
-    ,d_console_cmd_handler(new ConsoleCommandHandler())
+    :d_console_cmd_handler(new ConsoleCommandHandler())
     ,err_con(new UIConsoleErrorHandler(con))
-    ,con(new UIConsole(v,  d_console_cmd_handler ))
+    ,con(new UIConsole(_v,  d_console_cmd_handler ))
 
-    ,fps_label(new UILabel(v,0.85,0.1))
-    ,sc(_s)
+    ,fps_label(new UILabel(_v,0.85,0.1))
 {
     /*Setup error handler*/
     MainLog::GetInstance()->SetCallback([=](Log::Verbosity v, const std::string &s)-> void {UNUSED(v); con->Msg(s); });
     InitDebugCommands();
+
+    sc = Singltone<SScene>::GetInstance();
 }
 
 int DebugUI::Draw()
@@ -134,11 +134,10 @@ int DebugUI::InitDebugCommands()
         con->Msg(os.str());
     }));
 
-    d_console_cmd_handler->AddCommand("toggle_ui", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("toggle_fps", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         d_toggle_fps_view = !d_toggle_fps_view;
-        d_toggle_cfg_view = !d_toggle_cfg_view;
 
     }));
     d_console_cmd_handler->AddCommand("msaa_enable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {

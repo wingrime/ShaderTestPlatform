@@ -5,8 +5,6 @@
 class SScene;
 class DebugUI {
 public:
-
-        RectSizeInt v;
         ConsoleCommandHandler *d_console_cmd_handler;
         UIConsoleErrorHandler *err_con;
         UIConsole *con;
@@ -17,15 +15,10 @@ public:
     int InitDebugCommands();
 
     bool d_toggle_fps_view = true;
-    bool d_toggle_cfg_view = true;
-
-
-
 
     /*on screen UI shold be rid from there*/
     int UpdateCfgLabel();
     int UpdateViewSelLabel();
-    inline int Init() {InitDebugCommands();return ESUCCESS;}
     int upViewItem();
     int downViewItem();
 

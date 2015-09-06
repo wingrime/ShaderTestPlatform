@@ -82,7 +82,7 @@ SScene::SScene(RectSizeInt v)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
 
 
-    ,dbg_ui(this,v)
+    //,dbg_ui(this,v)
     
 {
 
@@ -190,7 +190,7 @@ SScene::SScene(RectSizeInt v)
     vertBlurStage.isPostProcess = false;
     initStage(&vertBlurStage);
     rtHDRVertBlurResult = lookupStageRBO(vertBlurStage.stageName);
-    SShader * vertBlurShader = lookupStageShader(vertBlurStage.stageName);
+    //SShader * vertBlurShader = lookupStageShader(vertBlurStage.stageName);
 
 
     RenderPipelineStageConfig vertSSAOBlurStage ;
@@ -286,7 +286,7 @@ SScene::SScene(RectSizeInt v)
 
     postProcessDebugOutput = (new SPostProcess(shaderViewAsIs,w,h));
 
-    dbg_ui.Init();
+
     UpdateCfgLabel();
 }
 
@@ -745,7 +745,7 @@ int SScene::Render() {
 
     pp_time.End();
     ui_time.Begin();
-    dbg_ui.Draw();
+    Singltone<DebugUI>::GetInstance()->Draw();
     ui_time.End();
 
     char buf [120];
@@ -759,7 +759,7 @@ int SScene::Render() {
                                                                     (float)ui_time.getTime()*(1.0/1000000.0),\
                                                                     (float)pp_time.getTime()*(1.0/1000000.0),\
                                                                       std::chrono::duration <float, std::milli> (diff).count(),pos.x,pos.y,pos.z );
-    dbg_ui.fps_label->setText(buf);
+    Singltone<DebugUI>::GetInstance()->fps_label->setText(buf);
    
     return true;
 }

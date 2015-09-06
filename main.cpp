@@ -61,7 +61,7 @@ void display ()
     ImGui::NewFrame();
 
      ///ImGui::End();
-    sc->dbg_ui.DrawGUI();
+    dbg_ui->DrawGUI();
     ImGui::Render();
 
     if (g_scriptCallFrequency) {
@@ -93,17 +93,18 @@ void key ( unsigned char key, int x, int y )
     UNUSED(x);
     UNUSED(y);
     SScene * sc = MainScene::GetInstance();
+    DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
     //static int fullscreen = 0;
     static int console_mode = 0;
     if (console_mode) {
         if (key == 27)
         {
             console_mode = 0;
-            sc->dbg_ui.con->Msg("Console close\n");
-            sc->dbg_ui.con->HandleExitConsole();
+            dbg_ui->con->Msg("Console close\n");
+            dbg_ui->con->HandleExitConsole();
             return;
         } else  if (key == 43) {
-            sc->dbg_ui.con->HandlePrevHistoryCommand();
+            dbg_ui->con->HandlePrevHistoryCommand();
             return;
         }
         // disable due "-" key better accessible
@@ -111,7 +112,7 @@ void key ( unsigned char key, int x, int y )
         //    sc->con->HandleNextHistoryCommand();
        //     return;
         //}
-        sc->dbg_ui.con->HandleInputKey(key);
+        dbg_ui->con->HandleInputKey(key);
         return;
     }
 
@@ -122,7 +123,7 @@ void key ( unsigned char key, int x, int y )
     }
 
 /*backspace or plus goes to console*/
-else if (key == 8 || key == 43) {console_mode = 1; sc->dbg_ui.con->Cls(); sc->dbg_ui.con->Msg("Debug console, [ESC] for exit\n"); }
+else if (key == 8 || key == 43) {console_mode = 1; dbg_ui->con->Cls(); dbg_ui->con->Msg("Debug console, [ESC] for exit\n"); }
 else
     s_input->HandleInputKey(key);
 
@@ -330,11 +331,14 @@ int main ( int argc, char * argv [] )
     LOGV("Create Scene");
 
     MainScene msc(RectSizeInt(h,w));
+    SScene * sc = MainScene::GetInstance();
+    Singltone<DebugUI> dbg(sc,RectSizeInt(h,w));
+    DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
 
     imGuiSetup();
 
     //sc.reset(new SScene(&v));
-    SScene * sc = MainScene::GetInstance();
+
     s_input.reset(new InputCommandHandler());
 
     /*input key handlers*/
@@ -355,7 +359,7 @@ int main ( int argc, char * argv [] )
     s_input->BindKey('f',"toogle_fullscreen");
 
     s_input->AddCommand("clear_console", InputCommandHandler::InputCommand([=] (void) -> void {
-        sc->dbg_ui.con->Cls();
+        dbg_ui->con->Cls();
     }));
     s_input->BindKey('c',"clear_console");
 
@@ -373,9 +377,7 @@ int main ( int argc, char * argv [] )
         LOGE("No init.lua script find or load failed!");
     Singltone<sel::State>  g_script_state(&state);
 
-
-    sc->dbg_ui.d_toggle_cfg_view = config->operator []("scene.toggle_debug_viewport_cfg").GetInt();
-    sc->dbg_ui.d_toggle_fps_view = config->operator []("scene.toggle_debug_viewport_fps").GetInt();
+    dbg_ui->d_toggle_fps_view = config->operator []("scene.toggle_debug_viewport_fps").GetInt();
 
 
     sc->toggleMSAA((bool)config->operator []("scene.toggle_msaa").GetInt());
@@ -389,8 +391,8 @@ int main ( int argc, char * argv [] )
 
     /* main loop */
     LOGV("Entering main loop");
-    sc->dbg_ui.con->Msg("git revision: " GIT_SHA1 "\n");
-    sc->dbg_ui.con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
+    dbg_ui->con->Msg("git revision: " GIT_SHA1 "\n");
+    dbg_ui->con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
 
     glutMainLoop ();
     LOGV("Leave main loop");
