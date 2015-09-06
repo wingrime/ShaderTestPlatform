@@ -6,18 +6,19 @@
 #include <imgui.h>
 #include <RBO.h>
 #include "MAssert.h"
-DebugUI::DebugUI(SScene *_s, RectSizeInt &_v)
-    :d_console_cmd_handler(new ConsoleCommandHandler())
-    ,err_con(new UIConsoleErrorHandler(con))
-    ,con(new UIConsole(_v,  d_console_cmd_handler ))
-
-    ,fps_label(new UILabel(_v,0.85,0.1))
+#include "IMGuiHooks.h"
+DebugUI::DebugUI(RectSizeInt &_v)
+    :fps_label(new UILabel(_v,0.85,0.1))
 {
     /*Setup error handler*/
-    MainLog::GetInstance()->SetCallback([=](Log::Verbosity v, const std::string &s)-> void {UNUSED(v); con->Msg(s); });
+    d_console_cmd_handler = new ConsoleCommandHandler();
+    err_con = new UIConsoleErrorHandler(con);
+    con = new UIConsole(_v,  d_console_cmd_handler );
+    Singltone<Log>::GetInstance()->SetCallback([=](Log::Verbosity v, const std::string &s)-> void {UNUSED(v); con->Msg(s); });
     InitDebugCommands();
 
     sc = Singltone<SScene>::GetInstance();
+    imGuiSetup();
 }
 
 int DebugUI::Draw()
@@ -25,6 +26,18 @@ int DebugUI::Draw()
     if (d_toggle_fps_view)
         fps_label->Draw();
     con->Draw();
+    DrawGUI();
+
+    return ESUCCESS;
+
+}
+
+int DebugUI::Reshape(const RectSizeInt &v)
+{
+    /*ImGui hook*/
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize.x = (float)v.w;
+    io.DisplaySize.y =  (float)v.h;
     return ESUCCESS;
 
 }
@@ -452,7 +465,7 @@ int DebugUI::DrawGUI()
             sc->pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",bloomMul);
          }
     }
-    static float shadowBias = 1.0;
+    static float shadowBias = 10.0;
     static float shadowEpsMult = 1.0;
     static float shadowPenumbra = 1500.0;
     if (ImGui::CollapsingHeader("Shadows"))
@@ -469,7 +482,7 @@ int DebugUI::DrawGUI()
         }
         if (ImGui::Button("Reset Shadows"))
         {
-            shadowBias = 1.0;
+            shadowBias = 10.0;
             shadowPenumbra = 1500.0;
             shadowEpsMult = 1.0;
             mp->SetUniform("shadowEps",0.0001f*shadowBias);
@@ -555,6 +568,7 @@ int DebugUI::DrawGUI()
     }
 
     ImGui::End();
+    ImGui::Render();
     return ESUCCESS;
 }
 

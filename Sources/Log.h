@@ -29,7 +29,6 @@ private:
     std::function<void (Log::Verbosity, const std::string &)> d_callback;
 
 };
-#define MainLog Singltone<Log>
 #define LOGW(a) (Singltone<Log>::GetInstance()->LogW(a))
 #define LOGE(a) (Singltone<Log>::GetInstance()->LogE(a))
 #define LOGV(a) (Singltone<Log>::GetInstance()->LogV(a))

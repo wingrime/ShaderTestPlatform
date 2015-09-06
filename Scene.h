@@ -175,6 +175,7 @@ private:
    bool d_toggle_brightpass = true;
    bool d_toggle_ssao = true;
 public:
+    int ResetCfgLabel();
     int UpdateScene(float dt);
 private:
 
@@ -189,7 +190,11 @@ public:
 
     int debugSetFinalRenderOutput(RBO * r);
     int debugSetDebugRenderOutputFlag(bool flag);
+    float debugGetRenderTime();
+    float debugGetPostProcessingTime();
 
+    float d_dbgRenderTimeMs;
+    float d_dbgPostProcessingTimeMs;
     RBO * debugFinalRenderOutput;
     bool debugRenderOutputFlag = false;
 
@@ -200,4 +205,3 @@ public:
     Recorder getRec() const;
     void setRec(const Recorder &value);
 };
-#define MainScene Singltone<SScene>

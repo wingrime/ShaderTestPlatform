@@ -1,10 +1,3 @@
-/*
-Global TODOs:
-- cubemaps
-- more accurate rendering path control for more flexability
-- online attribute control
-- skybox
-*/
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -35,10 +28,10 @@ Global TODOs:
  * Must be moved to Singltone interface as be ready
 */
 sel::State state;
-std::shared_ptr<InputCommandHandler> s_input;
 /* Global configuration*/
 static long int g_scriptCallFrequency = 0;
 static long int g_frameNumber = 0;
+
 void display ()
 {
     /* main engine loop */
@@ -49,9 +42,8 @@ void display ()
    // update time
    last_t = std::chrono::steady_clock::now();
 
-   g_frameNumber ++;
-
-    SScene * sc = MainScene::GetInstance();
+   SScene * sc = Singltone<SScene>::GetInstance();
+    DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
     //auto start = std::chrono::steady_clock::now();
     imGuiRender();
     sc->Render();
@@ -59,10 +51,15 @@ void display ()
     ImGuiIO& io = ImGui::GetIO();
     io.DeltaTime = dt_seconds;
     ImGui::NewFrame();
+    char buf [120];
+    float pptime = sc->debugGetPostProcessingTime();
+    float rtime = sc->debugGetRenderTime();
+    float fps = 1000.0/(pptime+rtime);
+    sprintf(buf,"DRAW:%4.3f ms\nPP: %4.3f ms\nFPS: %4.3f\nframe:%d\n", rtime ,pptime, fps, g_frameNumber );
+    dbg_ui->fps_label->setText(buf);
 
-     ///ImGui::End();
-    dbg_ui->DrawGUI();
-    ImGui::Render();
+    dbg_ui->Draw();
+
 
     if (g_scriptCallFrequency) {
         if ((g_frameNumber % g_scriptCallFrequency) == 0)
@@ -71,20 +68,19 @@ void display ()
         }
 
     }
-
     glutSwapBuffers ();
-
+    g_frameNumber++;
 }
 
 void reshape ( int w, int h )
 {
-    SScene * sc = MainScene::GetInstance();
+    SScene * sc = Singltone<SScene>::GetInstance();
+    DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
+
+    const RectSizeInt rect(h,w);
 
     sc->Reshape(w,h);
-    /*ImGui hook*/
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize.x = (float)w;
-    io.DisplaySize.y =  (float)h;
+    dbg_ui->Reshape(rect);
 
 }
 
@@ -92,7 +88,6 @@ void key ( unsigned char key, int x, int y )
 {
     UNUSED(x);
     UNUSED(y);
-    SScene * sc = MainScene::GetInstance();
     DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
     //static int fullscreen = 0;
     static int console_mode = 0;
@@ -125,7 +120,7 @@ void key ( unsigned char key, int x, int y )
 /*backspace or plus goes to console*/
 else if (key == 8 || key == 43) {console_mode = 1; dbg_ui->con->Cls(); dbg_ui->con->Msg("Debug console, [ESC] for exit\n"); }
 else
-    s_input->HandleInputKey(key);
+    Singltone<InputCommandHandler>::GetInstance()->HandleInputKey(key);
 
 }
 
@@ -137,7 +132,7 @@ void mouse_move_passive (  int x , int y) {
 
 }
 void mouse_move (  int x , int y) {
-    SScene * sc = MainScene::GetInstance();
+    SScene * sc = Singltone<SScene>::GetInstance();
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -173,13 +168,7 @@ void special(int key, int x, int y){
     UNUSED(x);
     UNUSED(y);
     UNUSED(key);
-    //SScene * sc = MainScene::GetInstance();
-
-    //if (key == GLUT_KEY_DOWN) sc->dbg_ui.downCfgItem();
-    //else if (key == GLUT_KEY_UP) sc->dbg_ui.upCfgItem();
-    //else if (key == GLUT_KEY_LEFT) sc->dbg_ui.decCfgItem();
-    //else if (key == GLUT_KEY_RIGHT) sc->dbg_ui.incCfgItem();
-   // FIXME else s_input->HandleInputKey(key); FIXME
+    /*Special key should be handled here*/
 }
 void mouse(int button, int state, int x, int y)  {
     ImGuiIO& io = ImGui::GetIO();
@@ -236,9 +225,6 @@ void APIENTRY openglCallbackFunction(GLenum source,
         // nice feature;
        //D_TRAP();
     }
-
-
-
 }
 int initLuaBindings(sel::State& state)
 {
@@ -246,12 +232,10 @@ int initLuaBindings(sel::State& state)
     state.OpenLib("math",luaopen_math);
     struct Env {
         Env() {}
-        /*basic log*/
-       // state.OpenLib(
         int loge(std::string msg) {LOGE(msg);return 0;}
         int logw(std::string msg) {LOGW(msg);return 0;}
         int logv(std::string msg) {LOGV(msg);return 0;}
-        int  fwd(double a) {MainScene::GetInstance()->cam.goForward(a);return 0;}
+        int  fwd(double a) {Singltone<SScene>::GetInstance()->cam.goForward(a);return 0;}
         int setUpdateCallFrequency(int f) {g_scriptCallFrequency = f; return 0;}
 
     };
@@ -263,13 +247,10 @@ int initLuaBindings(sel::State& state)
                                "fwd", &Env::fwd
                                );
 
-    //state[Scene].
-
-
     return 0;
 }
 
-int initHooks() {
+int initGlutHooks() {
 
     /*glut callbacks*/
     glutDisplayFunc(display);
@@ -283,63 +264,12 @@ int initHooks() {
     return 0;
 }
 
+int initKeybindings() {
 
-
-int main ( int argc, char * argv [] )
-{
-    std::ios::sync_with_stdio(false);
-    /*init singltones*/
-    MainLog main_log;
-    MainConfig main_config;
-    Config * config = MainConfig::GetInstance();
-    Log gl_log("gl_log.log");
-
-    LOGV("GIT REVISION:"  GIT_SHA1 );
-    /*backtrace on windows*/
-    LoadLibraryA("backtrace.dll");
-    LOGV("Backtrace dll loaded");
-
-    int h = config->operator []("launch.h").GetInt();
-    int w = config->operator []("launch.w").GetInt();
-
-    int ogl_major = config->operator []("launch.ogl_major").GetInt();
-    int ogl_minor = config->operator []("launch.ogl_minor").GetInt();
-
-    LOGV("Init gl context");
-    oglInit(argc,argv,w,h,ogl_major,ogl_minor);
-    initHooks();
-
-
-
-   if(glDebugMessageCallback){
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(openglCallbackFunction, nullptr);
-        GLuint unusedIds = 0;
-        glDebugMessageControl(GL_DONT_CARE,
-            GL_DONT_CARE,
-             GL_DONT_CARE,
-            0,
-            &unusedIds,
-            true);
-        LOGV("OpenGl debug callback installed");
-    }
-    else
-        LOGW("OpenGl debug callback not avaliable");
-
-
-
-    LOGV("Create Scene");
-
-    MainScene msc(RectSizeInt(h,w));
-    SScene * sc = MainScene::GetInstance();
-    Singltone<DebugUI> dbg(sc,RectSizeInt(h,w));
+    InputCommandHandler *s_input = Singltone<InputCommandHandler>::GetInstance();
+    SScene * sc = Singltone<SScene>::GetInstance();
     DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
 
-    imGuiSetup();
-
-    //sc.reset(new SScene(&v));
-
-    s_input.reset(new InputCommandHandler());
 
     /*input key handlers*/
     s_input->AddCommand("forward", InputCommandHandler::InputCommand([=] (void) -> void {
@@ -362,14 +292,63 @@ int main ( int argc, char * argv [] )
         dbg_ui->con->Cls();
     }));
     s_input->BindKey('c',"clear_console");
+    return 0;
+}
 
+int main ( int argc, char * argv [] )
+{
+    std::ios::sync_with_stdio(false);
+    /*init subsystem singltones*/
+    Singltone<Log> main_log;
+    Singltone<Config> main_config;
+
+    Config * config = Singltone<Config>::GetInstance();
+    Log gl_log("gl_log.log");
+
+    LOGV("GIT REVISION:"  GIT_SHA1 );
+
+    /*backtrace on windows*/
+    LoadLibraryA("backtrace.dll");
+
+    int h = config->operator []("launch.h").GetInt();
+    int w = config->operator []("launch.w").GetInt();
+
+    int ogl_major = config->operator []("launch.ogl_major").GetInt();
+    int ogl_minor = config->operator []("launch.ogl_minor").GetInt();
+
+    LOGV("Init gl context");
+    oglInit(argc,argv,w,h,ogl_major,ogl_minor);
+    initGlutHooks();
+
+
+
+   if(glDebugMessageCallback){
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(openglCallbackFunction, nullptr);
+        GLuint unusedIds = 0;
+        glDebugMessageControl(GL_DONT_CARE,
+            GL_DONT_CARE,
+             GL_DONT_CARE,
+            0,
+            &unusedIds,
+            true);
+        LOGV("OpenGl debug callback installed");
+    }
+    else
+        LOGW("OpenGl debug callback not avaliable");
+
+    Singltone<SScene> msc(RectSizeInt(h,w));
+    SScene * sc = Singltone<SScene>::GetInstance();
+    Singltone<DebugUI> dbg(RectSizeInt(h,w));
+    DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
+
+    Singltone<InputCommandHandler> input_handler;
+
+    LOGV("Init Keybindings");
+    initKeybindings();
 
     LOGV("Init Script");
-
     initLuaBindings(state);
-
-    //state.Load("init.lua");
-    //state["init"]();
 
     if (state.Load("init.lua")) {
         state["init"]();
@@ -382,13 +361,9 @@ int main ( int argc, char * argv [] )
 
     sc->toggleMSAA((bool)config->operator []("scene.toggle_msaa").GetInt());
     sc->toggleBrightPass((bool)config->operator []("scene.toggle_brightpass").GetInt());
-
+    LOGV("Load Scene");
     /*load models*/
     sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sponza.obj")) );
-    //sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sky_dome.obj")) );
-    /*remove me please*/
-    //sc->d_render_list[1]->SetModelMat(SMat4x4().Scale(2.0,2.0,2.0).Move(0.0,200.0,0.0));
-
     /* main loop */
     LOGV("Entering main loop");
     dbg_ui->con->Msg("git revision: " GIT_SHA1 "\n");

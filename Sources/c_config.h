@@ -20,5 +20,4 @@ public:
 private:
     FileBuffer *raw;
 };
-#define MainConfig Singltone<Config>
 

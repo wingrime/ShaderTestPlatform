@@ -287,7 +287,7 @@ SScene::SScene(RectSizeInt v)
     postProcessDebugOutput = (new SPostProcess(shaderViewAsIs,w,h));
 
 
-    UpdateCfgLabel();
+    ResetCfgLabel();
 }
 
 SScene::~SScene()
@@ -570,6 +570,16 @@ int SScene::debugSetDebugRenderOutputFlag(bool flag)
     debugRenderOutputFlag = flag;
     return ESUCCESS;
 }
+
+float SScene::debugGetRenderTime()
+{
+    return d_dbgRenderTimeMs;
+}
+
+float SScene::debugGetPostProcessingTime()
+{
+    return d_dbgPostProcessingTimeMs;
+}
 Recorder SScene::getRec() const
 {
     return rec;
@@ -744,26 +754,17 @@ int SScene::Render() {
         pp_stage_hdr_tonemap->DrawRBO(false);
 
     pp_time.End();
-    ui_time.Begin();
-    Singltone<DebugUI>::GetInstance()->Draw();
-    ui_time.End();
 
-    char buf [120];
+
+
     auto end = std::chrono::steady_clock::now();
 
-    auto diff = end- start;
 
-    SVec4 pos = cam.getPosition();
-
-    sprintf(buf,"DRAW:%4.3f ms\nUI: %4.3f ms\nPP: %4.3f ms\nCPU: %4.3f\nX:%4.3f\nY:%4.3f\nZ:%4.3f\n",      (float)rtime.getTime()*(1.0/ 1000000.0), \
-                                                                    (float)ui_time.getTime()*(1.0/1000000.0),\
-                                                                    (float)pp_time.getTime()*(1.0/1000000.0),\
-                                                                      std::chrono::duration <float, std::milli> (diff).count(),pos.x,pos.y,pos.z );
-    Singltone<DebugUI>::GetInstance()->fps_label->setText(buf);
-   
+    d_dbgRenderTimeMs =(float)rtime.getTime()*(1.0/ 1000000.0);
+    d_dbgPostProcessingTimeMs =(float)pp_time.getTime()*(1.0/ 1000000.0);
     return true;
 }
-int SScene::UpdateCfgLabel() {
+int SScene::ResetCfgLabel() {
 
     pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",d_cfg[0]);
     pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",d_cfg[0]);
