@@ -1,23 +1,8 @@
-#TODO LIST
-# fix zlib
-# deal with static/dynamic link
-
 cmake_minimum_required(VERSION 2.8)
-
-
-
-project (m_proj)
+project (MProject)
 
 set(BUILD_OUTDIR,"${PROJECT_SOURCE_DIR}/Build")
-
-
 set(EXECUTABLE_OUTPUT_PATH,"${PROJECT_SOURCE_DIR}/Build")
-
-set (CMAKE_CXX_COMPILER "g++")
-set (CMAKE_C_COMPILER "gcc") 
-set (CMAKE_RC_COMPILER "windres") 
-set (CMAKE_MAKE_PROGRAM "wingw32-make") 
-set (CMAKE_BUILD_TOOL "wingw32-make") 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -28,17 +13,14 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -g -ggdb -gdwarf-2 -O2
 else()
 add_definitions(-D__BUILD_DROP_ASSERT__)
 set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -static-libstdc++ -Wl,-Bstatic -lwinpthread -O3 -flto -msse2  -mfpmath=sse,387 -msse -fomit-frame-pointer ${CMAKE_CXX_FLAGS}")
-#todo ?
+
 #set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Werror -g -Wextra -Wshadow -pedantic ${CMAKE_CXX_FLAGS}")
 endif()
-
-
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-message ("M Proj building")
 
 if(NOT DEFINED ENV{FREETYPE_DIR})
 	set(ENV{FREETYPE_DIR} "${PROJECT_SOURCE_DIR}/External/freetype")
@@ -105,10 +87,7 @@ AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources RENDER_HEADERS)
 
 AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources/Tests RENDER_TESTS)
 
-message ("${RENDER_HEADERS}")
 
-
-message ("${RENDER_TESTS}")
 #add git revision to variable
 exec_program(
     "git"
@@ -120,7 +99,9 @@ add_definitions( -DGIT_SHA1="${VERSION}" )
 message ("${VERSION}")
 message ("GIT OUTPUT")
 
-add_executable("main" main.cpp External/imgui/imgui.cpp Scene.cpp DebugUI.cpp IMGuiHooks.cpp  ${RENDER_HEADERS})
+set(CORE_SRC External/imgui/imgui.cpp Scene.cpp DebugUI.cpp IMGuiHooks.cpp )
+
+add_executable("main" main.cpp ${CORE_SRC}  ${RENDER_HEADERS})
 
 target_link_libraries(main "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
@@ -138,7 +119,7 @@ add_custom_command(TARGET main
           COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
           COMMAND ${CMAKE_COMMAND} -E copy "${LUA_LIBRARIES}/liblua.dll" "${PROJECT_SOURCE_DIR}/Build/"
           )
-add_executable("tests" Scene.cpp DebugUI.cpp IMGuiHooks.cpp External/imgui/imgui.cpp "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
+add_executable("tests" ${CORE_SRC} "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
 target_link_libraries(tests "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(tests "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
 target_link_libraries(tests OpenGL32)
