@@ -87,6 +87,12 @@ AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources RENDER_HEADERS)
 
 AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources/Tests RENDER_TESTS)
 
+#buildin lua, submodules are strange things there
+include_directories(${PROJECT_SOURCE_DIR}/External/lua/src)
+AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/External/lua/src LUA_BUILDIN_SRC)
+list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/luac.c)
+list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/lua.c)
+list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/loadlib_rel.c)
 
 #add git revision to variable
 exec_program(
@@ -99,15 +105,15 @@ add_definitions( -DGIT_SHA1="${VERSION}" )
 message ("${VERSION}")
 message ("GIT OUTPUT")
 
-set(CORE_SRC External/imgui/imgui.cpp Scene.cpp DebugUI.cpp IMGuiHooks.cpp )
+set(CORE_SRC External/imgui/imgui.cpp Scene.cpp DebugUI.cpp IMGuiHooks.cpp  )
 
-add_executable("main" main.cpp ${CORE_SRC}  ${RENDER_HEADERS})
+add_executable("main" main.cpp ${CORE_SRC} ${LUA_BUILDIN_SRC} ${RENDER_HEADERS} )
 
 target_link_libraries(main "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
 target_link_libraries(main OpenGL32)
 target_link_libraries(main "${FREETYPE_LIBRARY}")
-target_link_libraries(main "${LUA_LIBRARIES}/liblua.dll.a" )
+#target_link_libraries(main "${LUA_LIBRARIES}/liblua.dll.a" ) #build in lua
 
 set_target_properties( main PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Build")
 
@@ -117,18 +123,16 @@ add_custom_command(TARGET main
           COMMAND ${CMAKE_COMMAND} -E copy "$ENV{FREETYPE_DIR}/bin/freetype6.dll" "${PROJECT_SOURCE_DIR}/Build/"
           COMMAND ${CMAKE_COMMAND} -E copy "${GLEW_LIBRARY}/../bin/libglew.dll" "${PROJECT_SOURCE_DIR}/Build/"
           COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
-          COMMAND ${CMAKE_COMMAND} -E copy "${LUA_LIBRARIES}/liblua.dll" "${PROJECT_SOURCE_DIR}/Build/"
+          #COMMAND ${CMAKE_COMMAND} -E copy "${LUA_LIBRARIES}/liblua.dll" "${PROJECT_SOURCE_DIR}/Build/"   #to link lua
           )
 add_executable("tests" ${CORE_SRC} "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
+set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Build")
 target_link_libraries(tests "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(tests "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
 target_link_libraries(tests OpenGL32)
 target_link_libraries(tests "${FREETYPE_LIBRARY}")
 #run tests
-add_custom_command(TARGET tests
-          POST_BUILD
-          # thast should not be there but seems cmake not build tests in right output
-          # test autorun disabled
-          COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/tests.exe" "${PROJECT_SOURCE_DIR}/Build/"
-          #COMMAND "${PROJECT_SOURCE_DIR}/Build/tests.exe"
-          )
+#add_custom_command(TARGET tests
+#          POST_BUILD
+#          COMMAND "${PROJECT_SOURCE_DIR}/Build/tests.exe"
+#          )
