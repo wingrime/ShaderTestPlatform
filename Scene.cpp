@@ -255,9 +255,7 @@ SScene::SScene(RectSizeInt v)
     renderPipelineLink();
 
     rtShadowMap->texDEPTH()->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
-
     rtPrepass->texIMG(0)->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
-
     rtPrepass->texIMG(0)->setInterpolationMode(SRBOTexture::InterpolationType::TEX_NEAREST);
 
     pp_stage_ssao = new SPostProcess(new SShader("PostProcessing/PostProccessQuard.vert", "PostProcessing/SSAO/SimpleSSAO.frag"),w/2,h/2,rtPrepass->texIMG(0),rtPrepass->texDEPTH(),texRandom);
