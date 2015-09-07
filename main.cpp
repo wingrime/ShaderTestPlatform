@@ -16,11 +16,8 @@
 #include "Scene.h"
 #include <chrono>
 #include "selene.h"
-
 #include "oglGlutInit.h"
-
 #include <imgui.h>
-
 #include "IMGuiHooks.h"
 
 /*Singletons */
