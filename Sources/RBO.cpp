@@ -46,14 +46,14 @@ SGenericTexture* RBO::texDEPTH()
     return d_texDEPTH;
 }
 
-SVec2 RBO::getSize()
+RectSizeInt RBO::getSize()
 {
-    return SVec2(d_w,d_h);
+    return RectSizeInt(d_w,d_h);
 }
 
-int RBO::Resize(SVec2 new_sz)
+int RBO::Resize(RectSizeInt new_sz)
 {
-    //TODO: full impl
+    //NOIMPL
     d_w = new_sz.w;
     d_h = new_sz.h;
     return ESUCCESS;
@@ -187,7 +187,7 @@ int RBO::debugRegisterSelf()
     return 0;
 }
 /* Constructor from ptr's*/
-RBO::RBO(std::string name, int w, int h, RBOType _type,
+RBO::RBO(const std::string &name, int w, int h, RBOType _type,
         SRBOTexture * _texIMG,
         SRBOTexture * _texIMG1,
         SRBOTexture * _texIMG2,
@@ -226,7 +226,7 @@ RBO::RBO(std::string name, int w, int h, RBOType _type,
         IsReady = true;
 }
 /*single buffer*/
-RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
+RBO::RBO(const std::string &name , int def_w, int def_h, RBO::RBOType type)
     :d_name(name),d_type(type),d_w(def_w),d_h(def_h)
 {
     for (int i = 0 ; i < MAX_COLOR_ATTACHMENTS; i++) {
@@ -260,13 +260,8 @@ RBO::RBO(std::string name ,int def_w,int def_h, RBO::RBOType type)
     if (attachRBOTextures() == ESUCCESS)
         IsReady = true;
 }
-
-RBO::~RBO()
-{
-    glDeleteFramebuffers(1,&d_fbo);
-}
 /* new constructor*/
-RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, int t0_s, SRBOTexture::RTType t1_type, int t1_s, SRBOTexture::RTType t2_type, int t2_s)
+RBO::RBO(const std::string &name, int def_w, int def_h, RBO::RBOType type, SRBOTexture::RTType t0_type, int t0_s, SRBOTexture::RTType t1_type, int t1_s, SRBOTexture::RTType t2_type, int t2_s)
         :d_name(name),d_type(type),d_w(def_w),d_h(def_h)
 {
     MASSERT(t0_type == SRBOTexture::RTType::RT_NONE);
@@ -315,6 +310,16 @@ RBO::RBO(std::string name, int def_w, int def_h, RBO::RBOType type, SRBOTexture:
     if (attachRBOTextures() == ESUCCESS)
         IsReady = true;
 
+}
+
+RBO::~RBO()
+{
+    for (int i = 0 ; i < d_buffers; i++) {
+        delete d_texIMG[i];
+
+    }
+    delete d_texDEPTH;
+    glDeleteFramebuffers(1,&d_fbo);
 }
 
 int RBO::ResolveMSAA(const RBO &dst)

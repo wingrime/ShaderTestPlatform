@@ -31,83 +31,24 @@
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
 
-template <class T>
-inline void hash_combine(std::size_t & seed, const T & v)
-{
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
-namespace std
-{
-    template <>
-    struct hash<CObjVertexN>
-    {
-        size_t operator()(const CObjVertexN& k) const
-        {
-            // Compute individual hash values for two data members and combine them using XOR and bit shifting
-            //return ((hash<float>()(k.n.x) ^ (hash<float>()(k.n.y) << 1)  ) >> 1);
-            std::size_t seed = 0;
-            hash_combine(seed, k.n.x);
-            hash_combine(seed, k.n.y);
-            hash_combine(seed, k.n.z);
-            hash_combine(seed, k.p.x);
-            hash_combine(seed, k.p.y);
-            hash_combine(seed, k.p.z);
-            hash_combine(seed, k.tc.u);
-            hash_combine(seed, k.tc.v);
-            return seed;
-        }
-    };
-}
-std::shared_ptr<CObjSubmesh> MeshIndexer::Do()
-{
-    LOGV(string_format("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d ",d_inmesh->name.c_str(),d_inmesh->m_name.c_str(),d_inmesh->id, d_inmesh->vn.size()));
-    std::shared_ptr<CObjSubmesh> mesh;
-    mesh.reset(new CObjSubmesh());
-    mesh->m_name = d_inmesh->m_name;
-    mesh->name = d_inmesh->name;
-    mesh->id = d_inmesh->id;
-     mesh->m_dir = d_inmesh->m_dir;
-    unsigned int current_index = 0;
+#include "IndexedMesh.h"
 
-    std::unordered_map<CObjVertexN, unsigned int  > vn_map;
-
-
-    for( auto it = std::begin(d_inmesh->vn); it != std::end(d_inmesh->vn); ++it) {
-        auto k = vn_map.find(*it);
-        if (k == vn_map.end()) {
-        /* if there is no index, then add new index*/
-            vn_map[*it] = current_index;
-            mesh->vn.push_back(*it);
-            mesh->indexes.push_back(current_index);
-            current_index++;
-        } else {
-            /*if it is in index*/
-            mesh->indexes.push_back(vn_map[*it]);
-        }
-
-    }
-    LOGV(string_format("Indexing result: indepened_triangles=%d",mesh->vn.size()) );
-    return  (mesh);
-
-}
-
-int SObjModel::ConfigureProgram(SShader* sprog){
+int SObjModel::ConfigureProgram(SShader& sprog){
     if (!IsReady)
         return EFAIL;
-    sprog->SetUniform("matrixModel",model);
+    sprog.SetUniform("matrixModel",model);
 
-    sprog->SetUniform("samplerAlbedo",0);
-    sprog->SetUniform("samplerNormalMap",1);
-    sprog->SetUniform("samplerAlphaMap",2);
+    sprog.SetUniform("samplerAlbedo",0);
+    sprog.SetUniform("samplerNormalMap",1);
+    sprog.SetUniform("samplerAlphaMap",2);
 
-    sprog->SetUniform("samplerShadowMap",5);
-    sprog->SetUniform("samplerTex1",6);
-    sprog->SetUniform("samplerEnvCubeMap",7);
-    sprog->SetUniform("samplerTex2",8);
-    sprog->SetUniform("samplerEnvSH",9);
-    sprog->SetUniform("samplerRandomNoise",10);
-    sprog->Bind();
+    sprog.SetUniform("samplerShadowMap",5);
+    sprog.SetUniform("samplerTex1",6);
+    sprog.SetUniform("samplerEnvCubeMap",7);
+    sprog.SetUniform("samplerTex2",8);
+    sprog.SetUniform("samplerEnvSH",9);
+    sprog.SetUniform("samplerRandomNoise",10);
+    sprog.Bind();
 
     return 0;
 }
@@ -115,27 +56,32 @@ int SObjModel::ConfigureProgram(SShader* sprog){
 SObjModel::SObjModel(const std::string&  fname) 
 {
     LOGV(std::string("Opening obj model ")+fname);
-    CObjMeshParser parser(fname);
-    if (!parser.IsReady)
+    CObjMeshParser parser;
+    ObjCtx * ctx = parser.ParseFromFile(fname);
+
+    if (!ctx)
         {
             LOGE(std::string("Unable open model"));
             return;
         }
 
-    auto submesh_set = parser.getSM();
+    auto submesh_set = ctx->subMeshSet;
     long total_triangles = 0;
     for (auto it = submesh_set.begin(); it != submesh_set.end();++it) {
-        MeshIndexer idx(*it);
-        auto res = std::shared_ptr<CObjSubmesh>(idx.Do());
+        MeshIndexer idx;
+        auto res = idx.IndexNonIndexedMesh(*it);
         (*it)->vn.clear();
         total_triangles += res->vn.size();
         d_sm.push_back(res);
-        (*it).reset();
    }
+    std::vector<std::string> mtlrefs = ctx->refMaterialFiles;
+    CObjMeshParser::ReleaseContext(ctx);
     LOGV(string_format("Mesh information: Submesh count:%d, Total mesh triangles:%d", d_sm.size(), total_triangles ));
 
     LOGV("Load materials");
-    std::vector<std::string> mtlrefs = parser.getMTLs();
+
+    //std::string s = mtlrefs[0];
+    //printf("RefMaterial:%s\n",s.c_str());
 
     if (!mtlrefs.empty())
     {
@@ -168,29 +114,29 @@ SObjModel::SObjModel(const std::string&  fname)
 void SObjModel::SetModelMat(const SMat4x4& m){
 	model = m;
 }
-void SObjModel::BindTextures(SMaterial * m) {
-    if (m->alphaMaskTex && m->alphaMaskTex->IsReady)
-        m->alphaMaskTex->Bind(2);
+void SObjModel::BindTextures(SMaterial &m) {
+    if (m.alphaMaskTex && m.alphaMaskTex->IsReady)
+        m.alphaMaskTex->Bind(2);
     else
         texDiffuse->Bind(2);
-    if (m->albedoTex && m->albedoTex->IsReady)
-        m->albedoTex->Bind(0);
+    if (m.albedoTex && m.albedoTex->IsReady)
+        m.albedoTex->Bind(0);
     else
         texDiffuse->Bind(0);
-    if (m->bumpMapTex && m->bumpMapTex->IsReady)
-        m->bumpMapTex->Bind(1);
+    if (m.bumpMapTex && m.bumpMapTex->IsReady)
+        m.bumpMapTex->Bind(1);
     else
         texNormal->Bind(1);
 }
 
 void SObjModel::LoadTextures() {
 
-    texDiffuse.reset(new STexture("empty_texture.png"));
+    texDiffuse = (new STexture("empty_texture.png"));
     if (!texDiffuse->IsReady) {
         LOGE(std::string(" diffuse texture file not found"));
         return;
     }
-    texNormal.reset(new STexture("empty_normal.png",false));
+    texNormal = (new STexture("empty_normal.png",false));
     if (!texNormal->IsReady) {
        LOGE(std::string("normal texture file not found"));
         return;
@@ -273,7 +219,7 @@ void SObjModel::BindVAOs() {
             //MASSERT(submesh->vn.empty());
            // MASSERT(submesh->indexes.empty());
             //gl 4.5 without EXT
-            glNamedBufferDataEXT(temp_vbo,submesh->vn.size() *sizeof(CObjVertexN), submesh->vn.data(), GL_STATIC_DRAW);
+            glNamedBufferDataEXT(temp_vbo,submesh->vn.size() *sizeof(UVNVertex), submesh->vn.data(), GL_STATIC_DRAW);
             glNamedBufferDataEXT(temp_ibo,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
             SubMeshIDs idx;
             idx.vbo = temp_vbo;
@@ -286,7 +232,7 @@ void SObjModel::BindVAOs() {
         }
         //glBindVertexArray(0);
 }
-void SObjModel::Render(RenderContext& r) {
+void SObjModel::Render(RenderContext &r) {
     glBindVertexArray(d_emptyVAO);
 
     /*activate shader and load model matrix*/
@@ -327,7 +273,7 @@ void SObjModel::Render(RenderContext& r) {
 
             if (last_hash != m.name_hash){
                 last_hash = m.name_hash;
-                BindTextures(&m);
+                BindTextures(m);
                 for (int i = 0 ; i < r.MAX_RBO_TEXTURES;i++)
                 {
                     if (r.d_RBOTexture[i]) {
@@ -343,15 +289,15 @@ void SObjModel::Render(RenderContext& r) {
             /*direct approach*/
 
             if (locPositions != EFAIL) {
-            glVertexAttribPointer ( locPositions, 3 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,p) );
+            glVertexAttribPointer ( locPositions, 3 ,GL_FLOAT,  GL_FALSE, sizeof(UVNVertex), (const GLvoid*) offsetof(UVNVertex,p) );
             glEnableVertexAttribArray ( locPositions );
             }
             if (locNormals != EFAIL) {
-            glVertexAttribPointer ( locNormals, 3 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,n) );
+            glVertexAttribPointer ( locNormals, 3 ,GL_FLOAT,  GL_FALSE, sizeof(UVNVertex), (const GLvoid*) offsetof(UVNVertex,n) );
             glEnableVertexAttribArray ( locNormals );
             }
             if (locUV != EFAIL) {
-            glVertexAttribPointer ( locUV, 2 ,GL_FLOAT,  GL_FALSE, sizeof(CObjVertexN), (const GLvoid*) offsetof(CObjVertexN,tc) );
+            glVertexAttribPointer ( locUV, 2 ,GL_FLOAT,  GL_FALSE, sizeof(UVNVertex), (const GLvoid*) offsetof(UVNVertex,tc) );
             glEnableVertexAttribArray ( locUV );
             }
 

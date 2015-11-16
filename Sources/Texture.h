@@ -37,12 +37,10 @@ public:
     int Bind(unsigned int sampler) const;
     int setInterpolationMode(InterpolationType t);
     int BindImage(unsigned int unit);
-
-
-    std::string d_fname;
-    TextureType type;      /*serialize support */
-    int x,y;
     bool IsReady = false;
+
+
+
     bool d_issRGB;
 
     friend class cereal::access;
@@ -56,6 +54,10 @@ public:
 private:
     int CreateTexture(GLsizei num_mipmaps, GLenum internalformat);
     int ConfigureTexture(const BorderType t) const;
+
+    std::string d_fname;
+    TextureType type;      /*serialize support */
+    int x,y;
 
   
 };

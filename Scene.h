@@ -22,6 +22,7 @@
 #include "RenderState.h"
 #include "DebugUI.h"
 #include "WeatherSky.h"
+#include "r_projmat.h"
 
 struct RenderPipelineStageConfig {
     /* pipline stage name */
@@ -69,7 +70,7 @@ public:
     ~SScene();
     int Render();
 
-    int Reshape(int w, int h);
+    int Reshape(RectSizeInt v);
 
     std::vector< std::shared_ptr <SObjModel> > d_render_list;
 
@@ -137,18 +138,14 @@ public:
 
 
 private:
-    bool d_first_render;
+    bool d_RegenerateCubemap;
+    SMat4x4 infFarMatrix = SInfinityFarProjectionMatrix(100,1.0,toRad(26.0));
 
     /* prepass prog*/
     SShader *  prepass_prog;
-
-
-   SShader * pp_prog_hdr_blur_kawase;
-
-    SShader* pp_prog_hdr_tonemap; /* final tonemap*/
-
+    SShader * pp_prog_hdr_blur_kawase;
+    SShader * pp_prog_hdr_tonemap; /* final tonemap*/
     SShader * cubemap_prog_generator;
-
     SShader * shaderViewAsIs;
 
     /*shortcuts for stages*/
@@ -162,7 +159,7 @@ private:
     int RenderShadowMap(const RBO& v);
     int RenderCubemap();
     int RenderPrepass(const RenderPipelineStageRuntime &runtime);
-    int BlurKawase();
+    int BlurKawase(float factor);
 
 private:
 
@@ -174,6 +171,7 @@ private:
    bool d_toggle_MSAA = true;
    bool d_toggle_brightpass = true;
    bool d_toggle_ssao = true;
+   float d_BloomFactor;
 public:
     int ResetCfgLabel();
     int UpdateScene(float dt);
@@ -181,7 +179,7 @@ private:
 
     DebugDraw d_debugDrawMgr;
     int UpdateCfgLabel();
-    float  d_cfg [15] = {0.020, 0.40,0.00,0.26,2.0,0.75,0.015,0.22,0.30,0.10,0.20,0.01,0.30,1.12,4.6};
+    //float  d_cfg [15] = {0.020, 0.40,0.00,0.26,2.0,0.75,0.015,0.22,0.30,0.10,0.20,0.01,0.30,1.12,4.6};
 public:
     //DebugUI dbg_ui;
     /* shadow map debug*/
@@ -194,6 +192,7 @@ public:
     float debugGetPostProcessingTime();
 
     float d_dbgRenderTimeMs;
+
     float d_dbgPostProcessingTimeMs;
     RBO * debugFinalRenderOutput;
     bool debugRenderOutputFlag = false;

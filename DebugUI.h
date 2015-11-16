@@ -6,7 +6,7 @@ class SScene;
 class DebugUI {
 public:
 
-        UIConsole *con;
+   UIConsole *con;
 
     DebugUI(RectSizeInt &v);
 

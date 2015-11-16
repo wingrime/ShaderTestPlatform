@@ -5,7 +5,7 @@
 /* enums can't forward */
 #include "RBOTexture.h"
 #include <vector>
-class SVec2;
+class vec2;
 
 /*RenderTarget Type*/
 class RBO {
@@ -26,30 +26,31 @@ public:
     };
 
 	/*base constructor*/
-    RBO(std::string name,int w, int h,RBOType type, \
+    RBO(const std::string& name,int w, int h,RBOType type, \
                                                SRBOTexture * texIMG, \
                                                SRBOTexture * texIMG1,\
                                                SRBOTexture * texIMG2,\
                                                SRBOTexture * texDEPTH);
 
-    RBO(std::string name,int w, int h,RBOType type, \
+    RBO(const std::string& name,int w, int h,RBOType type, \
                                                SRBOTexture * texIMG, \
                                                SRBOTexture * texDEPTH)
 
         : RBO(name , w, h , type , texIMG,0,0, texDEPTH ){}
-    RBO(std::string name,int w, int h,RBOType type, SRBOTexture * texIMG ) :RBO(name,w, h , type , texIMG, 0 ){}
+    RBO(const std::string& name,int w, int h,RBOType type, SRBOTexture * texIMG ) :RBO(name,w, h , type , texIMG, 0 ){}
 
-    RBO(std::string name,int def_w, int def_h,RBOType type);
+    RBO(const std::string& name,int def_w, int def_h,RBOType type);
 
-    RBO(std::string name,int w, int h) :RBO(name,w,h,RBO_SCREEN) {}
-    ~RBO();
+    RBO(const std::string& name,int w, int h) :RBO(name,w,h,RBO_SCREEN) {}
 
     /*new interface*/
-    RBO(std::string name,int def_w, int def_h,RBOType type, SRBOTexture::RTType t0_type, int t0_s, \
+    RBO(const std::string& name,int def_w, int def_h,RBOType type, SRBOTexture::RTType t0_type, int t0_s, \
                                            SRBOTexture::RTType t1_type, int t1_s, \
                                            SRBOTexture::RTType t2_type, int t2_s );
 
     RBO(const RBO&) = delete;
+
+    ~RBO();
 
     int ResolveMSAA(const RBO& dst);
 
@@ -65,9 +66,9 @@ public:
     SGenericTexture* texDEPTH();
 
     /*Request size*/
-    SVec2 getSize();
+    RectSizeInt getSize();
     /*Do resize*/
-    int Resize(SVec2 new_sz);
+    int Resize(RectSizeInt new_sz);
     bool IsReady = false;
     RBOType getType();
 private:

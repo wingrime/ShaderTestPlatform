@@ -15,11 +15,15 @@ SPostProcess::SPostProcess(SShader *prog, int w, int h,
 {
     for (int i = 0 ; i < SRC_TEXTURES_MAX ; i++){
         d_texSRC[i] = 0;
+        d_RBO[i] = 0; //??
+
     }
+    d_resultRBO = 0;
     d_texSRC[0] = texSRC1;
     d_texSRC[1] = texSRC2;
     d_texSRC[2] = texSRC3;
     d_texSRC[3] = texSRC4;
+
 
     InitQuard();
     InitUniforms(RectSizeInt(w,h));
@@ -27,6 +31,7 @@ SPostProcess::SPostProcess(SShader *prog, int w, int h,
 
 
 }
+
 
 SPostProcess::SPostProcess(SShader *prog,  RBO * resultRBO,
                                            RBO * srcRBO1,
@@ -49,8 +54,8 @@ SPostProcess::SPostProcess(SShader *prog,  RBO * resultRBO,
     }
 
     InitQuard();
-    SVec2 sz = resultRBO->getSize();
-    InitUniforms(RectSizeInt(sz.w,sz.h));
+    RectSizeInt sz = resultRBO->getSize();
+    InitUniforms(sz);
 }
 
 void SPostProcess::InitUniforms(RectSizeInt s)
@@ -62,7 +67,7 @@ void SPostProcess::InitUniforms(RectSizeInt s)
             p_prog->SetUniform(buf,i);
     }
     /*configure outbuffer size*/
-    p_prog->SetUniform("vp",SVec4(s.w,s.h,0,0));
+    p_prog->SetUniform("vp",vec4(s.w,s.h,0,0));
 
 }
 void SPostProcess::Draw() {
@@ -94,6 +99,8 @@ void SPostProcess::DrawRBO(bool redraw)
 }
 
 void SPostProcess::Clean()
+
+
 {
     MASSERT(!d_resultRBO);
     d_resultRBO->Clean();

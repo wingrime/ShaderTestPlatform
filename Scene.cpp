@@ -80,12 +80,13 @@ SScene::SScene(RectSizeInt v)
     ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
+    ,d_RegenerateCubemap(true)
 
 
     //,dbg_ui(this,v)
     
 {
-
+    d_BloomFactor = 0.1;
     /*Weather system*/
     w_sky = new SWeatherSky();
     /*scene noise*/
@@ -284,8 +285,6 @@ SScene::SScene(RectSizeInt v)
 
     postProcessDebugOutput = (new SPostProcess(shaderViewAsIs,w,h));
 
-
-    ResetCfgLabel();
 }
 
 SScene::~SScene()
@@ -293,23 +292,24 @@ SScene::~SScene()
 
 }
 
-int SScene::Reshape(int w, int h) {
+int SScene::Reshape(RectSizeInt v) {
 
-        rtSCREEN->Resize(SVec2(w,h));
+    mainRenderTonemapPass->stageRBO->Resize(v);
+        rtSCREEN->Resize(v);
         /* there should be internal buffer recreation code but ?? */
-        glViewport ( 0, 0, (GLsizei)w, (GLsizei)h );
+        glViewport( 0, 0, (GLsizei)v.w, (GLsizei)v.h );
         /*fix aspect ratio*/
-        //cam.setProjMatrix( SPerspectiveProjectionMatrix(100.0f, 10000.0f,(float)h / (float)w,toRad(26.0)) );
+        cam.setProjMatrix( SPerspectiveProjectionMatrix(100.0f, 10000.0f,(float)v.h / (float)v.w,toRad(26.0)) );
 
         return ESUCCESS;
 }
 
 int SScene::AddObjectToRender(std::shared_ptr<SObjModel> obj)
 {
-    obj->ConfigureProgram(lookupStageShader("Main"));
-    obj->ConfigureProgram(lookupStageShader("MainMSAA"));
-    obj->ConfigureProgram(lookupStageShader("Shadowmap"));
-    obj->ConfigureProgram(cubemap_prog_generator);
+    obj->ConfigureProgram(*lookupStageShader("Main"));
+    obj->ConfigureProgram(*lookupStageShader("MainMSAA"));
+    obj->ConfigureProgram(*lookupStageShader("Shadowmap"));
+    obj->ConfigureProgram(*cubemap_prog_generator);
     d_render_list.push_back(obj);
     return 0;
 
@@ -337,7 +337,7 @@ int SScene::toggleSSAO(bool b)
 
 int SScene::regenerateEnvCubeMap()
 {
-    d_first_render = false;
+    d_RegenerateCubemap = true;
     return 0;
 }
 
@@ -347,43 +347,43 @@ std::vector <Point> FrustumPoints(const SMat4x4& PV) {
     std::vector <Point> s;
     SMat4x4 invPV = PV.Inverse();
 
-    SVec4 f1 = invPV*SVec4(1.0,-1.0,-1.0,1.0);
+    vec4 f1 = invPV*vec4(1.0,-1.0,-1.0,1.0);
     f1.DivW();
     s.push_back(Point(f1));
-    SVec4 f2 = invPV*SVec4(-1.0,1.0,-1.0,1.0);
+    vec4 f2 = invPV*vec4(-1.0,1.0,-1.0,1.0);
     f2.DivW();
     s.push_back(Point(f2));
-    SVec4 f3 = invPV*SVec4(1.0,1.0,-1.0,1.0);
+    vec4 f3 = invPV*vec4(1.0,1.0,-1.0,1.0);
     f3.DivW();
     s.push_back(Point(f3));
-    SVec4 f4 = invPV*SVec4(-1.0,-1.0,-1.0,1.0);
+    vec4 f4 = invPV*vec4(-1.0,-1.0,-1.0,1.0);
     f4.DivW();
     s.push_back(Point(f4));
-    SVec4 b1 = invPV*SVec4(1.0,-1.0,1.0,1.0);
+    vec4 b1 = invPV*vec4(1.0,-1.0,1.0,1.0);
     b1.DivW();
     s.push_back(Point(b1));
-    SVec4 b2 = invPV*SVec4(-1.0,1.0,1.0,1.0);
+    vec4 b2 = invPV*vec4(-1.0,1.0,1.0,1.0);
     b2.DivW();
     s.push_back(Point(b2));
-    SVec4 b3 = invPV*SVec4(1.0,1.0,1.0,1.0);
+    vec4 b3 = invPV*vec4(1.0,1.0,1.0,1.0);
     b3.DivW();
     s.push_back(Point(b3));
-    SVec4 b4 = invPV*SVec4(-1.0,-1.0,1.0,1.0);
+    vec4 b4 = invPV*vec4(-1.0,-1.0,1.0,1.0);
     b4.DivW();
     s.push_back(Point(b4));
     return s;
 
 }
 
-Point2d ProjectPoint(const Point &in, const SMat4x4 &sm_mvp) {
-    SVec4 v = sm_mvp*SVec4(in.x,in.y,in.z,1.0);
+vec2 ProjectPoint(const Point &in, const SMat4x4 &sm_mvp) {
+    vec4 v = sm_mvp*vec4(in.x,in.y,in.z,1.0);
     v = v / v.w;
-    return Point2d(v.x,v.y);
+    return vec2(v.x,v.y);
 }
 
 
 BBox PSRProjectionBoundingBox(const AABB &a, const SMat4x4 &sm_mvp) {
-    Point2d p[8];
+    vec2 p[8];
 
     p[0] = ProjectPoint(Point(a.max_point.x,a.max_point.y,a.max_point.z),sm_mvp);
     p[1] = ProjectPoint(Point(a.max_point.x,a.max_point.y,a.min_point.z),sm_mvp);
@@ -418,7 +418,7 @@ BBox PSRProjectionPointSet(const std::vector <Point> & p_list , const SMat4x4 &s
     res.min_point.x = std::numeric_limits<float>::max();
     res.min_point.y = std::numeric_limits<float>::max();
     for (auto& ps : p_list ) {
-        Point2d p = ProjectPoint(ps,sm_mvp);
+        vec2 p = ProjectPoint(ps,sm_mvp);
         if (res.max_point.x < p.x )
               res.max_point.x =p.x;
         if (res.max_point.y < p.y )
@@ -446,15 +446,15 @@ SMat4x4 PSRFocusSMSTransformMatrix(const BBox &psr ) {
                     0.0,0.0,0.0,1.0);
 }
 
-SMat4x4 LookAtMatrix(const SVec4 &forward, const SVec4 &up ) {
+SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
 
-    SVec4 zaxis = SVec4::Normalize(forward); /*direction to view point*/
-    SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(SVec4::Normalize(up),zaxis)); /* left vector*/
-    SVec4 yaxis(SVec4::Normalize(SVec4::Cross3(zaxis,xaxis))); /* new up vector */
-    SVec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
-    SVec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
-    SVec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
-    SVec4 v4 (0.0,0.0,0.0,1.0);
+    vec4 zaxis = vec4::Normalize(forward); /*direction to view point*/
+    vec4 xaxis = vec4::Normalize(vec4::Cross3(vec4::Normalize(up),zaxis)); /* left vector*/
+    vec4 yaxis(vec4::Normalize(vec4::Cross3(zaxis,xaxis))); /* new up vector */
+    vec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
+    vec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
+    vec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
+    vec4 v4 (0.0,0.0,0.0,1.0);
     SMat4x4 l = SMat4x4(v1,v2,v3,v4);
     return l;
 
@@ -476,9 +476,9 @@ int SScene::UpdateScene(float dt) {
     std::vector <Point> aabbPoints = AABBPoints(psrAABB);
     psrPoints.insert(psrPoints.end(),aabbPoints.begin(),aabbPoints.end()); /*JOIN - better solution, convex hull*/
 
-    //SVec4 cam_up = SVec4::Normalize(cam.getViewMatrix().ExtractUpVector());
-    SVec4 cam_up = SVec4(0.0,1.0,0.0,1.0);
-    SVec4 sunDirection = w_sky->GetSunDirection();
+    //vec4 cam_up = vec4::Normalize(cam.getViewMatrix().ExtractUpVector());
+    vec4 cam_up = vec4(0.0,1.0,0.0,1.0);
+    vec4 sunDirection = w_sky->GetSunDirection();
     SMat4x4 shadowMapViewMatrix = LookAtMatrix(sunDirection,cam_up); /*new basis*/
     int min_idx;
     UNUSED(min_idx);
@@ -488,7 +488,7 @@ int SScene::UpdateScene(float dt) {
     float min_z = std::numeric_limits<float>::max();
     float shadowMapDistance;
     for (auto& p : psrPoints ) {
-        SVec4 ov = shadowMapViewMatrix*SVec4(p.x,p.y,p.z,1.0f);//OPTIMIZE dot with row should be enought;
+        vec4 ov = shadowMapViewMatrix*vec4(p.x,p.y,p.z,1.0f);//OPTIMIZE dot with row should be enought;
 
         if (max_z < ov.z)
         {
@@ -506,7 +506,7 @@ int SScene::UpdateScene(float dt) {
     shadowMapDistance = fabs(max_z-min_z);
     Point p = psrPoints[max_idx];
 
-    SVec4 pos = SVec4(p.x,p.y,p.z,1.0);
+    vec4 pos = vec4(p.x,p.y,p.z,1.0);
 
 
     SMat4x4 shadowMapFinalProjectionMatrix[4];
@@ -597,7 +597,7 @@ int inline SScene::RenderShadowMap(const RBO& v) {
     cam_prog->SetUniform("MVP2",d_shadowmap_cam[2].getProjMatrix()*d_shadowmap_cam[2].getViewMatrix());
     cam_prog->SetUniform("MVP3",d_shadowmap_cam[3].getProjMatrix()*d_shadowmap_cam[3].getViewMatrix());
     RenderContext r_ctx(cam_prog);
-    for (auto& r : d_render_list ) {
+    for (auto r : d_render_list ) {
         r->Render(r_ctx);
     }
     return ESUCCESS;
@@ -654,9 +654,8 @@ int SScene::RenderPrepass(const RenderPipelineStageRuntime &runtime)
     return 0;
 }
 
-int SScene::BlurKawase()
+int SScene::BlurKawase(float factor)
 {
-    float factor = d_cfg[6];
     int blurSizeLoc = pp_prog_hdr_blur_kawase->getUniformLocation("blurSize");
     pp_prog_hdr_blur_kawase->SetUniform(blurSizeLoc,(float)(factor*1.0));
     pp_stage_hdr_blur_hor->DrawRBO(false);
@@ -689,8 +688,7 @@ int inline SScene::RenderDirect(const RenderPipelineStageRuntime &runtime) {
         }
         RenderContext r_ctx2(w_sky->GetSkyShader() ,cam.getViewMatrix(),w_sky->GetSkyProjectionMatrix());
         w_sky->Draw(r_ctx2);
-
-    d_debugDrawMgr.Render(SInfinityFarProjectionMatrix(100,1.0,toRad(26.0))*cam.getViewMatrix());
+    d_debugDrawMgr.Render(infFarMatrix*cam.getViewMatrix());
 
     return 0;
 }
@@ -704,8 +702,8 @@ int SScene::Render() {
        msaa_pass.Bind();
     else
        normal_pass.Bind();
-    if (!d_first_render ) {
-        d_first_render = true;
+    if (d_RegenerateCubemap) {
+        d_RegenerateCubemap = false;
         RenderCubemap();
     }
     rtime.Begin();
@@ -729,7 +727,7 @@ int SScene::Render() {
     pp_stage_hdr_lum_key->DrawRBO(false);
     if (d_toggle_brightpass ) {
         pp_stage_hdr_bloom->DrawRBO(false);
-        BlurKawase();
+        BlurKawase(d_BloomFactor);
     } else {
         pp_stage_hdr_blur_vert2->Clean();
     }
@@ -761,29 +759,4 @@ int SScene::Render() {
     d_dbgRenderTimeMs =(float)rtime.getTime()*(1.0/ 1000000.0);
     d_dbgPostProcessingTimeMs =(float)pp_time.getTime()*(1.0/ 1000000.0);
     return true;
-}
-int SScene::ResetCfgLabel() {
-
-    pp_stage_ssao_blur_hor->getShader()->SetUniform("blurSize",d_cfg[0]);
-    pp_stage_ssao_blur_vert->getShader()->SetUniform("blurSize",d_cfg[0]);
-    /*dbg*/
-    pp_prog_hdr_tonemap->SetUniform("aoStrength",d_cfg[0]);
-
-    SShader * s = pp_stage_ssao->getShader();
-    s->SetUniform("ssaoSize",d_cfg[1]);
-    s->SetUniform("ssaoLevelClamp",d_cfg[2]);
-    s->SetUniform("ssaoDepthClamp",d_cfg[3]);
-    pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomClamp",d_cfg[4]);
-    pp_stage_hdr_bloom->getShader()->SetUniform("hdrBloomMul",d_cfg[5]);
-
-
-    pp_prog_hdr_tonemap->SetUniform("A",d_cfg[7]);
-    pp_prog_hdr_tonemap->SetUniform("B",d_cfg[8]);
-    pp_prog_hdr_tonemap->SetUniform("C",d_cfg[9]);
-    pp_prog_hdr_tonemap->SetUniform("D",d_cfg[10]);
-    pp_prog_hdr_tonemap->SetUniform("E",d_cfg[11]);
-    pp_prog_hdr_tonemap->SetUniform("F",d_cfg[12]);
-    pp_prog_hdr_tonemap->SetUniform("LW",float((d_cfg[13])));
-
-    return ESUCCESS;
 }

@@ -67,7 +67,7 @@ TEST(Camera, RotateY90) {
 TEST(Camera, LookAtIndent) {
     SCamera *cam = new SCamera(SMat4x4(), SMat4x4());
 
-    cam->LookAt(SVec4(0.0,0.0,-1.0,0.0),SVec4(0.0,0.0,0.0,0.0),SVec4(0.0,1.0,0.0,0.0));
+    cam->LookAt(vec4(0.0,0.0,-1.0,0.0),vec4(0.0,0.0,0.0,0.0),vec4(0.0,1.0,0.0,0.0));
     EXPECT_EQ( SMat4x4::Eq(SMat4x4(1.0,0.0,0.0,0.0, \
                                    0.0,1.0,0.0,0.0, \
                                    0.0,0.0,1.0,0.0, \

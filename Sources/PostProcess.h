@@ -25,8 +25,8 @@ public:
                                                const SGenericTexture* texSRC4);
 
     SPostProcess(SShader *prog,int w, int h,   const SGenericTexture* texSRC1,
-                                               const SGenericTexture* texSRC2,
-                                               const SGenericTexture* texSRC3)
+                                              const SGenericTexture* texSRC2,
+                                              const SGenericTexture* texSRC3)
                     :SPostProcess(prog,w,h,texSRC1,texSRC2, texSRC3,0) {}
     SPostProcess(SShader *prog,int w, int h,    const SGenericTexture* texSRC1,
                                                 const SGenericTexture* texSRC2)

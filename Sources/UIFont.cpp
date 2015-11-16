@@ -61,7 +61,7 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
 
     ui_prog->Bind();
     ui_prog->SetUniform("tex",0);
-    ui_prog->SetUniform("color",SVec4(1,1,1,1));
+    ui_prog->SetUniform("color",vec4(1,1,1,1));
     ui_prog->SetAttrib( "coord", 2, sizeof(float)*2, 0,GL_FLOAT);
 
     glBindVertexArray ( 0 );
@@ -155,7 +155,7 @@ int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp
     float w = t.bitmap_width * sx;
     float h = t.bitmap_rows * sy;
 
-    ui_prog->SetUniform("quad_size",SVec4(x2,y2,w,h));
+    ui_prog->SetUniform("quad_size",vec4(x2,y2,w,h));
    // GLfloat box[4][4] = {
    //     {x2,     y2    , 0, 0},
    //     {x2 + w, y2    , 1, 0},

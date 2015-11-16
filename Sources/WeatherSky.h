@@ -24,21 +24,23 @@ struct SolAng {
 class SWeatherSky {
 public:
     SWeatherSky ();
+    ~SWeatherSky ();
+    SWeatherSky (const SWeatherSky&) = delete;
     void Draw(RenderContext &r);
     SolAng SolarAngleModel(float LT,float delta_GMT,float d, float longtitude, float attitude);
     void SetTime(float time);
     void SetTurbidity(float t);
     void SetSunSize(float t);
-    void SetSunPos(const SVec4& sun);
+    void SetSunPos(const vec4& sun);
 
 
 
     SShader * GetSkyShader() {return sky_dome_prog;}
     SShader * GetSkyCubemapShader() {return sky_dome_cubemap_prog;}
     SObjModel * GetSkyModel() {return sky_dome_model;}
-    SMat4x4  GetSkyProjectionMatrix() {return matrix_projection;}
+    const SMat4x4  GetSkyProjectionMatrix() {return matrix_projection;}
 
-    SVec4 GetSunDirection();
+    vec4 GetSunDirection();
 
 private:
 
@@ -50,7 +52,7 @@ private:
 
     SMat4x4 matrix_projection = SInfinityFarProjectionMatrix(100.0f,1.0f,toRad(26.0));
 
-    SVec4 sun_light_direction = SVec4(0.5,0.5,0.0,1.0);
+    vec4 sun_light_direction = vec4(0.5,0.5,0.0,1.0);
 
 
     /*Sun location model*/

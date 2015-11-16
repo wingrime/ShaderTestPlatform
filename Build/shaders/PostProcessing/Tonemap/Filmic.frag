@@ -50,8 +50,9 @@ vec3 gamma_v3( vec3 c) {
 
 void main ()
 {
-  vec3 img_color = ( texelFetch(texHDR,ivec2(gl_FragCoord.xy),0)).rgb;
-  float img_bloom;
+  //vec3 img_color = ( texelFetch(texHDR,ivec2(gl_FragCoord.xy),0)).rgb;
+  vec3 img_color = texture(texHDR,uv).rgb;
+    float img_bloom;
   if (b_brightPass == 1)
     img_bloom =  ( texture(texBLUM,uv)).r;
   else

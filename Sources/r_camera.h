@@ -4,6 +4,7 @@
 /*serialization*/
 #include <cereal/types/map.hpp>
 #include <cereal/types/memory.hpp>
+#include <cereal/types/vector.hpp>
 #include <cereal/archives/binary.hpp>
 /*inhertance, can't avoid*/
 #include "r_projmat.h"
@@ -47,23 +48,23 @@ public:
     SCamera(const SCamera& sc) :proj(sc.proj),view(sc.view) {}
 
 
-    inline __attribute__((always_inline)) SMat4x4  getViewMatrix() const {return view;}
-    inline __attribute__((always_inline)) SMat4x4  getProjMatrix() const {return proj;}
-    SMat4x4 getViewProjectMatrix() ;
+    const SMat4x4  getViewMatrix() const {return view;}
+    const SMat4x4  getProjMatrix() const {return proj;}
+    const SMat4x4 getViewProjectMatrix() ;
 
     int setViewMatrix( const SMat4x4& m);
     int setProjMatrix( const SMat4x4& m);
 
-    SVec4 getPosition() const;
+    vec4 getPosition() const;
     int goForward(float s);
     int rotEulerX(float x);
     int rotEulerY(float y);
     int rotEulerZ(float z);
 
     int goPosition(float x, float y ,float z);
-    int goPosition(const SVec4& v);
-    int rotEuler(const SVec4& v);
-    int LookAt(const SVec4 &at, const SVec4 &eye, const SVec4 &up);
+    int goPosition(const vec4& v);
+    int rotEuler(const vec4& v);
+    int LookAt(const vec4 &at, const vec4 &eye, const vec4 &up);
 
     int SyncFromCamera(const SCamera& s);
 

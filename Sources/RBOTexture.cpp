@@ -245,6 +245,8 @@ SRBOTexture::SRBOTexture(RectSizeInt s, RTType t, unsigned int miplevel)
 }
 SRBOTexture::~SRBOTexture() {
     glDeleteTextures(1,&d_glTexID);
+
+
 }
 
 

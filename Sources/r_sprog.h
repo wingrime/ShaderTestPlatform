@@ -13,7 +13,7 @@
 
 #include "r_shader.h"
 class SMat4x4;
-class SVec4;
+class vec4;
 
 /*Hi-level interface to shader program*/
 /*
@@ -32,6 +32,9 @@ public:
     SShader(const std::string& vprog,const std::string& fprog, const std::string& gprog);
 
     SShader(const std::string& vprog,const std::string& fprog) :SShader(vprog, fprog, "") {}
+
+    SShader (const SShader &) = delete;
+
     unsigned int getUniformLocation(const std::string& name);
     ~SShader();
     int Bind();
@@ -41,20 +44,20 @@ public:
     int SetUniform(const std::string& var,float i );
     int SetUniform(const std::string& var,int i );
     int SetUniform(const std::string& var,const SMat4x4& mat );
-    int SetUniform(const std::string& var,const SVec4& vec );
+    int SetUniform(const std::string& var,const vec4& vec );
     /*via location*/
     int SetUniform(int loc, float i );
     int SetUniform(int loc,int i );
-    int SetUniform(int loc,const SVec4& vec );
+    int SetUniform(int loc,const vec4& vec );
     int SetUniform(int loc,const SMat4x4& mat );
 
     int SetAttrib(const std::string& name, int numComponents, GLsizei stride, unsigned int offset, GLenum type);
 
 
     /*Request Information*/
-    inline std::string GetVertexShaderFileName() {return prog->GetVertexShaderFileName(); };
-    inline std::string GetFragmentShaderFileName() {return prog->GetFragmentShaderFileName(); };
-    inline std::string GetGeometryShaderFileName() {return prog->GetVertexShaderFileName(); };
+    std::string GetVertexShaderFileName() {return prog->GetVertexShaderFileName(); }
+    std::string GetFragmentShaderFileName() {return prog->GetFragmentShaderFileName(); }
+    std::string GetGeometryShaderFileName() {return prog->GetVertexShaderFileName(); }
 
     bool IsReady = false;
 
@@ -76,7 +79,7 @@ static std::list<SShader *> s_d_shaders_enum;
     std::vector< std::pair<int, const SMat4x4> > d_matrix_update_list;
     std::vector< std::pair<int, int> >     d_int_update_list;
     std::vector< std::pair<int, float > >  d_float_update_list;
-    std::vector< std::pair<int, SVec4 >  > d_vector_update_list;
+    std::vector< std::pair<int, vec4 >  > d_vector_update_list;
 
 };
 

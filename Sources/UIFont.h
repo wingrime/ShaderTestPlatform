@@ -21,6 +21,7 @@ class SProg;
 class UIFont {
 	public: 
 		UIFont(FT_Library &lib,const std::string& fnt_name, unsigned const int sz) ;
+        UIFont( const UIFont&) = delete;
 
 		int RenderText(const std::string& text, float x_uv, float y_uv, float vp_sx, float vp_sy);
 

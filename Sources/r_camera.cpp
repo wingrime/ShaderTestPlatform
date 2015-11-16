@@ -18,7 +18,7 @@ int SCamera::goPosition(float x, float y ,float z) {
     return 0;
 }
 
-int SCamera::goPosition(const SVec4 &v)
+int SCamera::goPosition(const vec4 &v)
 {
     xPos = v.x;
     yPos = v.y;
@@ -27,7 +27,7 @@ int SCamera::goPosition(const SVec4 &v)
     return 0;
 }
 
-int SCamera::rotEuler(const SVec4& v)
+int SCamera::rotEuler(const vec4& v)
 {
     xRot = v.x;
     yRot = v.y;
@@ -36,7 +36,7 @@ int SCamera::rotEuler(const SVec4& v)
     return 0;
 }
 
-int SCamera::LookAt(const SVec4& at,const  SVec4& eye,const SVec4& up)
+int SCamera::LookAt(const vec4& at,const  vec4& eye,const vec4& up)
 {
     view = LookAtMatrix(at,eye,up);
     return 0;
@@ -88,14 +88,14 @@ SMat4x4 SCamera::buildViewMatrix(){
     return a;
 }
 
-SMat4x4 SCamera::getViewProjectMatrix()
+const SMat4x4 SCamera::getViewProjectMatrix()
 {
     return SMat4x4(proj*view);
 }
 
 
 
-SVec4 SCamera::getPosition() const {
+vec4 SCamera::getPosition() const {
     return view.ExtractPositionNoScale();
 }
 
@@ -152,12 +152,12 @@ bool Recorder::Empty()
 int Recorder::Save(const std::string &fname)
 {
 
-    std::ofstream os(fname);
-   {
+   // std::ofstream os(fname);
+   //{
        /*use raii */
-       cereal::JSONOutputArchive archive( os);
-       archive( CEREAL_NVP( r));
-   }
+    //   cereal::JSONOutputArchive archive( os);
+   //    archive( CEREAL_NVP( r));
+   //}
     return ESUCCESS;
 }
 

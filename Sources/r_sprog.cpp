@@ -121,12 +121,12 @@ int SShader::SetUniform(const std::string &var, const SMat4x4 &mat)
     return ESUCCESS;
 }
 
-int SShader::SetUniform(const std::string &var, const SVec4 &vec)
+int SShader::SetUniform(const std::string &var, const vec4 &vec)
 {
     int loc = prog->LookupUniformLocation(var);
     if (loc == EFAIL)
         return EFAIL;
-    d_vector_update_list.push_back( std::pair<int,SVec4 >( loc, vec) );
+    d_vector_update_list.push_back( std::pair<int,vec4 >( loc, vec) );
     //return prog->SetUniform(var, vec);
     return ESUCCESS;
 }
@@ -143,9 +143,9 @@ int SShader::SetUniform(int loc, int i)
     return ESUCCESS;
 }
 
-int SShader::SetUniform(int loc, const SVec4 &vec)
+int SShader::SetUniform(int loc, const vec4 &vec)
 {
-    d_vector_update_list.push_back( std::pair<int,SVec4 >( loc, vec) );
+    d_vector_update_list.push_back( std::pair<int,vec4 >( loc, vec) );
     return ESUCCESS;
 }
 

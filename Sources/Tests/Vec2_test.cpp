@@ -2,9 +2,9 @@
 #include "mat_math.h"
 #include <cmath>
 
-TEST(SVec2, DefaultConstructor ) {
+TEST(vec2, DefaultConstructor ) {
 
-    SVec2 v;
+    vec2 v;
     EXPECT_EQ(v.x == 0.0,true);
     EXPECT_EQ(v.y == 0.0,true);
 
@@ -14,9 +14,9 @@ TEST(SVec2, DefaultConstructor ) {
     EXPECT_EQ(v.w == 0.0,true);
     EXPECT_EQ(v.h == 0.0,true);
 }
-TEST(SVec2, NormalConstructor ) {
+TEST(vec2, NormalConstructor ) {
 
-    SVec2 v(1.0,2.0);
+    vec2 v(1.0,2.0);
     EXPECT_FLOAT_EQ(v.x , 1.0);
     EXPECT_FLOAT_EQ(v.y , 2.0);
     EXPECT_FLOAT_EQ(v.r , 1.0);
@@ -25,27 +25,58 @@ TEST(SVec2, NormalConstructor ) {
     EXPECT_FLOAT_EQ(v.h , 2.0);
  
 }
-TEST(SVec2, CopyConstructor ) {
+TEST(vec2, CopyConstructor ) {
 
-    SVec2 v(SVec2(SVec2(1.0,2.0)));
+    vec2 v(vec2(vec2(1.0,2.0)));
 
     EXPECT_FLOAT_EQ(v.x ,1.0);
     EXPECT_FLOAT_EQ(v.y ,2.0);
 
 }
-TEST(SVec2, Add ) {
+TEST(vec2, Add ) {
 
-    SVec2 v1(2.1 ,3.3);
-    SVec2 v2(3.1 ,3.5);
-    SVec2 v3 = v1+v2;
+    vec2 v1(2.1 ,3.3);
+    vec2 v2(3.1 ,3.5);
+    vec2 v3 = v1+v2;
     EXPECT_FLOAT_EQ(v3.x ,2.1+3.1);
     EXPECT_FLOAT_EQ(v3.y ,3.3+3.5);
 }
-TEST(SVec2, Sub ) {
+TEST(vec2, Sub ) {
 
-    SVec2 v1(2.1 ,3.3);
-    SVec2 v2(3.1 ,3.5);
-    SVec2 v3 = v1-v2;
+    vec2 v1(2.1 ,3.3);
+    vec2 v2(3.1 ,3.5);
+    vec2 v3 = v1-v2;
     EXPECT_FLOAT_EQ(v3.x ,2.1-3.1);
     EXPECT_FLOAT_EQ(v3.y ,3.3-3.5);
 }
+TEST(vec2, Neg ) {
+
+    vec2 v1(2.1 ,3.3);
+    EXPECT_FLOAT_EQ(-v1.x ,-2.1);
+    EXPECT_FLOAT_EQ(-v1.y ,-3.3);
+}
+TEST(vec2, FloatMul ) {
+
+    vec2 v1(1.0 ,2.0);
+    EXPECT_FLOAT_EQ((v1*2.0).x ,2.0);
+    EXPECT_FLOAT_EQ((v1*2.0).y ,4.0);
+}
+TEST(vec2, FloatDiv ) {
+
+    vec2 v1(1.0 ,2.0);
+    EXPECT_FLOAT_EQ((v1/2.0).x ,0.5);
+    EXPECT_FLOAT_EQ((v1/2.0).y ,1.0);
+}
+TEST(vec2, Equal ) {
+
+    vec2 v1(2.1 ,3.3);
+    vec2 v2(2.1,3.3);
+    vec2 v3(0.0,0.0);
+    vec2 v4(0.0,0.0);
+    EXPECT_TRUE(v1 == v2);
+    EXPECT_TRUE(v3 == v4);
+    EXPECT_FALSE(v1 == v3);
+
+
+}
+

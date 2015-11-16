@@ -5,6 +5,6 @@ TEST(ImageBuffer, NonExistsImage) {
     EXPECT_EQ(img.IsReady, false);
 }
 TEST(ImageBuffer, PNGImage) {
-    ImageBuffer img("TestCaseAssert\\empty_normal.png");
+    ImageBuffer img("..\\TestCaseAssert\\empty_normal.png");
     EXPECT_EQ(img.IsReady, true);
 }

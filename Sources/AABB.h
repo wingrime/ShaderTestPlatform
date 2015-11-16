@@ -1,8 +1,8 @@
 #ifndef __AABB__
 #define __AABB__
-#include "mat_math.h"
 #pragma once
-
+#include <vector>
+#include "mat_math.h"
 class AABB {
 public:
     AABB() :min_point(),max_point() {}

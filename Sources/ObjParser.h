@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <fstream>
+#ifdef OBJPARSER_SERIALIZE
 /*serialization*/
 #include <cereal/access.hpp>
 #include <cereal/types/memory.hpp>
@@ -11,170 +12,70 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/archives/binary.hpp>
+#endif
+#include "mat_math.h"
+#include "MeshTypes.h"
 
-
-
-struct CObjV3 {
-    float x;
-    float y;
-    float z;
-    // TODO: try use external
-    /*serialize support */
-//    friend class cereal::access;
-//    template <class Archive>
-//    void serialize( Archive & ar )
-//    {
-//        ar(CEREAL_NVP(x),CEREAL_NVP(y),CEREAL_NVP(z));
-//    }
-
-    //bool operator<(const CObjV3& p) const {
+    //bool operator<(const vec3& p) const {
     //    if (x != p.x )
     //        return (x < p.x);
     //    if (y != p.y )
     //        return (y < p.y);
 
     //     return (z < p.z);
+//}
 
-   // };
-    bool operator!=(const CObjV3& p) const {
-        if (x != p.x )
-            return true;
-        if (y != p.y )
-            return true;
-        if (z != p.z )
-            return true;
-        return false;
-
-    };
-};
-struct CObjV2 {
-    float u;
-    float v;
-    /*serialize support */
-    //friend class cereal::access;
-    //template <class Archive>
-    //void serialize( Archive & ar )
-    //{
-    //    ar(CEREAL_NVP(u),CEREAL_NVP(v));
-    //}
-    //bool operator<(const CObjV2& p) const {
-    //    if (u != p.u )
-    //        return (u < p.u);
-    //    return (v < p.v);
-    //};
-    bool operator!=(const CObjV2& p) const {
-        if (u != p.u )
-            return true;
-        if (v != p.v )
-            return true;
-        return false;
-    };
-
-};
-
-struct CObjIdx {
+struct CVertexIdx {
     int v_idx;
     int vt_idx;
     int n_idx;
 };
-struct CObjFaceI {
-    CObjIdx  f [4];
+struct CObjFace {
+    CVertexIdx  f [4];
 };
 
-struct CObjVertexN {
-    CObjV3 p;
-    CObjV3 n;
-    CObjV2 tc;
-        /*serialize support */
-    //friend class cereal::access;
-    //template <class Archive>
-   // void serialize( Archive & ar )
-    //{
-     //   ar(CEREAL_NVP(p),CEREAL_NVP(n),CEREAL_NVP(tc));
-   // }
 
-   // bool operator<(const CObjVertexN& o) const {
-   //     if (p != o.p )
-   //         return (p < o.p );
-   //     if (n != o.n )
-   //         return (n < o.n );
-   //    // if (tc != o.tc )
-   //      return (tc < o.tc );
-    //};
-    bool operator==(const CObjVertexN& o) const {
-        if (p != o.p )
-            return false;
-        if (n != o.n )
-            return false;
-        if (tc != o.tc )
-            return false;
-         return true;
-    }
 
-};
-
-struct CObjSubmesh {
-    std::string name; /* submesh name*/
-    std::string m_name; /* material name*/
-    std::string m_dir; /* model working dir*/
-    std::vector<CObjVertexN> vn; /* vertex list with normals*/
-    std::vector<unsigned int> indexes; /*indexed mesh*/
-    unsigned int id;/* number of submesh in obj*/
-    /*serialize support */
-    friend class cereal::access;
-    template <class Archive>
-    void serialize( Archive & ar )
-    {
-        ar(
-                    CEREAL_NVP(name),
-                    CEREAL_NVP(m_name),
-                    CEREAL_NVP(id)
- //disabled due size
- //                 CEREAL_NVP(vn),
- //                 CEREAL_NVP(indexes))
-           );
-    }
+struct ObjCtx{
+    std::string srcFileName;
+    std::vector<NonIndexedMesh *> subMeshSet;
+    std::vector<std::string > refMaterialFiles;
 };
 
 class CObjMeshParser {
 public:
-    CObjMeshParser(const std::string &fname);
-    void Reflect();
-
-    inline std::vector<std::shared_ptr<CObjSubmesh> > getSM() {return d_sm;}
-    inline std::vector<std::string> getMTLs() {return d_mtllibs;}
-
+    CObjMeshParser();
     bool IsReady = false;
 
-    long int getVertexCount() const {return d_vertex_count;}
+    ObjCtx* ParseFromFile(const std::string &fname);
+    static int Reflect(ObjCtx *ctx);
+    static void ReleaseContext(ObjCtx *ctx);
+    static void SortByMaterial(ObjCtx *ctx);
 
 private:
-    std::vector<std::shared_ptr<CObjSubmesh> > d_sm; /*set of submeshes*/
-    std::vector<std::string> d_mtllibs; /* set of reference MTL files */
 
-    std::vector<CObjVertexN> BuildVerts(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt , const CObjFaceI& face);
-    std::vector<CObjVertexN> BuildVertsN(const std::vector<CObjV3> &glv, const std::vector<CObjV2> &glt, const std::vector<CObjV3> &gln , const CObjFaceI& face);
-    CObjVertexN BuildVertN(const CObjV3 &p, const CObjV2 &tc, const CObjV3 &n);
+    int BuildVerts(const std::vector<vec3> &glv, const std::vector<vec2> &glt , const CObjFace& face, std::vector<UVNVertex> *res);
+    int BuildVertsN(const std::vector<vec3> &glv, const std::vector<vec2> &glt, const std::vector<vec3> &gln , const CObjFace& face, std::vector<UVNVertex> *res);
+    bool SanitizeFace(const CObjFace& face, int vertexCount, int normalCount, int txCount);
+    UVNVertex BuildVert(const vec3 &p, const vec2 &tc, const vec3 &n);
     std::string ParseG(const std::string& str);
     std::string ParseUSEMTL(const std::string& str);
     std::string ParseMTLLIB(const std::string& str);
-    CObjFaceI ParseF(const std::string& v_desc);
-    CObjV2 ParseVt(const std::string& v_desc);
-    CObjV3 ParseV(const std::string& v_desc);
-    CObjV3 ParseVn(const std::string& v_desc);
+    CObjFace ParseF(const std::string& v_desc);
+    vec2 ParseVt(const std::string& v_desc);
+    vec3 ParseV(const std::string& v_desc);
+    vec3 ParseVn(const std::string& v_desc);
     std::string ParseO(const std::string& str);
-    void SortByMaterial();
 
-    CObjV3 CalcNormal(const CObjV3 &v1, const CObjV3 &v2, const CObjV3 &v3);
+    vec3 CalcNormal(const vec3 &v1, const vec3 &v2, const vec3 &v3);
 
-    long int d_vertex_count; /* total vertex count */
-
+#ifdef OBJPARSER_SERIALIZE
     friend class cereal::access;
     template <class Archive>
     void serialize( Archive & ar )
     {
-        ar(CEREAL_NVP(d_sm),CEREAL_NVP(d_mtllibs),CEREAL_NVP(d_vertex_count));
+      //  ar(CEREAL_NVP(d_sm),CEREAL_NVP(d_mtllibs),CEREAL_NVP(d_vertex_count));
     }
-
+#endif
 
 };

@@ -15,18 +15,12 @@
 #include "Command.h"
 #include "Scene.h"
 #include <chrono>
-#include "selene.h"
+
 #include "oglGlutInit.h"
 #include <imgui.h>
 #include "IMGuiHooks.h"
+//#include "Scripting/Scriting.h"
 
-/*Singletons */
-/*
- * Must be moved to Singltone interface as be ready
-*/
-sel::State state;
-/* Global configuration*/
-static long int g_scriptCallFrequency = 0;
 static long int g_frameNumber = 0;
 
 void display ()
@@ -58,13 +52,13 @@ void display ()
     dbg_ui->Draw();
 
 
-    if (g_scriptCallFrequency) {
-        if ((g_frameNumber % g_scriptCallFrequency) == 0)
-        {
-            state["update"](dt);
-        }
+    //if (g_scriptCallFrequency) {
+    //    if ((g_frameNumber % g_scriptCallFrequency) == 0)
+    //    {
+    //        state["update"](dt);
+    //    }
 
-    }
+    //}
     glutSwapBuffers ();
     g_frameNumber++;
 }
@@ -76,7 +70,7 @@ void reshape ( int w, int h )
 
     const RectSizeInt rect(h,w);
 
-    sc->Reshape(w,h);
+    sc->Reshape(rect);
     dbg_ui->Reshape(rect);
 
 }
@@ -223,29 +217,7 @@ void APIENTRY openglCallbackFunction(GLenum source,
        //D_TRAP();
     }
 }
-int initLuaBindings(sel::State& state)
-{
-    /*Init lua env*/
-    state.OpenLib("math",luaopen_math);
-    struct Env {
-        Env() {}
-        int loge(std::string msg) {LOGE(msg);return 0;}
-        int logw(std::string msg) {LOGW(msg);return 0;}
-        int logv(std::string msg) {LOGV(msg);return 0;}
-        int  fwd(double a) {Singltone<SScene>::GetInstance()->cam.goForward(a);return 0;}
-        int setUpdateCallFrequency(int f) {g_scriptCallFrequency = f; return 0;}
 
-    };
-    state["Env"].SetClass<Env>("loge",&Env::loge,
-                               "logw",&Env::logw,
-                               "logv",&Env::logv,
-                               //setup script frequency
-                               "setUpdateCallFrequency",&Env::setUpdateCallFrequency,
-                               "fwd", &Env::fwd
-                               );
-
-    return 0;
-}
 
 int initGlutHooks() {
 
@@ -298,6 +270,10 @@ int main ( int argc, char * argv [] )
     /*init subsystem singltones*/
     Singltone<Log> main_log;
     Singltone<Config> main_config;
+    //Singltone<scripting::Scripting> mainScript("init.lua"); //TODO, from config or argv
+
+    //scripting::Scripting * script = Singltone<scripting::Scripting>::GetInstance();
+
 
     Config * config = Singltone<Config>::GetInstance();
     Log gl_log("gl_log.log");
@@ -345,13 +321,9 @@ int main ( int argc, char * argv [] )
     initKeybindings();
 
     LOGV("Init Script");
-    initLuaBindings(state);
+    //initLuaBindings(state);
+    //Singltone<sel::State>  g_script_state(&state);
 
-    if (state.Load("init.lua")) {
-        state["init"]();
-    } else
-        LOGE("No init.lua script find or load failed!");
-    Singltone<sel::State>  g_script_state(&state);
 
     dbg_ui->d_toggle_fps_view = config->operator []("scene.toggle_debug_viewport_fps").GetInt();
 

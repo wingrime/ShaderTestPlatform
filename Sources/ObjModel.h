@@ -31,22 +31,14 @@ struct SubMeshIDs {
     unsigned int ibo;
 };
 
-class MeshIndexer {
-public:
-    MeshIndexer(const std::shared_ptr<CObjSubmesh> &submesh)
-        :d_inmesh(submesh)
-    {}
-    std::shared_ptr<CObjSubmesh> Do();
-private:
-    const std::shared_ptr<CObjSubmesh> d_inmesh;
-};
+
 
 
 class SObjModel {
     public: 
         SObjModel(const std::string& fname);
         void Render(RenderContext& r);
-        int ConfigureProgram(SShader *sprog);
+        int ConfigureProgram(SShader &sprog);
 
         ~SObjModel();
 
@@ -55,7 +47,7 @@ class SObjModel {
         void SetModelMat(const SMat4x4& m);
     private:
         /*Utils*/
-        void BindTextures(SMaterial *m);
+        void BindTextures(SMaterial& m);
         void LoadTextures();
         void BindVAOs ();
 
@@ -63,12 +55,12 @@ class SObjModel {
 
         SMat4x4 model;
         // default textures for fail prove
-        std::shared_ptr<STexture> texDiffuse;
-        std::shared_ptr<STexture> texNormal;
+        STexture * texDiffuse;
+        STexture * texNormal;
 
 
 
-        std::vector<std::shared_ptr<CObjSubmesh> > d_sm;
+        std::vector<IndexedMesh *> d_sm;
 
 
 
@@ -88,9 +80,9 @@ class SObjModel {
         {
             ar( CEREAL_NVP(IsReady),
                 CEREAL_NVP(model),
-                CEREAL_NVP(d_materials),
-                CEREAL_NVP(d_textures),
-                CEREAL_NVP(d_sm)
+                CEREAL_NVP(d_materials)
+                //CEREAL_NVP(d_textures)
+                ///CEREAL_NVP(d_sm) ceral does not support raw pointers
                 );
         }
 

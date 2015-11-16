@@ -36,7 +36,7 @@ uniform samplerCube samplerEnvCubeMap;
 
 uniform float lightIntensity = 1.0;
 uniform float shadowPenumbra = 1500.0;
-uniform float shadowEps =   0.0001;
+uniform float shadowEps =   0.01;
 uniform float shadowEpsMult =   0.0001;
 uniform	float s0 = 290.0;
 uniform	float s1 = 840.0;

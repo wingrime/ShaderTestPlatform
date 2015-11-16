@@ -6,6 +6,7 @@
 #include "ErrorCodes.h"
 SPerfMan::SPerfMan() {
 	glGenQueries(1,&q);
+    res = 0;
 }
 SPerfMan::~SPerfMan() {
 	glDeleteQueries(1,&q);

@@ -6,81 +6,115 @@
 #include "string_format.h"
 #include "mat_math.h"
 #include "MAssert.h"
-
-SVec4 SVec4::Normalize() const {
-    float norm = Length();
-    MASSERT(norm==0.0);
-    return SVec4(x/norm,y/norm, z/norm, w/norm);
+#define MACHINE_EPS 0.0001
+vec4 vec4::Normalize() const {
+    float l = Length();
+    if (l != 0) {
+        return vec4(x / l , y /l , z /l , w / l);
+    } else {
+        MASSERT(true);
+        return vec4(0.0,0.0,0.0,0.0);
+    }
 }
-
-SVec4 SVec4::Normalize(const SVec4 &a)
+vec4 vec4::Normalize(const vec4 &a)
 {
     float l = a.Length();
-    MASSERT(l==0.0);
-    return SVec4(a.x / l , a.y /l , a.z /l , a.w / l);
+    if (l != 0) {
+        return vec4(a.x / l , a.y /l , a.z /l , a.w / l);
+    } else {
+        MASSERT(true);
+        return vec4(0.0,0.0,0.0,0.0);
+    }
 }
+bool vec4::Eq(const vec4& a,const vec4& b) {
+    return ( fabs(a.x - b.x) < MACHINE_EPS && fabs(a.y - b.y) < MACHINE_EPS && fabs(a.z - b.z) < MACHINE_EPS && fabs(a.w - b.w) < MACHINE_EPS);
+}
+float vec4::Length() const{
+    float  sqLength = x*x + y*y + z*z  + w*w;
 
-bool SVec4::Eq(const SVec4& a,const SVec4& b) {
-    return ( fabs(a.x - b.x) < 0.0001 && fabs(a.y - b.y) < 0.0001 && fabs(a.z - b.z) < 0.0001 && fabs(a.w - b.w) < 0.0001);
+    return sqrt(sqLength);
 }
-float SVec4::Length() const{
-    return sqrt(x*x + y*y + z*z  + w*w);
-}
-float SVec4::Dot(const SVec4& a,const SVec4& b) {
+float vec4::Dot(const vec4& a,const vec4& b) {
     return (a.x *b.x + a.y *b.y + a.z *b.z + a.w*a.w);
 }
-SVec4::SVec4(){
-    x = 0.0f;
-    y = 0.0f;
-    z = 0.0f;
-    w = 0.0f;
-}
-SVec4::SVec4(const SVec4& v){
+vec4::vec4(vec4 &&v){
     x = v.x;
     y = v.y;
     z = v.z;
     w = v.w;
 }
-SVec4::SVec4(float _x, float _y, float _z,float _w){
+vec4::vec4(const vec4& v){
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    w = v.w;
+}
+vec4::vec4()
+{
+    x = 0;
+    y = 0;
+    z = 0;
+    w = 0;
+}
+
+vec4::vec4(float _x, float _y, float _z,float _w){
     x = _x;
     y = _y;
     z = _z;
     w = _w;
 }
-SVec4::SVec4(const std::string& str){
+vec4::vec4(const std::string& str){
     const char *s = str.c_str();
     int c = sscanf(s, " %f,%f,%f,%f ",
             &x,&y,&z,&w);
-    MASSERT(c != 4);
-
-    //if (c != 4 )
-        // better error handling
-        //throw VectorError(std::string("Unable construct vector from string:")+str);
+    MASSERT(c != 4 );
+    // better error handling
 }
-/*not fully correct*/
-/*for 4D you need 3 vectors to do cross!, but if we set 3rd to (0,0,0,1)*/
-//SVec4 SVec4::operator*(const SVec4& v) const {
-//return (SVec4(vec.y * v.z - vec.z * v.y,
-//             vec.z * v.x - vec.x * v.z,
-//             vec.x * v.y - vec.y * v.x,
-//            0.0f));
-//}
-SVec4 SVec4::Cross3(const SVec4& a, const SVec4& b)  {
-return (SVec4(a.y * b.z - a.z * b.y,
+vec4 vec4::Cross3(const vec4& a, const vec4& b)  {
+return (vec4(a.y * b.z - a.z * b.y,
               a.z * b.x - a.x * b.z,
               a.x * b.y - a.y * b.x,
               0.0f));
 }
 
-SVec4 SVec4::operator+(const SVec4& v) const {
-return (SVec4(x + v.x,
+vec4 vec4::operator+(const vec4& v) const {
+return (vec4(x + v.x,
               y + v.y,
               z + v.z,
-              w + v.w));
+             w + v.w));
 }
 
-SVec4 operator-(const SVec4& v1,const SVec4& v2){
-return (SVec4(v1.x - v2.x,
+vec4 &vec4::operator=(const vec4 &v)
+{
+    //return (vec4(v.x,v.y,v.z,v.w));
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    w = v.w;
+    return (*this);
+}
+
+vec4 vec4::operator -()
+{
+    return vec4(-x,-y,-z,-w);
+}
+
+vec4 &vec4::operator=(vec4 &&v)
+{
+    x = v.x;
+    y = v.y;
+    z = v.z;
+    w = v.w;
+    return *this;
+}
+
+bool vec4::operator==(const vec4 &a) const
+{
+    return ( fabs(a.x - x) < MACHINE_EPS && fabs(a.y - y) < MACHINE_EPS && fabs(a.z - z) < MACHINE_EPS && fabs(a.w - w) < MACHINE_EPS);
+}
+
+vec4 operator-(const vec4& v1,const vec4& v2){
+return (vec4(v1.x - v2.x,
               v1.y - v2.y,
               v1.z - v2.z,
               v1.w - v2.w));
@@ -88,21 +122,29 @@ return (SVec4(v1.x - v2.x,
 
 
 
-void SVec4::Reflect() const{
+void vec4::Reflect() const{
     printf("%f %f %f %f\n",x,y,z,w);
 }
 
-void SVec4::DivW()
+void vec4::DivW()
 {
-    MASSERT(w == 0.0);//LOGE("Attempt SVec4::DivW when w is zero, nothing done");
-    x /= w;
-    y /= w;
-    z /= w;
-    w = 1.0;
+    MASSERT(w == 0.0);
+    if (w != 0.0)
+    {
+        x /= w;
+        y /= w;
+        z /= w;
+        w = 1.0;
+    } else {
+        x = 0.0;
+        y = 0.0;
+        z = 0.0;
+        w = 1.0;
+    }
 
 }
 
-void SVec4::Abs()
+void vec4::Abs()
 {
     x = fabs(x);
     y = fabs(y);
@@ -113,8 +155,9 @@ void SVec4::Abs()
 
 
 
+
 SMat4x4::~SMat4x4(){
-}
+};
 
 
 SMat4x4 SMat4x4::operator+(const SMat4x4& i) const {
@@ -122,7 +165,15 @@ return (SMat4x4(a11+i.a11,a12+i.a12,a13+i.a13,a14+i.a14,
                a21+i.a21,a22+i.a22,a23+i.a23,a24+i.a24,
                a31+i.a31,a32+i.a32,a33+i.a33,a34+i.a34,
                a41+i.a41,a42+i.a42,a43+i.a43,a44+i.a44
-               ));    
+                ));
+}
+
+SMat4x4 &SMat4x4::operator+(SMat4x4 &&o)
+{
+    for (int i = 0 ; i < 16 ; i++) {
+        raw[i] = raw[i] + o.raw[i];
+    }
+    return *this;
 }
 SMat4x4 SMat4x4::operator-(const SMat4x4& i) const {
 return (SMat4x4(a11-i.a11,a12-i.a12,a13-i.a13,a14-i.a14,
@@ -130,6 +181,14 @@ return (SMat4x4(a11-i.a11,a12-i.a12,a13-i.a13,a14-i.a14,
                a31-i.a31,a32-i.a32,a33-i.a33,a34-i.a34,
                a41-i.a41,a42-i.a42,a43-i.a43,a44-i.a44
                 ));
+}
+
+SMat4x4 &SMat4x4::operator-(SMat4x4 &&o)
+{
+    for (int i = 0 ; i < 16 ; i++) {
+        raw[i] = raw[i] - o.raw[i];
+    }
+    return *this;
 }
 
 SMat4x4 SMat4x4::Move(const Point &p) const
@@ -166,6 +225,8 @@ SMat4x4 SMat4x4::operator*(const SMat4x4& i) const {
 }
 
 
+
+
 void SMat4x4::Reflect() const{
     printf("%f %f %f %f\n",a11,a12,a13,a14);
     printf("%f %f %f %f\n",a21,a22,a23,a24);
@@ -181,16 +242,15 @@ std::string SMat4x4::ReflectStr() const{
                             a41,a42,a43,a44 );
 }
 
-SMat4x4::SMat4x4(SVec4 a1,
-                 SVec4 a2,
-                 SVec4 a3,
-                 SVec4 a4 ) {
+SMat4x4::SMat4x4(vec4 a1,
+                 vec4 a2,
+                 vec4 a3,
+                 vec4 a4 ) {
 
     a11 = a1.x; a12 = a2.x;a13 = a3.x; a14 = a4.x;
     a21 = a1.y; a22 = a2.y;a23 = a3.y; a24 = a4.y;
     a31 = a1.z; a32 = a2.z;a33 = a3.z; a34 = a4.z;
     a41 = a1.w; a42 = a2.w;a43 = a3.w; a44 = a4.w;
-    //printf("mat\n");
 }
 SMat4x4::SMat4x4(const std::string &str) {
     const char *s = str.c_str();
@@ -199,9 +259,7 @@ SMat4x4::SMat4x4(const std::string &str) {
             &a21,&a22,&a23,&a24,
             &a31,&a32,&a33,&a34,
             &a41,&a42,&a43,&a44);
-    MASSERT(c!=16);
-   // if (c != 16 )
-   //     throw MatrixError(std::string("Unable construct matrix from string:")+str);
+    MASSERT(c != 16 );
     //better error handing
 }
 
@@ -228,22 +286,43 @@ SMat4x4::SMat4x4( const SMat4x4& o){
         raw[i] = o.raw[i];
     }
 }
-/*https://www.opengl.org/discussion_boards/showthread.php/178484-Extracting-camera-position-from-a-ModelView-Matrix*/
-SVec4 SMat4x4::ExtractPositionNoScale() const
+
+SMat4x4::SMat4x4(SMat4x4 &&o)
 {
-    SVec4 d(-this->a14,-this->a24,-this->a34,1.0);
+    for (int i = 0; i< 16 ;i++ ) {
+        raw[i] = o.raw[i];
+    }
+}
+SMat4x4& SMat4x4::operator=(SMat4x4&& o) {
+    for (int i = 0; i< 16 ;i++ ) {
+        raw[i] = o.raw[i];
+    }
+    return *this;
+}
+
+SMat4x4 &SMat4x4::operator=(const SMat4x4 &o)
+{
+    for (int i = 0; i< 16 ;i++ ) {
+        raw[i] = o.raw[i];
+    }
+    return *this;
+}
+/*https://www.opengl.org/discussion_boards/showthread.php/178484-Extracting-camera-position-from-a-ModelView-Matrix*/
+vec4 SMat4x4::ExtractPositionNoScale() const
+{
+    vec4 d(-this->a14,-this->a24,-this->a34,1.0);
     SMat4x4 rot((*this).Transpose());
     rot.a14 = 0;
     rot.a24 = 0;
     rot.a34 = 0;
-    SVec4 res((rot)*(d));
+    vec4 res((rot)*(d));
     res.w = 1.0; //??
     return res;
 }
 // TODO make delta standart
 bool SMat4x4::Eq(const SMat4x4& a,const SMat4x4& b){
     for ( int i = 0 ; i < 16 ; i++ ) {
-        if ( abs(a.raw[i] - b.raw[i]) > 0.00001 )
+        if ( abs(a.raw[i] - b.raw[i]) > MACHINE_EPS )
             return false;
     }
     return true;
@@ -257,7 +336,7 @@ SMat4x4 SMat4x4::Move(float x,float y,float z) const{
     return (* this)+a;
 }
 /*optimize*/
-SMat4x4 SMat4x4::Translate(const SVec4& vec) const{
+SMat4x4 SMat4x4::Translate(const vec4& vec) const{
     SMat4x4 a =  SMat4x4(0.0);
     a.a14 = vec.x;
     a.a24 = vec.y;
@@ -462,46 +541,325 @@ SMat4x4 SMat4x4::Inverse() const
     return inv_res;
 }
 
-SVec4 SMat4x4::ExtractAtVector() const
+vec4 SMat4x4::ExtractAtVector() const
 {
-    return SVec4(a11,a12,a13,1.0);
+    return vec4(a11,a12,a13,1.0);
 }
 
-SVec4 SMat4x4::ExtractLeftVector() const
+vec4 SMat4x4::ExtractLeftVector() const
 {
-    return SVec4(a21,a22,a23,1.0);
+    return vec4(a21,a22,a23,1.0);
 }
 
-SVec4 SMat4x4::ExtractUpVector() const
+vec4 SMat4x4::ExtractUpVector() const
 {
-    return SVec4(a31,a32,a33,1.0);
+    return vec4(a31,a32,a33,1.0);
 }
 
-
-
-
-SVec4 operator* (const SMat4x4& m, const SVec4& v){
-    return SVec4(m.a11 * v.x + m.a12 * v.y + m.a13 * v.z+ m.a14 * v.w ,
+vec4 operator* (const SMat4x4& m, const vec4& v){
+    return vec4(m.a11 * v.x + m.a12 * v.y + m.a13 * v.z+ m.a14 * v.w ,
                  m.a21 * v.x + m.a22 * v.y + m.a23 * v.z+ m.a24 * v.w ,
                  m.a31 * v.x + m.a32 * v.y + m.a33 * v.z+ m.a34 * v.w ,
                  m.a41 * v.x + m.a42 * v.y + m.a43 * v.z+ m.a44 * v.w );
 
 }
 template <typename T>
-SVec4 operator/ (const SVec4& v,T num){
+vec4 operator/ (const vec4& v,T num){
     MASSERT(num = 0.0);
-    return SVec4(v.x / num , v.y / num  , v.z/ num , v.w/ num);
+    return vec4(v.x / num , v.y / num  , v.z/ num , v.w/ num);
 }
 
-//#define CHECK_QU() {if (!CheckUnit()) EMSGS("UnitQuaterion not unit lenght!")}
 
+/*vec2 impl*/
+vec2::vec2(const vec2& v){
+    x = v.x;
+    y = v.y;
+}
+vec2::vec2(float _x, float _y){
+    x = _x;
+    y = _y;
+}
+vec2::vec2(){
+    x = 0;
+    y = 0;
+}
+
+vec2::vec2(vec2 &&o)
+{
+  x = o.x;
+  y = o.y;
+}
+
+vec2 &vec2::operator=(vec2 &&o)
+{
+    x = o.x;
+    y = o.y;
+    return *this;
+}
+
+vec2 &vec2::operator=(const vec2 &o)
+{
+    x = o.x;
+    y = o.y;
+    return (*this);
+    //return vec2(o.x,o.y);
+}
+
+vec2 &vec2::operator-()
+{
+    x = -x;
+    y = -y;
+    return *this;
+
+}
+
+vec2 &vec2::operator-(vec2 &&o)
+{
+    x = x - o.x;
+    y = y - o.y;
+    return *this;
+
+}
+
+vec2 &vec2::operator+(vec2 &&o)
+{
+    x = x + o.x;
+    y = y + o.y;
+    return *this;
+
+}
+
+vec2 vec2::operator*(float a)
+{
+    return vec2(x*a,y*a);
+}
+
+vec2 vec2::operator/(float a)
+{
+    if (a == 0) {
+        MASSERT(true);
+        return vec2(0.0,0.0);
+    }
+    return vec2(x/a,y/a);
+}
+
+float vec2::length(const vec2 &o)
+{
+    return sqrt(o.x*o.x+o.y*o.y);
+}
+
+vec2 vec2::normalize(const vec2 &o)
+{
+    float l = vec2::length(o);
+    if (l != 0) {
+        return vec2(o.x / l , o.y /l );
+    } else {
+        MASSERT(true);
+        return vec2(0.0,0.0);
+    }
+}
+
+bool vec2::operator!=(const vec2 &p) const
+{
+    if (x != p.x )
+        return true;
+    if (y != p.y )
+        return true;
+    return false;
+}
+
+bool vec2::operator==(const vec2 &p) const
+{
+    return (fabs(x - p.x) < MACHINE_EPS && fabs(y - p.y) < MACHINE_EPS );
+}
+vec2 operator-(const vec2& v1,const vec2& v2){
+return (vec2(v1.x - v2.x,
+              v1.y - v2.y));
+}
+vec2 operator+(const vec2& v1,const vec2& v2){
+return (vec2(v1.x + v2.x,
+              v1.y + v2.y));
+}
+
+vec3::vec3(float _x, float _y, float _z)
+{
+    x = _x;
+    y = _y;
+    z = _z;
+}
+vec3::vec3() {
+    x = 0;
+    y = 0;
+    z = 0;
+}
+
+vec3::vec3(vec3 &&o)
+{
+    x = o.x;
+    y = o.y;
+    z = o.z;
+}
+
+vec3 &vec3::operator=(vec3 &&o)
+{
+    x = o.x;
+    y = o.y;
+    z = o.z;
+    return *this;
+}
+
+vec3 &vec3::operator=(const vec3 &o)
+{
+    x = o.x;
+    y = o.y;
+    z = o.z;
+    return (*this);
+    //return vec3(o.x,o.y,o.z);
+}
+
+vec3 &vec3::operator-(vec3 &&o)
+{
+    x = x - o.x;
+    y = y - o.y;
+    z = z - o.z;
+    return *this;
+}
+
+vec3 &vec3::operator+(vec3 &&o)
+{
+
+    x = x + o.x;
+    y = y + o.y;
+    z = z + o.z;
+    return *this;
+}
+
+vec3 vec3::operator-()
+{
+    return vec3(-x,-y,-z);
+}
+
+vec3 vec3::operator/(float a)
+{
+    if (a == 0) {
+        MASSERT(true);
+        return vec3(0.0,0.0,0.0);
+    }
+    return vec3(x/a,y/a,z/a);
+}
+
+vec3 vec3::cross(const vec3 &a, const vec3 &b)
+{
+    return vec3( a.y * b.z - a.z * b.y,
+                  a.z * b.x - a.x * b.z,
+                 a.x * b.y - a.y * b.x);
+}
+
+vec3 vec3::normalize(const vec3 &a)
+{
+    float l = vec3::length(a);
+    if (l != 0) {
+        return vec3(a.x / l , a.y /l , a.z /l);
+    } else {
+        MASSERT(true);
+        return vec3(0.0,0.0,0.0);
+    }
+}
+
+float vec3::length(const vec3 &a)
+{
+    return sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+}
+
+
+
+vec3 vec3::operator*(float a)
+{
+    return vec3(x*a,y*a,z*a);
+}
+bool vec3::operator!=(const vec3& p) const {
+    if (x != p.x )
+        return true;
+    if (y != p.y )
+        return true;
+    if (z != p.z )
+        return true;
+    return false;
+
+}
+
+bool vec3::operator==(const vec3 &p) const
+{
+    return ( fabs(x - p.x)< MACHINE_EPS && fabs(y - p.y)< MACHINE_EPS && fabs(z - p.z)< MACHINE_EPS);
+
+};
+vec3::vec3(const vec3& v){
+    x = v.x;
+    y = v.y;
+    z = v.z;
+}
+vec3 operator-(const vec3& v1,const vec3& v2){
+return (vec3(v1.x - v2.x,
+             v1.y - v2.y,
+             v1.z - v2.z
+             ));
+}
+vec3 operator+(const vec3& v1,const vec3& v2){
+return (vec3(v1.x + v2.x,
+             v1.y + v2.y,
+             v1.z + v2.z));
+}
+
+SMat4x4 LookAtMatrix(const vec4 &at, const vec4 &eye, const vec4 &up)
+{
+        vec4 zaxis = vec4::Normalize( eye -at); /*direction to view point*/
+        vec4 xaxis = vec4::Normalize(vec4::Cross3(up,zaxis)); /* left vector*/
+        vec4 yaxis(vec4::Cross3(zaxis,xaxis)); /* new up vector */
+        vec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
+        vec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
+        vec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
+        vec4 v4(-vec4::Dot(xaxis,eye),-vec4::Dot(yaxis,eye),-vec4::Dot(zaxis,eye),1.0);
+        return SMat4x4(v1,v2,v3,v4);
+}
+vec4 operator*(const vec4 &v1, float v2)
+{
+    return vec4(v1.x*v2,v1.y*v2,v1.z*v2,v1.w*v2);
+}
+vec4 operator/(const vec4 &v1, float v2)
+{
+    if (v2 != 0)
+        return vec4(v1.x/v2,v1.y/v2,v1.z/v2,v1.w/v2);
+    else
+    {
+        MASSERT(true);
+        return vec4(0.0,0.0,0.0,1.0);
+    }
+}
+
+Point operator-(const Point& v1,const Point& v2){
+return (Point(v1.x - v2.x,
+              v1.y - v2.y,
+              v1.z - v2.z));
+}
+Point operator-(const Point& v1){
+return (Point(-v1.x,
+              -v1.y,
+              -v1.z));
+}
+Point operator+(const Point& v1,const Point& v){
+return (Point(v1.x + v.x,
+              v1.y + v.y,
+              v1.z + v.z));
+}
+
+/* QUATERIONS SUPPORT*/
 UnitQuaterion UnitQuaterion::Normalize() const {
     float norm = Norm();
     return UnitQuaterion(q.x/norm,q.y/norm, q.z/norm, q.w/norm);
 }
 bool UnitQuaterion::CheckUnit() const {
    return ((Norm()-1.0f) < CheckDelta);
-} 
+}
 void UnitQuaterion::Reflect() const{
     printf("UnitQuaterion: %f %f %f %f\n",q.x,q.y,q.z,q.w);
 }
@@ -521,13 +879,13 @@ UnitQuaterion UnitQuaterion::SLERP(const UnitQuaterion& a,const UnitQuaterion& b
 }
 /*Simplifed for Unit quaterion*/
 SMat4x4 UnitQuaterion::toMatrix() const {
-    return SMat4x4( 1.0f-2.0f*(q.y*q.y + q.z*q.z) ,     2.0f*(q.x*q.y + q.w*q.z) ,          2.0f*(q.x*q.z - q.w*q.y) , 0.0f, 
+    return SMat4x4( 1.0f-2.0f*(q.y*q.y + q.z*q.z) ,     2.0f*(q.x*q.y + q.w*q.z) ,          2.0f*(q.x*q.z - q.w*q.y) , 0.0f,
                          2.0f*(q.x*q.y - q.w*q.z) ,1.0f-2.0f*(q.x*q.x + q.z*q.z) ,          2.0f*(q.y*q.z + q.w*q.x) , 0.0f,
                          2.0f*(q.x*q.z + q.w*q.y) ,     2.0f*(q.y*q.z - q.w*q.x) ,     1.0f-2.0f*(q.x*q.x + q.y*q.y) , 0.0f,
                          0.0f                     ,     0.0f                     ,          0.0f                     , 1.0f);
 }
 /* WARNING: vector.w will be ignored */
-UnitQuaterion UnitQuaterion::Rotate(const SVec4& axis, float fi) const {
+UnitQuaterion UnitQuaterion::Rotate(const vec4& axis, float fi) const {
     return (*this)*UnitQuaterion(axis,fi/2)*(*this).Inverse();
 }
 UnitQuaterion UnitQuaterion::Rotate(const UnitQuaterion& qaxis) const {
@@ -554,7 +912,7 @@ UnitQuaterion::UnitQuaterion(float x, float y, float z,float w){
     //CHECK_QU();
 }
 /* WARNING: vector.w will be ignored */
-UnitQuaterion::UnitQuaterion(const SVec4& v, float fi){
+UnitQuaterion::UnitQuaterion(const vec4& v, float fi){
     float sin_fi = sin(fi/2);
     q.x = sin_fi*v.x;
     q.y = sin_fi*v.y;
@@ -591,69 +949,5 @@ UnitQuaterion UnitQuaterion::Inverse() const{
     return UnitQuaterion(-q.x ,-q.y,-q.z , q.w);
 }
 
-/*SVec2 impl*/
-SVec2::SVec2(const SVec2& v){
-    x = v.x;
-    y = v.y;
-}
-SVec2::SVec2(float _x, float _y){
-    x = _x;
-    y = _y;
-}
-SVec2::SVec2(){
-    x = 0;
-    y = 0;
-}
-SVec2 operator-(const SVec2& v1,const SVec2& v2){
-return (SVec2(v1.x - v2.x,
-              v1.y - v2.y));
-}
-SVec2 operator+(const SVec2& v1,const SVec2& v2){
-return (SVec2(v1.x + v2.x,
-              v1.y + v2.y));
-}
-
-
-
-
-SMat4x4 LookAtMatrix(const SVec4 &at, const SVec4 &eye, const SVec4 &up)
-{
-        SVec4 zaxis = SVec4::Normalize( eye -at); /*direction to view point*/
-        SVec4 xaxis = SVec4::Normalize(SVec4::Cross3(up,zaxis)); /* left vector*/
-        SVec4 yaxis(SVec4::Cross3(zaxis,xaxis)); /* new up vector */
-        SVec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
-        SVec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
-        SVec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
-        SVec4 v4(-SVec4::Dot(xaxis,eye),-SVec4::Dot(yaxis,eye),-SVec4::Dot(zaxis,eye),1.0);
-        return SMat4x4(v1,v2,v3,v4);
-}
-
-
-SVec4 operator*(const SVec4 &v1, float v2)
-{
-    return SVec4(v1.x*v2,v1.y*v2,v1.z*v2,v1.w*v2);
-}
-SVec4 operator/(const SVec4 &v1, float v2)
-{
-    return SVec4(v1.x/v2,v1.y/v2,v1.z/v2,v1.w/v2);
-}
-
-
-
-Point operator-(const Point& v1,const Point& v2){
-return (Point(v1.x - v2.x,
-              v1.y - v2.y,
-              v1.z - v2.z));
-}
-Point operator-(const Point& v1){
-return (Point(-v1.x,
-              -v1.y,
-              -v1.z));
-}
-Point operator+(const Point& v1,const Point& v){
-return (Point(v1.x + v.x,
-              v1.y + v.y,
-              v1.z + v.z));
-}
 
 

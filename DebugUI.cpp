@@ -76,23 +76,23 @@ int DebugUI::InitDebugCommands()
         UNUSED(name);
         UNUSED(arg_list);
         for (int i = 0; i < 4 ; i++) {
-            sc->d_shadowmap_cam[i] = sc->cam;
+            //sc->d_shadowmap_cam[i] = sc->cam;
         }
-        sc->d_first_render = false;
+        sc->regenerateEnvCubeMap();
 
     }));
-    d_console_cmd_handler->AddCommand("dump_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+   d_console_cmd_handler->AddCommand("dump_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         UNUSED(arg_list);
          std::ostringstream os;
-        {
+       {
             /*use raii */
             cereal::JSONOutputArchive archive( os);
             archive( CEREAL_NVP( sc->cam));
         }
         con->Msg(os.str());
 
-    }));
+     }));
     d_console_cmd_handler->AddCommand("dump_model", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
        UNUSED(arg_list);
        UNUSED(name);
@@ -102,9 +102,8 @@ int DebugUI::InitDebugCommands()
             /*use raii */
             cereal::JSONOutputArchive archive( os);
             //TODO
-            //archive( CEREAL_NVP( sc->model));
+            archive( CEREAL_NVP( sc->d_render_list[0] ));
         }
-        //con->Msg(os.str());
 
     }));
     d_console_cmd_handler->AddCommand("mem_stats", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -131,14 +130,14 @@ int DebugUI::InitDebugCommands()
         d_console_cmd_handler->AddCommand("sm_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
             UNUSED(arg_list);
             UNUSED(name);
-        sc->d_shadowmap_cam[0].LookAt(SVec4( 0.0,0.0, 0.0,1.0),SVec4(0.0,4000,0.0,1.0) ,   SVec4(1.0,0.0,0.0,1.0) );
+        sc->d_shadowmap_cam[0].LookAt(vec4( 0.0,0.0, 0.0,1.0),vec4(0.0,4000,0.0,1.0) ,   vec4(1.0,0.0,0.0,1.0) );
 
     }));
         d_console_cmd_handler->AddCommand("dump_smcam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
             UNUSED(arg_list);
             UNUSED(name);
 
-         std::ostringstream os;
+       std::ostringstream os;
         {
             /*use raii */
             cereal::JSONOutputArchive archive( os);
@@ -205,9 +204,9 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("goto", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
-        SVec4 vect(args[1]);
+        vec4 vect(args[1]);
         sc->cam.goPosition(vect);
-        sc->cam.rotEuler(SVec4(0,0,0,0));
+        sc->cam.rotEuler(vec4(0,0,0,0));
     }));
     d_console_cmd_handler->AddCommand("scale", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
@@ -221,21 +220,21 @@ int DebugUI::InitDebugCommands()
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
-        sc->cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
+        sc->cam.goPosition(vec4(0.0,0.0,0.0,0.0));
         sc->cam.rotEulerX(toRad(val_f));
     }));
     d_console_cmd_handler->AddCommand("rot_y", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
-        sc->cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
+        sc->cam.goPosition(vec4(0.0,0.0,0.0,0.0));
         sc->cam.rotEulerY(toRad(val_f));
     }));
     d_console_cmd_handler->AddCommand("rot_z", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
-        sc->cam.goPosition(SVec4(0.0,0.0,0.0,0.0));
+        sc->cam.goPosition(vec4(0.0,0.0,0.0,0.0));
         sc->cam.rotEulerZ(toRad(val_f));
     }));
 
@@ -304,10 +303,10 @@ int DebugUI::InitDebugCommands()
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
         std::shared_ptr<SObjModel> m =  std::shared_ptr<SObjModel>(new SObjModel(args[1]));
-        m->ConfigureProgram(sc->lookupStageShader("Main"));
-        m->ConfigureProgram(sc->lookupStageShader("MainMSAA"));
-        m->ConfigureProgram(sc->lookupStageShader("Shadowmap"));
-        m->ConfigureProgram( (sc->cubemap_prog_generator));\
+        m->ConfigureProgram(*sc->lookupStageShader("Main"));
+        m->ConfigureProgram(*sc->lookupStageShader("MainMSAA"));
+        m->ConfigureProgram(*sc->lookupStageShader("Shadowmap"));
+        m->ConfigureProgram( *sc->cubemap_prog_generator);
         sc->d_render_list[0] = m;
         sc->regenerateEnvCubeMap();
 
@@ -325,9 +324,8 @@ int DebugUI::InitDebugCommands()
     d_console_cmd_handler->AddCommand("script", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
-        //const std::vector < std::string >& args = *arg_list;
-
-        //con->Msg("Load scripst..");
+        const std::vector < std::string >& args = *arg_list;
+        con->Msg("Load scripst..");
         //state.Load(args[1]);
         //state["init"]();
 
@@ -496,19 +494,19 @@ int DebugUI::DrawGUI()
     if (ImGui::CollapsingHeader("Weather")) {
         if (ImGui::SliderFloat("LocalTime", &WeatherLocalTime, 0.0f,25.0f)) {
             sc->w_sky->SetTime(WeatherLocalTime);
-            sc->d_first_render = false;
+            sc->regenerateEnvCubeMap();
         }
         if (ImGui::SliderFloat("SkyTurbidity", &WeatherSkyTurbidity, 0.0f,25.0f)) {
             sc->w_sky->SetTurbidity(WeatherSkyTurbidity);
-            sc->d_first_render = false;
+            sc->regenerateEnvCubeMap();
         }
         if (ImGui::SliderFloat("SunSize", &WearherSunSize, 0.0f,1000.0f)) {
             sc->w_sky->SetSunSize(WearherSunSize);
-            sc->d_first_render = false;
+            sc->regenerateEnvCubeMap();
         }
         if (ImGui::Button("Reset Weather"))
         {
-            sc->d_first_render = false;
+            sc->regenerateEnvCubeMap();
             WeatherLocalTime = 1.0;
             WeatherSkyTurbidity = 2.0;
             WearherSunSize = 100.0;

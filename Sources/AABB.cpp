@@ -25,22 +25,22 @@ std::vector <Point> AABBPoints(const AABB &a) {
 AABB FrustrumSize(const SMat4x4& r) {
 
     SMat4x4 invPV = r.Inverse();
-    SVec4 f1 = invPV*SVec4(1.0,-1.0,-1.0,1.0);
+    vec4 f1 = invPV*vec4(1.0,-1.0,-1.0,1.0);
     f1.DivW();
-    SVec4 f2 = invPV*SVec4(-1.0,1.0,-1.0,1.0);
+    vec4 f2 = invPV*vec4(-1.0,1.0,-1.0,1.0);
     f2.DivW();
-    SVec4 f3 = invPV*SVec4(1.0,1.0,-1.0,1.0);
+    vec4 f3 = invPV*vec4(1.0,1.0,-1.0,1.0);
     f3.DivW();
-    SVec4 f4 = invPV*SVec4(-1.0,-1.0,-1.0,1.0);
+    vec4 f4 = invPV*vec4(-1.0,-1.0,-1.0,1.0);
     f4.DivW();
 
-    SVec4 b1 = invPV*SVec4(1.0,-1.0,1.0,1.0);
+    vec4 b1 = invPV*vec4(1.0,-1.0,1.0,1.0);
     b1.DivW();
-    SVec4 b2 = invPV*SVec4(-1.0,1.0,1.0,1.0);
+    vec4 b2 = invPV*vec4(-1.0,1.0,1.0,1.0);
     b2.DivW();
-    SVec4 b3 = invPV*SVec4(1.0,1.0,1.0,1.0);
+    vec4 b3 = invPV*vec4(1.0,1.0,1.0,1.0);
     b3.DivW();
-    SVec4 b4 = invPV*SVec4(-1.0,-1.0,1.0,1.0);
+    vec4 b4 = invPV*vec4(-1.0,-1.0,1.0,1.0);
     b4.DivW();
 
     float x_m;
@@ -104,7 +104,7 @@ AABB FrustrumSize(const SMat4x4& r) {
     return a;
 }
 const Point TransformPoint(const Point &in, const SMat4x4 &sm_mvp) {
-    SVec4 v = sm_mvp*SVec4(in.x,in.y,in.z,1.0);
+    vec4 v = sm_mvp*vec4(in.x,in.y,in.z,1.0);
     v = v / v.w;
     v.w = 1.0;
     return Point(v.x,v.y,v.z);

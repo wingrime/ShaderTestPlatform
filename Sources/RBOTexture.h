@@ -31,12 +31,11 @@ public:
 
 
     /* simple empty texture */
-    SRBOTexture(RectSizeInt s)
-    :SRBOTexture(s,RT_TEXTURE_FLOAT) {}
+    SRBOTexture(RectSizeInt s);
     SRBOTexture(RectSizeInt s, RTType t, unsigned int miplevel);
     SRBOTexture(RectSizeInt s, RTType t) :SRBOTexture(s,t,1) {}
     SRBOTexture(const SRBOTexture&) = delete;
-     ~SRBOTexture();
+    virtual ~SRBOTexture();
 
     int Bind(unsigned int sampler) const; /*bind as texture to sampler*/
     int BindImage(unsigned int unit);
@@ -70,3 +69,4 @@ private:
 
   
 };
+

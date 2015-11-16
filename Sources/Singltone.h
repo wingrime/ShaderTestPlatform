@@ -9,7 +9,9 @@ public:
     void Release();
     virtual ~Singltone();
     Singltone();
-   template<typename... Args> Singltone(Args... args);
+    Singltone(const Singltone<T>& c ) = delete;
+
+    template<typename... Args> Singltone(Args... args);
 
 private:
     static T* g_instance;

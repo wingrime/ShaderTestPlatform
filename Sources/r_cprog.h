@@ -21,12 +21,13 @@ private:
 
 class SCProg {
 public:
-    SCProg(const std::string& src_file)  : SCProg(new FileBuffer(std::string(".\\shaders\\")+src_file)) {}
-    SCProg( AbstractBuffer* src);
+    SCProg(const std::string& src_file);
     ~SCProg();
 
+    SCProg(const SCProg &) = delete;
+
     /* Data */
-    int DataBuffer(SSBuffer* dat);
+    //int DataBuffer(SSBuffer* dat);
 
     /* Control */
     int Dispatch()  {return Dispatch (1,1,1);}

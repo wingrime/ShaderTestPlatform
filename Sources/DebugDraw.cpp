@@ -91,22 +91,22 @@ int DebugDraw::AddCameraFrustrum(const SMat4x4 &PV)
 {
     /*position*/
     SMat4x4 invPV = (PV).Inverse();
-    SVec4 f1 = invPV*SVec4(1.0,-1.0,-1.0,1.0);
+    vec4 f1 = invPV*vec4(1.0,-1.0,-1.0,1.0);
     f1.DivW();
-    SVec4 f2 = invPV*SVec4(-1.0,1.0,-1.0,1.0);
+    vec4 f2 = invPV*vec4(-1.0,1.0,-1.0,1.0);
     f2.DivW();
-    SVec4 f3 = invPV*SVec4(1.0,1.0,-1.0,1.0);
+    vec4 f3 = invPV*vec4(1.0,1.0,-1.0,1.0);
     f3.DivW();
-    SVec4 f4 = invPV*SVec4(-1.0,-1.0,-1.0,1.0);
+    vec4 f4 = invPV*vec4(-1.0,-1.0,-1.0,1.0);
     f4.DivW();
 
-    SVec4 b1 = invPV*SVec4(1.0,-1.0,1.0,1.0);
+    vec4 b1 = invPV*vec4(1.0,-1.0,1.0,1.0);
     b1.DivW();
-    SVec4 b2 = invPV*SVec4(-1.0,1.0,1.0,1.0);
+    vec4 b2 = invPV*vec4(-1.0,1.0,1.0,1.0);
     b2.DivW();
-    SVec4 b3 = invPV*SVec4(1.0,1.0,1.0,1.0);
+    vec4 b3 = invPV*vec4(1.0,1.0,1.0,1.0);
     b3.DivW();
-    SVec4 b4 = invPV*SVec4(-1.0,-1.0,1.0,1.0);
+    vec4 b4 = invPV*vec4(-1.0,-1.0,1.0,1.0);
     b4.DivW();
 
 

@@ -190,7 +190,7 @@ int SProg::SetUniform( const std::string& name ,const SMat4x4& mat )
     return ESUCCESS;
 }
 
-int SProg::SetUniform(int loc, const SVec4 &vec)
+int SProg::SetUniform(int loc, const vec4 &vec)
 {
     glUniform4fv(loc, 1, (float *)vec.raw);
     return ESUCCESS;
@@ -218,7 +218,7 @@ int SProg::SetUniform(int loc, const SMat4x4 &mat)
         glUniformMatrix4fv(loc, 1, GL_TRUE, (float *) mat.raw);
     return ESUCCESS;
 }
-int SProg::SetUniform(const std::string& name, const SVec4& vec)
+int SProg::SetUniform(const std::string& name, const vec4& vec)
 {
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {

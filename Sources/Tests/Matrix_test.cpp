@@ -38,7 +38,7 @@ TEST(Matrix,Translate) {
     EXPECT_EQ(SMat4x4::Eq(SMat4x4(1,2,3,4, \
                                   5,6,7,8, \
                                   9,10,11,12,\
-                                  13,14,15,16).Translate(SVec4(10,20,30,1.0)),
+                                  13,14,15,16).Translate(vec4(10,20,30,1.0)),
                           SMat4x4(1,2,3,4+10, \
                                   5,6,7,8+20, \
                                   9,10,11,12+30,\
@@ -46,7 +46,7 @@ TEST(Matrix,Translate) {
 }
 TEST(Matrix, LookAtIndent) {
 
-    SMat4x4 m = LookAtMatrix(SVec4(0.0,0.0,-1.0,0.0),SVec4(0.0,0.0,0.0,0.0),SVec4(0.0,1.0,0.0,0.0));
+    SMat4x4 m = LookAtMatrix(vec4(0.0,0.0,-1.0,0.0),vec4(0.0,0.0,0.0,0.0),vec4(0.0,1.0,0.0,0.0));
     EXPECT_EQ( SMat4x4::Eq(SMat4x4(1.0,0.0,0.0,0.0, \
                                    0.0,1.0,0.0,0.0, \
                                    0.0,0.0,1.0,0.0, \

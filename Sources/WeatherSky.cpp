@@ -9,21 +9,21 @@ void SWeatherSky::SetTime(float LT) {
     float sun_z = cos(a.Elev);
 
 
-    sun_light_direction = SVec4(sun_x, sun_y , sun_z,1.0);
+    sun_light_direction = vec4(sun_x, sun_y , sun_z,1.0);
 
-    sky_dome_prog->SetUniform("sky_sunpos",SVec4(sun_x,sun_y,sun_z,0.0) );
-    sky_dome_cubemap_prog->SetUniform("sky_sunpos",SVec4(sun_x,sun_y,sun_z,0.0) );
+    sky_dome_prog->SetUniform("sky_sunpos",vec4(sun_x,sun_y,sun_z,0.0) );
+    sky_dome_cubemap_prog->SetUniform("sky_sunpos",vec4(sun_x,sun_y,sun_z,0.0) );
     //Debug info
     //printf("sun: %f %f %f\n Elev %f, Ath %f\n", sun_x,sun_y,sun_z,toDeg(a.Elev),toDeg(a.Ath));
 
 }
 
-SVec4 SWeatherSky::GetSunDirection()
+vec4 SWeatherSky::GetSunDirection()
 {
     return sun_light_direction;
 }
 
-void SWeatherSky::SetSunPos(const SVec4& sun) {
+void SWeatherSky::SetSunPos(const vec4& sun) {
     sky_dome_prog->SetUniform("sky_sunpos",sun);
     sky_dome_cubemap_prog->SetUniform("sky_sunpos",sun);
 }
@@ -73,21 +73,28 @@ SWeatherSky::SWeatherSky() {
     sky_dome_prog = new SShader("Sky/PerezSky.vert","Sky/PerezSky.frag");
     sky_dome_cubemap_prog = new SShader("Sky/PerezSkyCubemap.vert","Sky/PerezSkyCubemap.frag","Sky/PerezSkyCubemap.geom");
 
-    sky_dome_model->ConfigureProgram( sky_dome_prog);
-    sky_dome_model->ConfigureProgram( sky_dome_cubemap_prog);
+    sky_dome_model->ConfigureProgram( *sky_dome_prog);
+    sky_dome_model->ConfigureProgram( *sky_dome_cubemap_prog);
     sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
 
     sky_dome_prog->SetUniform("sky_turbidity",sky_turbidity);
     sky_dome_prog->SetUniform("sky_sunsize",sky_disksize);
     sky_dome_prog->SetUniform("sky_sunpower",sky_sunpower);
     sky_dome_prog->SetUniform("sky_power",sky_power);
-    sky_dome_prog->SetUniform("sky_sunpos",SVec4( 0.0,1.0,0.0,1.0 ));
+    sky_dome_prog->SetUniform("sky_sunpos",vec4( 0.0,1.0,0.0,1.0 ));
 
     sky_dome_cubemap_prog->SetUniform("sky_turbidity",sky_turbidity);
     sky_dome_cubemap_prog->SetUniform("sky_sunsize",sky_disksize);
     sky_dome_cubemap_prog->SetUniform("sky_sunpower",sky_sunpower);
     sky_dome_cubemap_prog->SetUniform("sky_power",sky_power);
-    sky_dome_cubemap_prog->SetUniform("sky_sunpos",SVec4( 0.0,1.0,0.0,1.0 ));
+    sky_dome_cubemap_prog->SetUniform("sky_sunpos",vec4( 0.0,1.0,0.0,1.0 ));
+}
+
+SWeatherSky::~SWeatherSky()
+{
+    delete sky_dome_model;
+    delete sky_dome_prog;
+    delete sky_dome_cubemap_prog;
 }
 void SWeatherSky::Draw(RenderContext& r) {
     if (sky_dome_model->IsReady)
