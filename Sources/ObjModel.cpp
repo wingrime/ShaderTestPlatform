@@ -131,12 +131,12 @@ void SObjModel::BindTextures(SMaterial &m) {
 
 void SObjModel::LoadTextures() {
 
-    texDiffuse = (new STexture("empty_texture.png"));
+    texDiffuse = (new STexture("AssetBase/empty_texture.png"));
     if (!texDiffuse->IsReady) {
         LOGE(std::string(" diffuse texture file not found"));
         return;
     }
-    texNormal = (new STexture("empty_normal.png",false));
+    texNormal = (new STexture("AssetBase/empty_normal.png",false));
     if (!texNormal->IsReady) {
        LOGE(std::string("normal texture file not found"));
         return;

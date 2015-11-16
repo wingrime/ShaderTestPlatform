@@ -13,7 +13,7 @@ TODOs:
 /*free type 2*/
 #include "ft2build.h"
 #include FT_FREETYPE_H
-#define DEF_fontname "Anonymous Pro.ttf"
+#define DEF_fontname "AssetBase/Anonymous Pro.ttf"
 #define DEF_fontsize 20
 
 class SProg;

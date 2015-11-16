@@ -69,7 +69,7 @@ SolAng SWeatherSky::SolarAngleModel(float LT,float delta_GMT,float d, float long
 }
 SWeatherSky::SWeatherSky() {
 
-    sky_dome_model = new SObjModel("sky_dome.obj");
+    sky_dome_model = new SObjModel("AssetBase/sky_dome.obj");
     sky_dome_prog = new SShader("Sky/PerezSky.vert","Sky/PerezSky.frag");
     sky_dome_cubemap_prog = new SShader("Sky/PerezSkyCubemap.vert","Sky/PerezSkyCubemap.frag","Sky/PerezSkyCubemap.geom");
 

@@ -90,7 +90,7 @@ SScene::SScene(RectSizeInt v)
     /*Weather system*/
     w_sky = new SWeatherSky();
     /*scene noise*/
-    texRandom = new STexture("noise.png");
+    texRandom = new STexture("AssetBase/noise.png");
     texRandom->setInterpolationMode(STexture::InterpolationType::TEX_NEAREST);
 
     texConvoledCubemap = new SRBOTexture(RectSizeInt(10,4),SRBOTexture::RT_TEXTURE_FLOAT_RED);

@@ -332,7 +332,7 @@ int main ( int argc, char * argv [] )
     sc->toggleBrightPass((bool)config->operator []("scene.toggle_brightpass").GetInt());
     LOGV("Load Scene");
     /*load models*/
-    sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("sponza.obj")) );
+    sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("TestModels/sponza.obj")) );
     /* main loop */
     LOGV("Entering main loop");
     dbg_ui->con->Msg("git revision: " GIT_SHA1 "\n");
