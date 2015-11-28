@@ -458,10 +458,8 @@ SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
     SMat4x4 l = SMat4x4(v1,v2,v3,v4);
     return l;
 
-}
-int SScene::UpdateScene(float dt) {
-    /*shadowmap*/
-    UNUSED(dt);
+}int SScene::UpdateShadowmap()
+{
     SMat4x4 Bias = SMat4x4( 0.5,0.0,0.0,0.0,
                             0.0,0.5,0.0,0.0,
                             0.0,0.0,0.5,0.0,
@@ -472,7 +470,8 @@ int SScene::UpdateScene(float dt) {
 
     SMat4x4 PV = cam.getViewProjectMatrix();
     std::vector <Point> psrPoints;// = FrustumPoints(PV); - add view-frustum as PSR
-    AABB psrAABB =AABB(Point(-2000.0,-100,-1300.0), Point(2000.0,1300.0,1300.0) );
+    AABB psrAABB =AABB(Point(-2000.0,-100,-1300.0), Point(2000.0,1300.0,1300.0) ); //Scene PSR
+
     std::vector <Point> aabbPoints = AABBPoints(psrAABB);
     psrPoints.insert(psrPoints.end(),aabbPoints.begin(),aabbPoints.end()); /*JOIN - better solution, convex hull*/
 
@@ -544,7 +543,11 @@ int SScene::UpdateScene(float dt) {
      mp->SetUniform("sunLightDirectionVector",w_sky->GetSunDirection());
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
-
+}
+int SScene::UpdateScene(float dt) {
+    /*shadowmap*/
+    UNUSED(dt);
+    UpdateShadowmap();
     if (d_play) {
         cam.setViewMatrix(rec.Get());
         if (rec.Empty())
@@ -674,6 +677,8 @@ int SScene::BlurKawase(float factor)
     pp_stage_hdr_blur_vert2->DrawRBO(false);
     return 0;
 }
+
+
 int inline SScene::RenderDirect(const RenderPipelineStageRuntime &runtime) {
     runtime.stageRBO->Bind(true);
         RenderContext r_ctx(runtime.stageShader ,cam.getViewMatrix(), cam.getProjMatrix() ,

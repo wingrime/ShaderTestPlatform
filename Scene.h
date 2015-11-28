@@ -161,6 +161,8 @@ private:
     int RenderPrepass(const RenderPipelineStageRuntime &runtime);
     int BlurKawase(float factor);
 
+    int UpdateShadowmap();
+
 private:
 
    RenderPass normal_pass;
