@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <windows.h>
+
 #include <memory>
 
 #include <GL/glew.h>
@@ -26,14 +26,13 @@ static long int g_frameNumber = 0;
 void display ()
 {
     /* main engine loop */
-   static std::chrono::steady_clock::time_point last_t;
-   //full time difference;
-   float dt = std::chrono::duration<float, std::milli> ( (std::chrono::steady_clock::now() - last_t) ).count();\
-   float dt_seconds = std::chrono::duration<float, std::ratio<1>> ( (std::chrono::steady_clock::now() - last_t) ).count();
-   // update time
-   last_t = std::chrono::steady_clock::now();
-
-   SScene * sc = Singltone<SScene>::GetInstance();
+    static std::chrono::steady_clock::time_point last_t;
+    //full time difference;
+    float dt = std::chrono::duration<float, std::milli> ( (std::chrono::steady_clock::now() - last_t) ).count();
+    float dt_seconds = std::chrono::duration<float, std::ratio<1>> ( (std::chrono::steady_clock::now() - last_t) ).count();
+    // update time
+    last_t = std::chrono::steady_clock::now();
+    SScene * sc = Singltone<SScene>::GetInstance();
     DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
     //auto start = std::chrono::steady_clock::now();
     imGuiRender();
@@ -50,7 +49,6 @@ void display ()
     dbg_ui->fps_label->setText(buf);
 
     dbg_ui->Draw();
-
 
     //if (g_scriptCallFrequency) {
     //    if ((g_frameNumber % g_scriptCallFrequency) == 0)
@@ -195,28 +193,7 @@ void refresh() {
     glutPostRedisplay();
 }
 
-void APIENTRY openglCallbackFunction(GLenum source,
-                                           GLenum type,
-                                           GLuint id,
-                                           GLenum severity,
-                                           GLsizei length,
-                                           const GLchar* message,
-                                           const void* userParam){
- 
- /* todo find  where it was called */
-    UNUSED(source);
-    UNUSED(type);
-    UNUSED(id);
-    UNUSED(userParam);
-    UNUSED(length);
-    static Log gl_log("gl_log.log");
-    if (severity  != GL_DEBUG_SEVERITY_NOTIFICATION)
-   {
-        gl_log.LogW(message);
-        // nice feature;
-       //D_TRAP();
-    }
-}
+
 
 
 int initGlutHooks() {
@@ -270,8 +247,8 @@ int main ( int argc, char * argv [] )
     /*init subsystem singltones*/
     Singltone<Log> main_log;
     Singltone<Config> main_config;
-    //Singltone<scripting::Scripting> mainScript("init.lua"); //TODO, from config or argv
 
+    //Singltone<scripting::Scripting> mainScript("init.lua"); //TODO, from config or argv
     //scripting::Scripting * script = Singltone<scripting::Scripting>::GetInstance();
 
 
@@ -289,27 +266,11 @@ int main ( int argc, char * argv [] )
     int ogl_major = config->operator []("launch.ogl_major").GetInt();
     int ogl_minor = config->operator []("launch.ogl_minor").GetInt();
 
-    LOGV("Init gl context");
+    LOGV("Init OpengGL");
     oglInit(argc,argv,w,h,ogl_major,ogl_minor);
     initGlutHooks();
 
-
-
-   if(glDebugMessageCallback){
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(openglCallbackFunction, nullptr);
-        GLuint unusedIds = 0;
-        glDebugMessageControl(GL_DONT_CARE,
-            GL_DONT_CARE,
-             GL_DONT_CARE,
-            0,
-            &unusedIds,
-            true);
-        LOGV("OpenGl debug callback installed");
-    }
-    else
-        LOGW("OpenGl debug callback not avaliable");
-
+    /* Main Scene */
     Singltone<SScene> msc(RectSizeInt(h,w));
     SScene * sc = Singltone<SScene>::GetInstance();
     Singltone<DebugUI> dbg(RectSizeInt(h,w));
@@ -320,25 +281,24 @@ int main ( int argc, char * argv [] )
     LOGV("Init Keybindings");
     initKeybindings();
 
-    LOGV("Init Script");
+    //LOGV("Init Script subsystem");
     //initLuaBindings(state);
     //Singltone<sel::State>  g_script_state(&state);
 
 
     dbg_ui->d_toggle_fps_view = config->operator []("scene.toggle_debug_viewport_fps").GetInt();
 
-
     sc->toggleMSAA((bool)config->operator []("scene.toggle_msaa").GetInt());
     sc->toggleBrightPass((bool)config->operator []("scene.toggle_brightpass").GetInt());
-    LOGV("Load Scene");
+    LOGV("Enter load scene phase");
     /*load models*/
     sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("TestModels/sponza.obj")) );
     /* main loop */
-    LOGV("Entering main loop");
-    dbg_ui->con->Msg("git revision: " GIT_SHA1 "\n");
-    dbg_ui->con->Msg("Model View\nShestacov Alexsey 2014-2015(c)\n");
+    LOGV("Entel main game loop");
+    dbg_ui->con->Msg("Buildrev: " GIT_SHA1 "\n");
+    dbg_ui->con->Msg("ShaderTestPlatform \nShestacov Alexsey 2014-2015(c)\n");
 
     glutMainLoop ();
-    LOGV("Leave main loop");
+    LOGV("Exiting");
 
 }
