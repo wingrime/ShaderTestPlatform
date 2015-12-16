@@ -11,4 +11,10 @@ Require CMake and MinGW for build
 
 External depedences should be added later as Git Subrepo's
 
+#TODOs
+* Cascaded shadows
+* Some GI tech (voxel,lpv, light-maps)
+* Better piplenine chaing
+* Some multilight tech (forward+,deffered)
+
 
