@@ -13,8 +13,8 @@ public:
     int Draw();
     int Reshape(const RectSizeInt &v);
     int InitDebugCommands();
+    int ToggleFPSCounter(bool b);
 
-    bool d_toggle_fps_view = true;
 
 
 
@@ -25,6 +25,8 @@ private:
     /* imGUI code*/
     int DrawGUI();
     int DrawIntrospectionGUI(bool *opened);
+
+    bool d_toggle_fps_view = true;
 
     ConsoleCommandHandler *d_console_cmd_handler;
     UIConsoleErrorHandler *err_con;

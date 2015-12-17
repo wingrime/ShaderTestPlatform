@@ -286,7 +286,7 @@ int main ( int argc, char * argv [] )
     //Singltone<sel::State>  g_script_state(&state);
 
 
-    dbg_ui->d_toggle_fps_view = config->operator []("scene.toggle_debug_viewport_fps").GetInt();
+    dbg_ui->ToggleFPSCounter(config->operator []("scene.toggle_debug_viewport_fps").GetInt());
 
     sc->toggleMSAA((bool)config->operator []("scene.toggle_msaa").GetInt());
     sc->toggleBrightPass((bool)config->operator []("scene.toggle_brightpass").GetInt());

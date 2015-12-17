@@ -20,7 +20,10 @@ DebugUI::DebugUI(RectSizeInt &_v)
     sc = Singltone<SScene>::GetInstance();
     imGuiSetup();
 }
-
+int DebugUI::ToggleFPSCounter(bool b) 
+{
+    d_toggle_fps_view = b;
+}
 int DebugUI::Draw()
 {
     if (d_toggle_fps_view)
