@@ -10,8 +10,12 @@ NOT buildable untill I config suprepos and depedences
 Require CMake and MinGW for build
 
 External depedences should be added later as Git Subrepo's
-
-#TODOs
+# What was done
+ * Normal mapping
+ * Possion sampling soft shadows
+ * SH-Based Atomspheric lightning
+ * PBR-based BRDF
+# TODOs
 * Cascaded shadows
 * Some GI tech (voxel,lpv, light-maps)
 * Better piplenine chaing
