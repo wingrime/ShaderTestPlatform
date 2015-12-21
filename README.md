@@ -14,7 +14,11 @@ External depedences should be added later as Git Subrepo's
  * Normal mapping
  * Possion sampling soft shadows
  * SH-Based Atomspheric lightning
+ * SH-Basis RGB values are generating using compute shader from cubemap, generated from scene
  * PBR-based BRDF
+ * HDR Pipeline with Uncharted tonemapping function
+ * Sky-model based on perez all weather model
+ * Bloom
 
 # TODOs
 * Cascaded shadows
