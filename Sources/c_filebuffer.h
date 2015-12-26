@@ -4,7 +4,7 @@
 #pragma once
 
 #include "AbstractBuffer.h"
-
+#include <string>
 class FileBuffer :public AbstractBuffer{
     public:
         FileBuffer(const std::string& srcfile);
