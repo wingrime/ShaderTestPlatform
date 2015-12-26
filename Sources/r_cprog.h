@@ -1,8 +1,12 @@
 #pragma once
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#endif
 
 #include <string>
 /*inhertance - can't avoid include */
@@ -44,4 +48,3 @@ private:
     GLuint d_program;
     GLuint d_shader;
 };
-

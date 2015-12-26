@@ -1,7 +1,11 @@
 
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#endif
 
 #include <unordered_map>
 #include <vector>
@@ -18,7 +22,7 @@ Objectives:
     -   Load Shader config variables form json file
     -   Setting shader variables with limitations from
     json file
-    -   Automaticaly handle variables update when they 
+    -   Automaticaly handle variables update when they
     are changed.
 */
 SShader::SShader (const std::string &vprog, const std::string &fprog, const std::string &gprog)
@@ -154,6 +158,3 @@ int SShader::SetUniform(int loc, const SMat4x4 &mat)
     d_matrix_update_list.push_back( std::pair<int, const SMat4x4 >( loc, mat) );
     return ESUCCESS;
 }
-
-
-

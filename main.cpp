@@ -6,8 +6,15 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
+
+#ifndef __APPLE__
 #include <GL/wglew.h>
+#endif
 
 #include "c_config.h"
 
@@ -100,7 +107,7 @@ void key ( unsigned char key, int x, int y )
         return;
     }
 
-    if ( key == 27 || key == 'q' || key == 'Q' )  
+    if ( key == 27 || key == 'q' || key == 'Q' )
     {
          glutLeaveMainLoop();
          return;
@@ -140,7 +147,7 @@ void mouse_move (  int x , int y) {
     static float y_rm = 0;
     if (x_base == -10000) {
         x_rm = 0;
-        y_rm = 0; 
+        y_rm = 0;
         x_base = x;
         y_base = y;
     }
@@ -258,8 +265,9 @@ int main ( int argc, char * argv [] )
     LOGV("GIT REVISION:"  GIT_SHA1 );
 
     /*backtrace on windows*/
+#ifndef __APPLE__
     LoadLibraryA("backtrace.dll");
-
+#endif
     int h = config->operator []("launch.h").GetInt();
     int w = config->operator []("launch.w").GetInt();
 

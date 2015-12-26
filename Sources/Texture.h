@@ -5,8 +5,12 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#endif
 
 /*serialization*/
 #include <cereal/access.hpp>
@@ -28,7 +32,7 @@ public:
     STexture(const std::string& fname)
     : STexture( fname, true) {}
     /* simple empty texture */
-    STexture(int _x, int _y) 
+    STexture(int _x, int _y)
     :STexture(_x,_y,TEX_RGB)
     {};
     STexture(int _x, int _y, TextureType t);
@@ -59,9 +63,5 @@ private:
     TextureType type;      /*serialize support */
     int x,y;
 
-  
+
 };
-
-
-
-

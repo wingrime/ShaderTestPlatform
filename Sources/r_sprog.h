@@ -7,8 +7,12 @@
 #include <unordered_map>
 
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#endif
 
 
 #include "r_shader.h"
@@ -21,7 +25,7 @@ Objectives:
     -   Load Shader config variables form json file
     -   Setting shader variables with limitations from
     json file
-    -   Automaticaly handle variables update when they 
+    -   Automaticaly handle variables update when they
     are changed.
 */
 
@@ -82,6 +86,3 @@ static std::list<SShader *> s_d_shaders_enum;
     std::vector< std::pair<int, vec4 >  > d_vector_update_list;
 
 };
-
-
-

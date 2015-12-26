@@ -7,8 +7,12 @@
 #include <unordered_map>
 #include <map>
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#endif
 
 /* shader class*/
 #include "r_sprog.h"
@@ -53,7 +57,7 @@ int SObjModel::ConfigureProgram(SShader& sprog){
     return 0;
 }
 
-SObjModel::SObjModel(const std::string&  fname) 
+SObjModel::SObjModel(const std::string&  fname)
 {
     LOGV(std::string("Opening obj model ")+fname);
     CObjMeshParser parser;

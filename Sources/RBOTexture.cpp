@@ -2,8 +2,12 @@
 #include "ErrorCodes.h"
 
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#endif
 
 #include "Texture.h"
 #include "string_format.h"
@@ -248,5 +252,3 @@ SRBOTexture::~SRBOTexture() {
 
 
 }
-
-

@@ -3,10 +3,16 @@
 #define __OGL_INIT__
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
 #include <windows.h>
+#endif
 #include "Log.h"
+
+#ifndef __APPLE__
 void APIENTRY openglCallbackFunction(GLenum source,
                                            GLenum type,
                                            GLuint id,
@@ -14,7 +20,7 @@ void APIENTRY openglCallbackFunction(GLenum source,
                                            GLsizei length,
                                            const GLchar* message,
                                            const void* userParam){
- 
+
  /* todo find  where it was called */
     UNUSED(source);
     UNUSED(type);
@@ -31,6 +37,7 @@ void APIENTRY openglCallbackFunction(GLenum source,
         //D_TRAP();
     }
 }
+#endif
 int oglInit(int argc, char * argv [] , int w, int h , int ogl_major, int ogl_minor) {
     // initialize glut
     glutInit            ( &argc, argv );
@@ -47,6 +54,7 @@ int oglInit(int argc, char * argv [] , int w, int h , int ogl_major, int ogl_min
     if (err != GLEW_OK) {
         return -1;
     }
+#ifndef __APPLE__
     if(glDebugMessageCallback){
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(openglCallbackFunction, nullptr);
@@ -57,7 +65,9 @@ int oglInit(int argc, char * argv [] , int w, int h , int ogl_major, int ogl_min
             0,
             &unusedIds,
             true);
-    }
+            }
+#endif
+
     return 0 ;
 }
 #endif

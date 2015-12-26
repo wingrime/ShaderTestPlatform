@@ -1,9 +1,12 @@
 #pragma once
 #include <unordered_map>
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/wglew.h>
-
+#endif
 #include "c_filebuffer.h"
 
 class vec4;
