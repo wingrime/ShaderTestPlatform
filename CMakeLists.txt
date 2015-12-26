@@ -37,8 +37,8 @@ set(LUA_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/External/lua/src")
 set(LUA_LIBRARIES "${PROJECT_SOURCE_DIR}/External/lua")
 
 
-find_package(Freetype REQUIRED)	
-find_package(glew REQUIRED)	
+find_package(Freetype REQUIRED)
+find_package(glew REQUIRED)
 find_package(freeglut REQUIRED)
 find_package(lua REQUIRED)
 
@@ -84,7 +84,7 @@ include_directories(${PROJECT_SOURCE_DIR}/Sources/Tests)
 include_directories(${PROJECT_SOURCE_DIR}/External/imgui)
 
 #add to deps
-AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources RENDER_HEADERS) 
+AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources RENDER_HEADERS)
 
 AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources/Tests RENDER_TESTS)
 
@@ -92,11 +92,13 @@ AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Sources/Tests RENDER_TESTS)
 AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/Scripting SCRIPTING)
 
 #buildin lua, submodules are strange things there
-include_directories(${PROJECT_SOURCE_DIR}/External/lua/src)
-AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/External/lua/src LUA_BUILDIN_SRC)
-list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/luac.c)
-list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/lua.c)
-list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/loadlib_rel.c)
+#include_directories(${PROJECT_SOURCE_DIR}/External/lua/src)
+#AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/External/lua/src LUA_BUILDIN_SRC)
+#list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/luac.c)
+#list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/lua.c)
+#list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/loadlib_rel.c)
+#list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/loadlib.c)
+#list(REMOVE_ITEM LUA_BUILDIN_SRC ${PROJECT_SOURCE_DIR}/External/lua/src/wmain.c)
 
 #add git revision to variable
 exec_program(
