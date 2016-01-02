@@ -87,8 +87,8 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
     bool gs_used = false;
     d_program = glCreateProgram ();
     //fragement shader
-    FileBuffer *frag = new FileBuffer(std::string(".\\shaders\\")+fprog);
-    FileBuffer *vert = new FileBuffer(std::string(".\\shaders\\")+vprog);
+    FileBuffer *frag = new FileBuffer(std::string("./shaders/")+fprog);
+    FileBuffer *vert = new FileBuffer(std::string("./shaders/")+vprog);
 
     if (!vert || !vert->IsReady) {
         LOGE("Vertex Shader Open Failed");
