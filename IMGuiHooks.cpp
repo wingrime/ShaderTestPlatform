@@ -1,8 +1,8 @@
 #include <imgui.h>
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
+#include <GLUT/glut.h>
 #else
 #include <GL/gl.h>
 #include <GL/wglew.h>

@@ -2,10 +2,12 @@
 #ifndef __OGL_INIT__
 #define __OGL_INIT__
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
+#include <GLUT/glut.h>
 #else
+#include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/wglew.h>
 #include <windows.h>
@@ -44,9 +46,11 @@ int oglInit(int argc, char * argv [] , int w, int h , int ogl_major, int ogl_min
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
     glutInitWindowSize  ( w,h);
     // init modern opengl
+    #ifndef __APPLE__
     glutInitContextVersion ( ogl_major, ogl_minor );
     glutInitContextFlags   ( GLUT_FORWARD_COMPATIBLE| GLUT_DEBUG);
     glutInitContextProfile ( GLUT_CORE_PROFILE  );
+    #endif
 
     glutCreateWindow ("m_proj Shestacov Alexsey 2014-2015(c)" );
     glewExperimental = GL_TRUE; /*Required for some new glFunctions otherwice will crash*/

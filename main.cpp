@@ -5,11 +5,13 @@
 #include <memory>
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
+#include <GLUT/glut.h>
 #else
 #include <GL/gl.h>
+#include <GL/freeglut.h>
 #endif
 
 #ifndef __APPLE__
@@ -109,7 +111,12 @@ void key ( unsigned char key, int x, int y )
 
     if ( key == 27 || key == 'q' || key == 'Q' )
     {
+#ifdef __APPLE__
+        exit(0);
+#else
          glutLeaveMainLoop();
+#endif
+
          return;
     }
 
