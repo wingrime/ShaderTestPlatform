@@ -116,7 +116,7 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
     if (!gprog.empty())
     {
         gs_used = true;
-        FileBuffer *geom = new FileBuffer(std::string(".\\shaders\\")+gprog);
+        FileBuffer *geom = new FileBuffer(std::string("./shaders/")+gprog);
         gs = LoadShader ( (const char *)geom->buffer(), GL_GEOMETRY_SHADER, gprog  );
         if (vs == EFAIL) {
             LOGE("Geometry Shader Build Failed");
