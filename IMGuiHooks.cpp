@@ -6,6 +6,7 @@
 #else
 #include <GL/gl.h>
 #include <GL/wglew.h>
+#include <GL/freeglut.h>
 #endif
 #include "ErrorCodes.h"
 static GLuint       g_FontTexture = 0;
