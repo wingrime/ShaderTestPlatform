@@ -65,21 +65,21 @@ int DebugUI::InitDebugCommands()
 
     }));
 
-    d_console_cmd_handler->AddCommand("r_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Main.FloatUniform", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[2]);
         sc->debugGetMainStageShader()->SetUniform(args[1],val_f);
 
     }));
-    d_console_cmd_handler->AddCommand("r_set_i", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Main.IntegerUniform", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         int val_f = std::stoi(args[2]);
         sc->debugGetMainStageShader()->SetUniform(args[1],val_f);
 
     }));
-       d_console_cmd_handler->AddCommand("sky_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+       d_console_cmd_handler->AddCommand("Sky.FloatUniform", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[2]);
@@ -87,16 +87,13 @@ int DebugUI::InitDebugCommands()
 
     }));
 
-    d_console_cmd_handler->AddCommand("sm_cam_set", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("RegenerateEnvCubemap", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         UNUSED(arg_list);
-        for (int i = 0; i < 4 ; i++) {
-            //sc->d_shadowmap_cam[i] = sc->cam;
-        }
         sc->regenerateEnvCubeMap();
 
     }));
-   d_console_cmd_handler->AddCommand("dump_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+   d_console_cmd_handler->AddCommand("DumpCamera", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         UNUSED(arg_list);
          std::ostringstream os;
@@ -108,7 +105,7 @@ int DebugUI::InitDebugCommands()
         con->Msg(os.str());
 
      }));
-    d_console_cmd_handler->AddCommand("dump_model", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("DumpModel", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
        UNUSED(arg_list);
        UNUSED(name);
 
@@ -121,7 +118,7 @@ int DebugUI::InitDebugCommands()
         }
 
     }));
-    d_console_cmd_handler->AddCommand("mem_stats", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("MemoryStats", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         /*
@@ -142,13 +139,13 @@ int DebugUI::InitDebugCommands()
 
 
 
-        d_console_cmd_handler->AddCommand("sm_cam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        d_console_cmd_handler->AddCommand("ResetShadowMap", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
             UNUSED(arg_list);
             UNUSED(name);
         sc->d_shadowmap_cam[0].LookAt(vec4( 0.0,0.0, 0.0,1.0),vec4(0.0,4000,0.0,1.0) ,   vec4(1.0,0.0,0.0,1.0) );
 
     }));
-        d_console_cmd_handler->AddCommand("dump_smcam", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+        d_console_cmd_handler->AddCommand("DumpShadowMap", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
             UNUSED(arg_list);
             UNUSED(name);
 
@@ -161,69 +158,69 @@ int DebugUI::InitDebugCommands()
         con->Msg(os.str());
     }));
 
-    d_console_cmd_handler->AddCommand("toggle_fps", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("DBGUI.FoggleFPS", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         d_toggle_fps_view = !d_toggle_fps_view;
 
     }));
-    d_console_cmd_handler->AddCommand("msaa_enable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("MsaaEnable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         sc->toggleMSAA(true);
 
     }));
-    d_console_cmd_handler->AddCommand("msaa_disable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("MsaaDisable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         sc->toggleMSAA(false);
 
     }));
-    d_console_cmd_handler->AddCommand("brightpass_enable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("BrightpassEnable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         sc->toggleBrightPass(true);
 
     }));
-    d_console_cmd_handler->AddCommand("brightpass_disable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("BrightpassDisable", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         sc->toggleBrightPass(false);
 
     }));
-    d_console_cmd_handler->AddCommand("record", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Recorder.Start", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         sc->rec.Begin();
 
     }));
-    d_console_cmd_handler->AddCommand("end", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Recorder.Finish", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         sc->rec.End();
 
     }));
-    d_console_cmd_handler->AddCommand("play", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Recorder.Play", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         sc->rec.End();
         sc->d_play = true;
 
     }));
-    d_console_cmd_handler->AddCommand("save_rec", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Recorder.Save", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         sc->rec.Save(args[1]);
     }));
 
-    d_console_cmd_handler->AddCommand("goto", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Actor.Move", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         vec4 vect(args[1]);
         sc->cam.goPosition(vect);
         sc->cam.rotEuler(vec4(0,0,0,0));
     }));
-    d_console_cmd_handler->AddCommand("scale", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Model.Scale", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
@@ -231,21 +228,21 @@ int DebugUI::InitDebugCommands()
         m->SetModelMat(SMat4x4().Scale(val_f));
     }));
 
-    d_console_cmd_handler->AddCommand("rot_x", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Actor.RotateX", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
         sc->cam.goPosition(vec4(0.0,0.0,0.0,0.0));
         sc->cam.rotEulerX(toRad(val_f));
     }));
-    d_console_cmd_handler->AddCommand("rot_y", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Actor.RotateY", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
         sc->cam.goPosition(vec4(0.0,0.0,0.0,0.0));
         sc->cam.rotEulerY(toRad(val_f));
     }));
-    d_console_cmd_handler->AddCommand("rot_z", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Actor.Rotate.Z", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
@@ -253,7 +250,7 @@ int DebugUI::InitDebugCommands()
         sc->cam.rotEulerZ(toRad(val_f));
     }));
 
-    d_console_cmd_handler->AddCommand("weather_time", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Weather.SetTime", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);
@@ -261,14 +258,14 @@ int DebugUI::InitDebugCommands()
 
     }));
 
-    d_console_cmd_handler->AddCommand("vis_frustrum", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("DBG.DumpFrustrum", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         UNUSED(arg_list);
         sc->d_debugDrawMgr.AddCameraFrustrum(sc->cam.getViewProjectMatrix());
         sc->d_debugDrawMgr.Update();
 
     }));
-    d_console_cmd_handler->AddCommand("vis_cascades", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("DBG.DumpShadowmapCascades", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         UNUSED(arg_list);
         for (int i = 0 ; i < 4 ; i++)
@@ -278,7 +275,7 @@ int DebugUI::InitDebugCommands()
 
     }));
 
-    d_console_cmd_handler->AddCommand("vis_camaabb", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("DBG.DumpCameraAABB", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         UNUSED(arg_list);
 
@@ -290,7 +287,7 @@ int DebugUI::InitDebugCommands()
         sc->d_debugDrawMgr.Update();
 
     }));
-    d_console_cmd_handler->AddCommand("vis_cascadeaabb", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("DBG.DumpShadowmapCascadesAABB", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         UNUSED(arg_list);
         for (int i = 0 ; i < 4; i++)
@@ -299,13 +296,7 @@ int DebugUI::InitDebugCommands()
 
     }));
 
-    d_console_cmd_handler->AddCommand("regenerate_envmap", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
-        UNUSED(name);
-        UNUSED(arg_list);
-        sc->regenerateEnvCubeMap();
-    }));
-
-    d_console_cmd_handler->AddCommand("updc", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("DBG.MarkActorPosition", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
         SMat4x4 m = sc->cam.getViewMatrix();
@@ -313,7 +304,7 @@ int DebugUI::InitDebugCommands()
         sc->d_debugDrawMgr.Update();
     }));
 
-    d_console_cmd_handler->AddCommand("load", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Model.Load", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
@@ -326,7 +317,7 @@ int DebugUI::InitDebugCommands()
         sc->regenerateEnvCubeMap();
 
     }));
-    d_console_cmd_handler->AddCommand("add", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Model.Add", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         con->Msg("Load new model..");
@@ -336,6 +327,7 @@ int DebugUI::InitDebugCommands()
         sc->regenerateEnvCubeMap();
 
     }));
+    /*
     d_console_cmd_handler->AddCommand("script", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(arg_list);
         UNUSED(name);
@@ -345,6 +337,7 @@ int DebugUI::InitDebugCommands()
         //state["init"]();
 
     }));
+    */
     return ESUCCESS;
 }
 
