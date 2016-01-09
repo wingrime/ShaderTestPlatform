@@ -12,9 +12,6 @@
 #else
 #include <GL/gl.h>
 #include <GL/freeglut.h>
-#endif
-
-#ifndef __APPLE__
 #include <GL/wglew.h>
 #endif
 
