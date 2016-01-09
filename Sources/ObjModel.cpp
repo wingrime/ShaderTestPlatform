@@ -11,7 +11,6 @@
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
-#include <GL/wglew.h>
 #endif
 
 /* shader class*/
