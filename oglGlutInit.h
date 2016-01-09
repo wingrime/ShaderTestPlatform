@@ -29,7 +29,6 @@ void APIENTRY openglCallbackFunction(GLenum source,
     UNUSED(id);
     UNUSED(userParam);
     UNUSED(length);
-    static Log gl_log("gl_log.log");
     if (severity  != GL_DEBUG_SEVERITY_NOTIFICATION)
    {
         LOGW(message);
