@@ -25,8 +25,10 @@ private:
     /* imGUI code*/
     int DrawGUI();
     int DrawIntrospectionGUI(bool *opened);
+    int DrawConsoleUI(bool *opened);
 
     bool d_toggle_fps_view = true;
+    bool d_toggleConsoleOverlay = false;
 
     ConsoleCommandHandler *d_console_cmd_handler;
     UIConsoleErrorHandler *err_con;

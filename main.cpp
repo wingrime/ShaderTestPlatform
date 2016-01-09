@@ -109,7 +109,7 @@ void key ( unsigned char key, int x, int y )
     }
 
 /*backspace or plus goes to console*/
-else if (key == 8 || key == 43) {console_mode = 1; dbg_ui->con->Cls(); dbg_ui->con->Msg("Debug console, [ESC] for exit\n"); }
+else if (key == 8 || key == 43) {console_mode = 1; dbg_ui->con->Msg("Debug console, [ESC] for exit\n"); }
 else
     Singltone<InputCommandHandler>::GetInstance()->HandleInputKey(key);
 
@@ -195,9 +195,6 @@ void refresh() {
     glutPostRedisplay();
 }
 
-
-
-
 int initGlutHooks() {
 
     /*glut callbacks*/
@@ -255,7 +252,6 @@ int main ( int argc, char * argv [] )
 
 
     Config * config = Singltone<Config>::GetInstance();
-    Log gl_log("gl_log.log");
 
     LOGV("GIT REVISION:"  GIT_SHA1 );
 

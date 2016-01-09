@@ -21,6 +21,10 @@ UIConsole::~UIConsole()
 void UIConsole::Draw() {
     fnt->RenderText(d_output_cache,0.0,0.05,    v_port.w, v_port.h);
 }
+
+const std::vector<std::string> * UIConsole::getConsoleData() {
+    return &con;
+}
 int UIConsole::HandlePrevHistoryCommand() {
     if ( !console_history.empty() ) 
     {

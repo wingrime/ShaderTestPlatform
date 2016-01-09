@@ -26,6 +26,8 @@ public:
     int HandlePrevHistoryCommand();
     int HandleNextHistoryCommand();
     void Cls();
+    const std::vector<std::string> * getConsoleData();
+
 
 private:
     int HandleCommand(const std::string& cmd);

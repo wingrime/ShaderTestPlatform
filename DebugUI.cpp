@@ -8,7 +8,7 @@
 #include "MAssert.h"
 #include "IMGuiHooks.h"
 DebugUI::DebugUI(RectSizeInt &_v)
-    :fps_label(new UILabel(_v,0.85,0.1))
+    :fps_label(new UILabel(_v,0.8,0.02))
 {
     /*Setup error handler*/
     d_console_cmd_handler = new ConsoleCommandHandler();
@@ -37,7 +37,8 @@ int DebugUI::Draw()
         fps_label->setText(buf);
         fps_label->Draw();
     }
-    con->Draw();
+    if (d_toggleConsoleOverlay)
+        con->Draw();
     DrawGUI();
 
 
@@ -569,6 +570,12 @@ int DebugUI::DrawGUI()
     if (s_guiWndIs) {
         DrawIntrospectionGUI(&s_guiWndIs);
     }
+    /*Console */
+    static bool s_guiConsleIs = false;
+    ImGui::Checkbox("Debug Console",&s_guiConsleIs);
+    if (s_guiConsleIs) {
+        DrawConsoleUI(&s_guiConsleIs);
+    }
 
     ImGui::End();
     ImGui::Render();
@@ -621,3 +628,73 @@ int DebugUI::DrawIntrospectionGUI(bool *opened)
 
 }
 
+int DebugUI::DrawConsoleUI(bool *opened) {
+    static bool ScrollToBottom =  false;
+    ImGui::SetNextWindowSize(ImVec2(520,600), ImGuiSetCond_FirstUseEver);
+    if (!ImGui::Begin("Debug Console", opened))
+        {
+            ImGui::End();
+            return 0;
+        }
+
+        ImGui::TextWrapped("Basic debug console.");
+
+        if (ImGui::SmallButton("Clear")) con->Cls();
+        
+        ImGui::Separator();
+
+        
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
+        static ImGuiTextFilter filter;
+        filter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
+        ImGui::PopStyleVar();
+        ImGui::Separator();
+        
+
+       ImGui::BeginChild("ScrollingRegion", ImVec2(0,-ImGui::GetItemsLineHeightWithSpacing()));
+        if (ImGui::BeginPopupContextWindow())
+        {
+            if (ImGui::Selectable("Clear")) con->Cls();
+            ImGui::EndPopup();
+        }
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4,1)); // Tighten spacing
+        const std::vector<std::string> consoleData = *(con->getConsoleData());
+        for (unsigned int i = consoleData.size()-1; i > 0; i--)
+        {
+            const char* item = consoleData[i].c_str();
+            if (!filter.PassFilter(item))
+                continue;
+            ImVec4 col = ImColor(255,255,255);
+            if (strstr(item, "[ERR]")) col = ImColor(255,100,100);
+            else if (strstr(item, "[VERB]")) col = ImColor(100,255,100);
+            else if (strstr(item, "[WARN]")) col = ImColor(160,100,100);
+            ImGui::PushStyleColor(ImGuiCol_Text, col);
+            ImGui::TextWrapped(item);
+            ImGui::PopStyleColor();
+        }
+        
+        if (ScrollToBottom)
+            ImGui::SetScrollHere();
+        ScrollToBottom = false;
+        ImGui::PopStyleVar();
+        ImGui::EndChild();
+        ImGui::Separator();
+
+        // Command-line
+        char InputBuf[1024];
+        if (ImGui::InputText("Input", InputBuf, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            char* input_end = InputBuf+strlen(InputBuf);
+            while (input_end > InputBuf && input_end[-1] == ' ') input_end--; *input_end = 0;
+            //if (InputBuf[0])
+            //    ExecCommand(InputBuf);
+            strcpy(InputBuf, "");
+        }
+        
+
+        if (ImGui::IsItemHovered() || (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
+            ImGui::SetKeyboardFocusHere(-1); // Auto focus
+
+        ImGui::End();
+        return 0;
+}

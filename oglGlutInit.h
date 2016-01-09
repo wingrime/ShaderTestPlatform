@@ -32,7 +32,7 @@ void APIENTRY openglCallbackFunction(GLenum source,
     static Log gl_log("gl_log.log");
     if (severity  != GL_DEBUG_SEVERITY_NOTIFICATION)
    {
-        gl_log.LogW(message);
+        LOGW(message);
         /*Force breakpoint on GL debug message usable for finding bugs withing code
         Must not be enabled in production
         */
