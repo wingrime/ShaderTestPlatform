@@ -69,11 +69,33 @@ void reshape ( int w, int h )
     dbg_ui->Reshape(rect);
 
 }
-
+void key_up ( unsigned char key, int x, int y )
+{
+    UNUSED(x);
+    UNUSED(y);
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeysDown[key] = false;
+}
+void special_up ( int key, int x, int y )
+{
+    UNUSED(x);
+    UNUSED(y);
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeysDown[key] = false;
+}
+void special(int key, int x, int y){
+    UNUSED(x);
+    UNUSED(y);
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeysDown[key] = true;
+}
 void key ( unsigned char key, int x, int y )
 {
     UNUSED(x);
     UNUSED(y);
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeysDown[key] = true;
+    io.AddInputCharacter(key);
     DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
     //static int fullscreen = 0;
     static int console_mode = 0;
@@ -94,6 +116,9 @@ void key ( unsigned char key, int x, int y )
        //     return;
         //}
         dbg_ui->con->HandleInputKey(key);
+
+
+
         return;
     }
 
@@ -155,12 +180,7 @@ void mouse_move (  int x , int y) {
     sc->cam.rotEulerY(toRad(x_rm));
     sc->cam.rotEulerX(toRad(y_rm));
 }
-void special(int key, int x, int y){
-    UNUSED(x);
-    UNUSED(y);
-    UNUSED(key);
-    /*Special key should be handled here*/
-}
+
 void mouse(int button, int state, int x, int y)  {
     ImGuiIO& io = ImGui::GetIO();
     /*imgui hook*/
@@ -204,7 +224,9 @@ int initGlutHooks() {
     glutMouseFunc(mouse);
     glutMotionFunc(mouse_move);
     glutKeyboardFunc(key);
+    glutKeyboardUpFunc(key_up);
     glutSpecialFunc(special);
+    glutSpecialUpFunc(special_up);
     glutPassiveMotionFunc(mouse_move_passive);
     return 0;
 }
