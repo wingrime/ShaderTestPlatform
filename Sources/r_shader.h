@@ -7,7 +7,7 @@
 #include <GL/gl.h>
 #include <GL/wglew.h>
 #endif
-#include "c_filebuffer.h"
+#include "FileBuffer.h"
 
 class vec4;
 class SMat4x4;

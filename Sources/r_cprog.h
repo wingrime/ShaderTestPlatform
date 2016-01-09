@@ -9,7 +9,7 @@
 
 #include <string>
 /*inhertance - can't avoid include */
-#include "c_filebuffer.h"
+#include "FileBuffer.h"
 
 /* Compute shader stand-alone module*/
 

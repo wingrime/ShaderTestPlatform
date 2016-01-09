@@ -6,7 +6,7 @@
 #include    <string.h>
 #include    <vector>
 #include "string_format.h"
-#include "FileBuffer"
+#include "FileBuffer.h"
 #include "Log.h"
 
 FileBuffer::FileBuffer(const std::string& srcfile)
