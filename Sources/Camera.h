@@ -7,7 +7,7 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/archives/binary.hpp>
 /*inhertance, can't avoid*/
-#include "r_projmat.h"
+#include "ProjectionMatrix.h"
 //TODO: fine time sampling
 class Recorder {
 public:

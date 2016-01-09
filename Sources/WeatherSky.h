@@ -6,7 +6,7 @@
 #include "r_shader.h"
 #include "mat_math.h"
 #include "ObjModel.h"
-#include "r_projmat.h"
+#include "ProjectionMatrix.h"
 
 /*System includes*/
 #include "math.h"

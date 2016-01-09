@@ -19,7 +19,7 @@
 #include "mat_math.h"
 #include "RBO.h"
 #include "Texture.h"
-#include "r_projmat.h"
+#include "ProjectionMatrix.h"
 #include "RenderContext.h"
 #include "MAssert.h"
 

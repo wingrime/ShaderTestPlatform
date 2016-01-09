@@ -22,7 +22,7 @@
 #include "RenderState.h"
 #include "DebugUI.h"
 #include "WeatherSky.h"
-#include "r_projmat.h"
+#include "ProjectionMatrix.h"
 
 struct RenderPipelineStageConfig {
     /* pipline stage name */
