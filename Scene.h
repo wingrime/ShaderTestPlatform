@@ -10,7 +10,7 @@
 #include "RBO.h"
 #include "ObjModel.h"
 #include "PostProcess.h"
-#include "r_camera.h"
+#include "Camera.h"
 #include "r_perfman.h"
 #include "UILabel.h"
 #include "UIConsole.h"

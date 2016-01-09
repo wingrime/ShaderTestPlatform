@@ -4,7 +4,7 @@
 #include "mat_math.h"
 #include "GenericTexture.h"
 #include "r_projmat.h"
-#include "r_camera.h"
+#include "Camera.h"
 #include "ErrorCodes.h"
 /*
 Static object for storage current render context set:

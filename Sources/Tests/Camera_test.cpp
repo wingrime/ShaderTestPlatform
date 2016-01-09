@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "r_camera.h"
+#include "Camera.h"
 #include "mat_math.h"
 TEST(Camera, ConstructorFromMatrices) {
     SCamera *cam = new SCamera(SMat4x4(), SMat4x4());
