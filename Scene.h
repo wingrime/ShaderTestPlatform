@@ -41,7 +41,6 @@ struct RenderPipelineStageConfig {
     std::string ppFeedStage2;
     std::string ppFeedStage3;
     std::string ppFeedStage4;
-
 };
 struct RenderPipelineStageRuntime {
     RenderPipelineStageConfig stageConfig;
