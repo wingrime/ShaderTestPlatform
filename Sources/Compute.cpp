@@ -10,7 +10,7 @@ SSBuffer::SSBuffer(int sz) {
 }
 SCProg::SCProg(const std::string &src_file)
 {
-     AbstractBuffer * src = new FileBuffer(std::string(".\\shaders\\")+src_file);
+     AbstractBuffer * src = new FileBuffer(std::string("./shaders/")+src_file);
 
     d_ready  = false;
     d_program = glCreateProgram();
