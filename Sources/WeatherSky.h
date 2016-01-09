@@ -2,7 +2,7 @@
 /*
  * Sky Model
 */
-#include "r_sprog.h"
+#include "Shader.h"
 #include "r_shader.h"
 #include "mat_math.h"
 #include "ObjModel.h"

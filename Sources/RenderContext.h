@@ -1,6 +1,6 @@
 #pragma once
 
-#include "r_sprog.h"
+#include "Shader.h"
 #include "mat_math.h"
 #include "GenericTexture.h"
 #include "r_projmat.h"

@@ -6,7 +6,7 @@
 #include <GL/wglew.h>
 
 /* shader class*/
-#include "r_sprog.h"
+#include "Shader.h"
 #include "mat_math.h"
 #include "viewport.h"
 #include "r_texture.h"

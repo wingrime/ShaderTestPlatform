@@ -18,7 +18,7 @@
 #include <type_traits>
 #include <memory.h>
 
-#include "r_sprog.h"
+#include "Shader.h"
 RenderPipelineStageRuntime * SScene::initStage(RenderPipelineStageConfig *pipelineStage)
 {
     /*TODO: add RBO with many out buffers*/

@@ -2,7 +2,7 @@
 #include "Scene.h"
 #include "UILabel.h"
 #include "UIConsole.h"
-#include "r_sprog.h"
+#include "Shader.h"
 #include <imgui.h>
 #include <RBO.h>
 #include "MAssert.h"

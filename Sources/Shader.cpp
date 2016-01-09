@@ -12,7 +12,7 @@
 #include <string>
 #include "ErrorCodes.h"
 
-#include "r_sprog.h"
+#include "Shader.h"
 #include "r_shader.h"
 #include "mat_math.h"
 

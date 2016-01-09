@@ -1,7 +1,7 @@
 #include "PostProcess.h"
 #include "MAssert.h"
 #include "RBO.h"
-#include "r_sprog.h"
+#include "Shader.h"
 #include "mat_math.h"
 #include "GenericTexture.h"
 
