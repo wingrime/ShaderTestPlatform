@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "Command.h"
-#include "e_base.h"
+#include "Error.h"
 /* font factory compile time depedency*/
 #include "UIFont.h"
 #include "mat_math.h"
