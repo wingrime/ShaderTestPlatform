@@ -43,7 +43,11 @@ void APIENTRY openglCallbackFunction(GLenum source,
 int oglInit(int argc, char * argv [] , int w, int h , int ogl_major, int ogl_minor) {
     // initialize glut
     glutInit            ( &argc, argv );
+    #ifndef __APPLE__
     glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
+    #else
+    glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_3_2_CORE_PROFILE );
+    #endif
     glutInitWindowSize  ( w,h);
     // init modern opengl
     #ifndef __APPLE__
