@@ -19,9 +19,6 @@
 #include <memory.h>
 
 #include "r_sprog.h"
-
-
-
 RenderPipelineStageRuntime * SScene::initStage(RenderPipelineStageConfig *pipelineStage)
 {
     /*TODO: add RBO with many out buffers*/
@@ -81,6 +78,7 @@ SScene::SScene(RectSizeInt v)
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
     ,d_RegenerateCubemap(true)
+    ,d_dbgFrameNumber(0)
 
 
     //,dbg_ui(this,v)
@@ -581,6 +579,10 @@ float SScene::debugGetPostProcessingTime()
 {
     return d_dbgPostProcessingTimeMs;
 }
+long int SScene::debugGetFrameNumber()
+{
+    return d_dbgFrameNumber;
+}
 Recorder SScene::getRec() const
 {
     return rec;
@@ -763,5 +765,6 @@ int SScene::Render() {
 
     d_dbgRenderTimeMs =(float)rtime.getTime()*(1.0/ 1000000.0);
     d_dbgPostProcessingTimeMs =(float)pp_time.getTime()*(1.0/ 1000000.0);
+    d_dbgFrameNumber++;
     return true;
 }

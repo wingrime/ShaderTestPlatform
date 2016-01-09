@@ -26,9 +26,6 @@
 #include <imgui.h>
 #include "IMGuiHooks.h"
 //#include "Scripting/Scriting.h"
-
-static long int g_frameNumber = 0;
-
 void display ()
 {
     /* main engine loop */
@@ -51,7 +48,8 @@ void display ()
     float pptime = sc->debugGetPostProcessingTime();
     float rtime = sc->debugGetRenderTime();
     float fps = 1000.0/(pptime+rtime);
-    sprintf(buf,"DRAW:%4.3f ms\nPP: %4.3f ms\nFPS: %4.3f\nframe:%d\n", rtime ,pptime, fps, g_frameNumber );
+    long int frameNumber = sc->debugGetFrameNumber();
+    sprintf(buf,"DRAW:%4.3f ms\nPP: %4.3f ms\nFPS: %4.3f\nframe:%d\n", rtime ,pptime, fps, frameNumber );
     dbg_ui->fps_label->setText(buf);
 
     dbg_ui->Draw();
@@ -64,7 +62,6 @@ void display ()
 
     //}
     glutSwapBuffers ();
-    g_frameNumber++;
 }
 
 void reshape ( int w, int h )

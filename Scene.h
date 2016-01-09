@@ -181,6 +181,9 @@ private:
 
     DebugDraw d_debugDrawMgr;
     int UpdateCfgLabel();
+    
+    long int d_dbgFrameNumber;
+
     //float  d_cfg [15] = {0.020, 0.40,0.00,0.26,2.0,0.75,0.015,0.22,0.30,0.10,0.20,0.01,0.30,1.12,4.6};
 public:
     //DebugUI dbg_ui;
@@ -192,6 +195,7 @@ public:
     int debugSetDebugRenderOutputFlag(bool flag);
     float debugGetRenderTime();
     float debugGetPostProcessingTime();
+    long int debugGetFrameNumber();
 
     float d_dbgRenderTimeMs;
 
