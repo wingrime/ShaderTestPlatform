@@ -27,9 +27,21 @@ int DebugUI::ToggleFPSCounter(bool b)
 int DebugUI::Draw()
 {
     if (d_toggle_fps_view)
+    {
+        char buf [120];
+        float pptime = sc->debugGetPostProcessingTime();
+        float rtime = sc->debugGetRenderTime();
+        float fps = 1000.0/(pptime+rtime);
+        long int frameNumber = sc->debugGetFrameNumber();
+        sprintf(buf,"DRAW:%4.3f ms\nPP: %4.3f ms\nFPS: %4.3f\nframe:%d\n", rtime ,pptime, fps, frameNumber );
+        fps_label->setText(buf);
         fps_label->Draw();
+    }
     con->Draw();
     DrawGUI();
+
+
+
 
     return ESUCCESS;
 
