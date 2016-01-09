@@ -90,8 +90,8 @@ int BaseCommandHandler::ExecuteCommand(const std::string& cmd_n, ArgTypes... arg
             (*c)(args...);
         }// else
             //EMSGS("Invalid cmd type!\n");
-    } else
-         LOGE("No cmd: " + cmd_n);
+    } //else
+      //   LOGE("No cmd: " + cmd_n);
     return 0;
 }
 template <class T> 

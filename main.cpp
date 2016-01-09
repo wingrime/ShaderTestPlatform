@@ -318,7 +318,7 @@ int main ( int argc, char * argv [] )
     /* main loop */
     LOGV("Enter main game loop");
     dbg_ui->con->Msg("Buildrev: " GIT_SHA1 "\n");
-    dbg_ui->con->Msg("ShaderTestPlatform \nShestacov Alexsey 2014-2015(c)\n");
+    dbg_ui->con->Msg("ShaderTestPlatform \nShestacov Alexsey 2014-2016(c)\n");
 
     glutMainLoop ();
     LOGV("Exiting");

@@ -125,7 +125,7 @@ return (vec4(v1.x - v2.x,
 
 
 void vec4::Reflect() const{
-    LOGV(string_format("%f %f %f %f\n",x,y,z,w));
+    LOGV("%f %f %f %f\n",x,y,z,w);
 }
 
 void vec4::DivW()
@@ -230,10 +230,10 @@ SMat4x4 SMat4x4::operator*(const SMat4x4& i) const {
 
 
 void SMat4x4::Reflect() const{
-    LOGV(string_format("%f %f %f %f\n",a11,a12,a13,a14));
-    LOGV(string_format("%f %f %f %f\n",a21,a22,a23,a24));
-    LOGV(string_format("%f %f %f %f\n",a31,a32,a33,a34));
-    LOGV(string_format("%f %f %f %f\n",a41,a42,a43,a44));
+    LOGV("%f %f %f %f\n",a11,a12,a13,a14);
+    LOGV("%f %f %f %f\n",a21,a22,a23,a24);
+    LOGV("%f %f %f %f\n",a31,a32,a33,a34);
+    LOGV("%f %f %f %f\n",a41,a42,a43,a44);
 }
 std::string SMat4x4::ReflectStr() const{
     
@@ -863,7 +863,7 @@ bool UnitQuaterion::CheckUnit() const {
    return ((Norm()-1.0f) < CheckDelta);
 }
 void UnitQuaterion::Reflect() const{
-    LOGV(string_format("UnitQuaterion: %f %f %f %f\n",q.x,q.y,q.z,q.w));
+    LOGV("UnitQuaterion: %f %f %f %f\n",q.x,q.y,q.z,q.w);
 }
 UnitQuaterion::UnitQuaterion(const UnitQuaterion& quat) {
     q.x = quat.q.x;

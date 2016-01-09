@@ -1,6 +1,5 @@
 #include "ObjParser.h"
 #include "mat_math.h"
-#include "string_format.h"
 #include "Log.h"
 UVNVertex inline CObjMeshParser::BuildVert(const vec3 &p, const vec2 &tc, const vec3 &n) {
     UVNVertex  v = { p , n , tc};
@@ -252,10 +251,10 @@ vec3 CObjMeshParser::ParseVn(const std::string &v_desc) {
 int CObjMeshParser::Reflect(ObjCtx *ctx) {
     LOGV("Reflect CObjMeshParser\n");
     for (auto it = ctx->subMeshSet.begin(); it != ctx->subMeshSet.end();++it) {
-        LOGV(string_format("SubMeshName=%s MaterialName=%s VertexCount=%d \n v:x      v:y      v:z      n:x       n:y      n:z     v:u     v:v \n", (*it)->name.c_str() ,  (*it)->m_name.c_str() ,(*it)->vn.size() ));
+        LOGV("SubMeshName=%s MaterialName=%s VertexCount=%d \n v:x      v:y      v:z      n:x       n:y      n:z     v:u     v:v \n", (*it)->name.c_str() ,  (*it)->m_name.c_str() ,(*it)->vn.size() );
            for (std::vector<UVNVertex>::iterator it2 = (*it)->vn.begin(); it2 != (*it)->vn.end();++it2) {
                 auto &v = (*it2);
-               LOGV(string_format(("% 6.4f % 6.4f % 6.4f % 6.4f % 6.4f % 6.4f : % 6.4f % 6.4f \n",  v.p.x, v.p.y, v.p.z,v.n.x, v.n.y, v.n.z, v.tc.u, v.tc.v));
+               LOGV("% 6.4f % 6.4f % 6.4f % 6.4f % 6.4f % 6.4f : % 6.4f % 6.4f \n",  v.p.x, v.p.y, v.p.z,v.n.x, v.n.y, v.n.z, v.tc.u, v.tc.v);
            }
     }
     return 0;
