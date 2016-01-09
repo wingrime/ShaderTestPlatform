@@ -74,7 +74,7 @@ void key_up ( unsigned char key, int x, int y )
     UNUSED(x);
     UNUSED(y);
     ImGuiIO& io = ImGui::GetIO();
-    io.KeysDown[key] = false;
+    //io.KeysDown[key] = false;
 }
 void special_up ( int key, int x, int y )
 {
@@ -94,10 +94,11 @@ void key ( unsigned char key, int x, int y )
     UNUSED(x);
     UNUSED(y);
     ImGuiIO& io = ImGui::GetIO();
-    io.KeysDown[key] = true;
     io.AddInputCharacter(key);
+    //io.KeysDown[key] = true;
     DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
     //static int fullscreen = 0;
+
     static int console_mode = 0;
     if (console_mode) {
         if (key == 27)

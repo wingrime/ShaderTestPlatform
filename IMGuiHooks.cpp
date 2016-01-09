@@ -170,31 +170,25 @@ bool ImGui_CreateDeviceObjects()
 }
 int imGuiSetup() {
     // Set up ImGui
-        ImGuiIO& guiIO = ImGui::GetIO();
-        guiIO.DisplaySize.x = 1000.0f;
-        guiIO.DisplaySize.y =  1000.0f;
-        guiIO.DeltaTime = 1.0f / 60.0f;
-        //guiIO.IniFilename = "imgui.ini";
-        guiIO.RenderDrawListsFn = ImGui_Impl_RenderDrawLists;
-        guiIO.KeyMap[0] = 9;    // tab
-        guiIO.KeyMap[1] = GLUT_KEY_LEFT;    // Left
-        guiIO.KeyMap[2] = GLUT_KEY_RIGHT;   // Right
-        guiIO.KeyMap[3] = GLUT_KEY_UP;      // Up
-        guiIO.KeyMap[4] = GLUT_KEY_DOWN;    // Down
-        guiIO.KeyMap[5] = GLUT_KEY_HOME;    // Home
-        guiIO.KeyMap[6] = GLUT_KEY_END;     // End
-        guiIO.KeyMap[7] = 127;  // Delete
-        guiIO.KeyMap[8] = 8;    // Backspace
-        guiIO.KeyMap[9] = 13;   // Enter
-        guiIO.KeyMap[10] = 27;  // Escape
-        guiIO.KeyMap[11] = 1;   // ctrl-A
-        guiIO.KeyMap[12] = 3;   // ctrl-C
-        guiIO.KeyMap[13] = 22;  // ctrl-V
-        guiIO.KeyMap[14] = 24;  // ctrl-X
-        guiIO.KeyMap[15] = 25;  // ctrl-Y
-        guiIO.KeyMap[16] = 26;  // ctrl-Z
-
-
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize.x = 1000.0f;
+    io.DisplaySize.y =  1000.0f;
+    io.DeltaTime = 1.0f / 60.0f;
+    io.IniFilename = "uicfg.ini";
+    io.RenderDrawListsFn = ImGui_Impl_RenderDrawLists;
+    io.KeyMap[ImGuiKey_Tab] = 0x08;//GLUT_KEY_TAB;             
+    io.KeyMap[ImGuiKey_LeftArrow] = GLUT_KEY_LEFT;
+    io.KeyMap[ImGuiKey_RightArrow] = GLUT_KEY_RIGHT;
+    io.KeyMap[ImGuiKey_UpArrow] = GLUT_KEY_UP;
+    io.KeyMap[ImGuiKey_DownArrow] = GLUT_KEY_DOWN;
+    io.KeyMap[ImGuiKey_PageUp] = GLUT_KEY_PAGE_UP;
+    io.KeyMap[ImGuiKey_PageDown] = GLUT_KEY_PAGE_DOWN;
+    io.KeyMap[ImGuiKey_Home] = GLUT_KEY_HOME;
+    io.KeyMap[ImGuiKey_End] = GLUT_KEY_END;
+    io.KeyMap[ImGuiKey_Delete] = GLUT_KEY_DELETE;
+    io.KeyMap[ImGuiKey_Backspace] = 43;//GLUT_KEY_BACKSPACE;
+    io.KeyMap[ImGuiKey_Enter] = 0x0D;//GLUT_KEY_ENTER;
+    io.KeyMap[ImGuiKey_Escape] = 0x1B;//GLUT_KEY_ESCAPE;
     return 0;
 }
 
