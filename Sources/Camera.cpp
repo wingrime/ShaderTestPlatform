@@ -6,8 +6,10 @@
 #include <ostream>
 #include <fstream>
 #include "ErrorCodes.h"
+#include "string_format.h"
+#include "Log.h"
 int SCamera::Reflect() const{
-    printf("camera: %f %f %f <_> %f %f %f\n", xPos,yPos,zPos, xRot,yRot,zRot);
+    LOGV(string_format("camera: %f %f %f <_> %f %f %f\n", xPos,yPos,zPos, xRot,yRot,zRot));
     return 0;
 }
 int SCamera::goPosition(float x, float y ,float z) {
