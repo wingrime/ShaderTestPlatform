@@ -1,5 +1,5 @@
 #include "Scene.h"
-#include "r_cprog.h"
+#include "Compute.h"
 #include <chrono>
 #include "c_config.h"
 #include "RenderContext.h"
@@ -770,10 +770,11 @@ int SScene::Render() {
 }
 
 int SScene::debugSetStageShaderUniform(const std::string& stage, const std::string& var, float val) {
-    SShader *shader = SScene::lookupStageShader(stage);
+    SShader *shader = lookupStageShader(stage);
     if (!shader) {
         LOGE("Invalid stage or stage without shader when stage lookup");
-        shader->SetUniform(var,val);
+        return -1;
     }
+    shader->SetUniform(var,val);
     return 0;
 }
