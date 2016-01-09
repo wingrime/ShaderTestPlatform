@@ -768,3 +768,12 @@ int SScene::Render() {
     d_dbgFrameNumber++;
     return true;
 }
+
+int SScene::debugSetStageShaderUniform(const std::string& stage, const std::string& var, float val) {
+    SShader *shader = SScene::lookupStageShader(stage);
+    if (!shader) {
+        LOGE("Invalid stage or stage without shader when stage lookup");
+        shader->SetUniform(var,val);
+    }
+    return 0;
+}

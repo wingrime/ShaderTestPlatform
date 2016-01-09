@@ -378,25 +378,25 @@ int DebugUI::DrawGUI()
     {
         ImGui::Text("Fimlic curve");
         if (ImGui::SliderFloat("A", &tmc_A, 0.0f, 1.0f)) {
-            sc->pp_prog_hdr_tonemap->SetUniform("A",tmc_A);
+            sc->debugSetStageShaderUniform("Tonemap","A",tmc_A);
         }
         if (ImGui::SliderFloat("B", &tmc_B, 0.0f, 1.0f)) {
-            sc->pp_prog_hdr_tonemap->SetUniform("B",tmc_B);
+            sc->debugSetStageShaderUniform("Tonemap","B",tmc_B);
         }
         if (ImGui::SliderFloat("C", &tmc_C, 0.0f, 1.0f)) {
-            sc->pp_prog_hdr_tonemap->SetUniform("C",tmc_C);
+            sc->debugSetStageShaderUniform("Tonemap","C",tmc_C);
         }
         if (ImGui::SliderFloat("D", &tmc_D, 0.0f, 1.0f)) {
-            sc->pp_prog_hdr_tonemap->SetUniform("D",tmc_D);
+            sc->debugSetStageShaderUniform("Tonemap","D",tmc_D);
         }
         if (ImGui::SliderFloat("E", &tmc_E, 0.0f, 1.0f)) {
-            sc->pp_prog_hdr_tonemap->SetUniform("E",tmc_E);
+            sc->debugSetStageShaderUniform("Tonemap","E",tmc_E);
         }
         if (ImGui::SliderFloat("F", &tmc_F, 0.0f, 1.0f)) {
-            sc->pp_prog_hdr_tonemap->SetUniform("F",tmc_F);
+            sc->debugSetStageShaderUniform("Tonemap","F",tmc_F);
         }
         if (ImGui::SliderFloat("LW", &tmc_LW, 0.0f, 3.0f)) {
-            sc->pp_prog_hdr_tonemap->SetUniform("LW",tmc_LW);
+            sc->debugSetStageShaderUniform("Tonemap","LW",tmc_LW);
         }
         ImGui::Text("Eye adaptation");
         if (ImGui::SliderFloat("eyeAdoptSpeed", &eyeAdoptSpeed, 0.0f, 0.5f)) {
@@ -412,13 +412,14 @@ int DebugUI::DrawGUI()
                 tmc_F = 0.30;
                 tmc_LW = 1.2;
                 eyeAdoptSpeed = 0.008;
-                sc->pp_prog_hdr_tonemap->SetUniform("A",tmc_A);
-                sc->pp_prog_hdr_tonemap->SetUniform("B",tmc_B);
-                sc->pp_prog_hdr_tonemap->SetUniform("C",tmc_C);
-                sc->pp_prog_hdr_tonemap->SetUniform("D",tmc_D);
-                sc->pp_prog_hdr_tonemap->SetUniform("E",tmc_E);
-                sc->pp_prog_hdr_tonemap->SetUniform("F",tmc_F);
-                sc->pp_prog_hdr_tonemap->SetUniform("LW",tmc_LW);
+                sc->debugSetStageShaderUniform("Tonemap","A",tmc_A);
+                sc->debugSetStageShaderUniform("Tonemap","B",tmc_B);
+                sc->debugSetStageShaderUniform("Tonemap","C",tmc_C);
+                sc->debugSetStageShaderUniform("Tonemap","D",tmc_D);
+                sc->debugSetStageShaderUniform("Tonemap","E",tmc_E);
+                sc->debugSetStageShaderUniform("Tonemap","F",tmc_F);
+                sc->debugSetStageShaderUniform("Tonemap","LW",tmc_LW);
+                sc->pp_stage_hdr_lum_key->getShader()->SetUniform("eyeAdoptSpeed",eyeAdoptSpeed);
             }
 
     }

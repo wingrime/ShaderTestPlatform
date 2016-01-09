@@ -52,6 +52,7 @@ struct RenderPipelineStageRuntime {
 
 class SScene {
 public:
+    friend class DebugUI;
     /* new code for render stages*/
     RenderPipelineStageRuntime *initStage(RenderPipelineStageConfig *pipelineStage);
     RBO *lookupStageRBO(const std::string & stageName);
@@ -64,7 +65,6 @@ private:
     std::unordered_map<std::string, int> d_pipelineLookupMap;
 
 public:
-    friend class DebugUI;
     SScene(RectSizeInt v);
     ~SScene();
     int Render();
@@ -184,7 +184,8 @@ public:
     float debugGetRenderTime();
     float debugGetPostProcessingTime();
     long int debugGetFrameNumber();
-    void setRec(const Recorder &value);
+    int debugSetStageShaderUniform(const std::string& stage, const std::string& var, float val);
+    
     /* shadow map debug*/
     AABB cameraFrustrumAABB[4];
     AABB cameraTransformFrustrumAABB[4];
@@ -198,4 +199,5 @@ public:
     Recorder rec;
     bool d_play = false;
     Recorder getRec() const;
+    void setRec(const Recorder &value);
 };
