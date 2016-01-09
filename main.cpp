@@ -316,7 +316,7 @@ int main ( int argc, char * argv [] )
     /*load models*/
     sc->AddObjectToRender(std::shared_ptr<SObjModel> (new SObjModel("TestModels/sponza.obj")) );
     /* main loop */
-    LOGV("Entel main game loop");
+    LOGV("Enter main game loop");
     dbg_ui->con->Msg("Buildrev: " GIT_SHA1 "\n");
     dbg_ui->con->Msg("ShaderTestPlatform \nShestacov Alexsey 2014-2015(c)\n");
 

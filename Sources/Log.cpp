@@ -1,7 +1,9 @@
 #include "Log.h"
 #include <iostream>
+#include <stdarg.h> 
 #include "MAssert.h"
 #include "ErrorCodes.h"
+#include "string_format.h"
 Log::~Log()
 {
     d_logfile_stream.flush();
@@ -22,7 +24,30 @@ int Log::LogW(const std::string &s)
        d_callback(Log::L_WARNING,std::string("[WARN] ")+s+'\n');
     return ESUCCESS;
 }
-
+int Log::LogFmtW(const std::string& fmt_str, ...) 
+{
+  va_list args;
+  va_start(args, fmt_str);
+  int r = LogW(string_format(fmt_str,args));
+  va_end(args);
+  return r;
+}
+int Log::LogFmtE(const std::string& fmt_str, ...) 
+{
+  va_list args;
+  va_start(args, fmt_str);
+  int r = LogE(string_format(fmt_str,args));
+  va_end(args);
+  return r;
+}
+int Log::LogFmtV(const std::string& fmt_str, ...) 
+{
+  va_list args;
+  va_start(args, fmt_str);
+  int r = LogV(string_format(fmt_str,args));
+  va_end(args);
+  return r;
+}
 int Log::LogE(const std::string &s)
 {
    d_logfile_stream <<  "[E]" << s << std::endl;

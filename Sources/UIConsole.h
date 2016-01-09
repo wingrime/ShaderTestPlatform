@@ -34,7 +34,7 @@ private:
     void RebuildOut();
     void HandleDelKey();
 
-    const unsigned int d_con_sz =  20; /*max messages in console log*/
+    const unsigned int d_con_sz =  2000; /*max messages in console log*/
     UIFontFactory ft;
     RectSizeInt v_port;
     UIFont * fnt ;

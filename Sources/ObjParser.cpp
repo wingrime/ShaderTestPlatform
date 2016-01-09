@@ -255,7 +255,7 @@ int CObjMeshParser::Reflect(ObjCtx *ctx) {
         LOGV(string_format("SubMeshName=%s MaterialName=%s VertexCount=%d \n v:x      v:y      v:z      n:x       n:y      n:z     v:u     v:v \n", (*it)->name.c_str() ,  (*it)->m_name.c_str() ,(*it)->vn.size() ));
            for (std::vector<UVNVertex>::iterator it2 = (*it)->vn.begin(); it2 != (*it)->vn.end();++it2) {
                 auto &v = (*it2);
-               LOGV(string_format("% 6.4f % 6.4f % 6.4f % 6.4f % 6.4f % 6.4f : % 6.4f % 6.4f \n",  v.p.x, v.p.y, v.p.z,v.n.x, v.n.y, v.n.z, v.tc.u, v.tc.v));
+               LOGV(string_format(("% 6.4f % 6.4f % 6.4f % 6.4f % 6.4f % 6.4f : % 6.4f % 6.4f \n",  v.p.x, v.p.y, v.p.z,v.n.x, v.n.y, v.n.z, v.tc.u, v.tc.v));
            }
     }
     return 0;
