@@ -69,14 +69,14 @@ int DebugUI::InitDebugCommands()
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[2]);
-        sc->mainRenderPassMSAA->stageShader->SetUniform(args[1],val_f);
+        sc->debugGetMainStageShader()->SetUniform(args[1],val_f);
 
     }));
     d_console_cmd_handler->AddCommand("r_set_i", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         int val_f = std::stoi(args[2]);
-        sc->mainRenderPassMSAA->stageShader->SetUniform(args[1],val_f);
+        sc->debugGetMainStageShader()->SetUniform(args[1],val_f);
 
     }));
        d_console_cmd_handler->AddCommand("sky_set_f", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
@@ -353,11 +353,7 @@ int DebugUI::InitDebugCommands()
 
 int DebugUI::DrawGUI()
 {
-    SShader *mp;
-    if (sc->d_toggle_MSAA)
-        mp = sc->mainRenderPassMSAA->stageShader;
-    else
-         mp = sc->mainRenderPass->stageShader;
+    SShader *mp = sc->debugGetMainStageShader();
     /*imgui new debug interface */
     static bool config_wnd = true;
     ImGui::Begin("MProject config",&config_wnd, ImGuiWindowFlags_AlwaysAutoResize);

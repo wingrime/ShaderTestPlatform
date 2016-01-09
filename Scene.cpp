@@ -593,6 +593,15 @@ void SScene::setRec(const Recorder &value)
     rec = value;
 }
 
+SShader* SScene::debugGetMainStageShader() {
+    if (d_toggle_MSAA)
+        return mainRenderPassMSAA->stageShader;
+    else
+        return mainRenderPass->stageShader;
+}
+
+
+
 int inline SScene::RenderShadowMap(const RBO& v) {
     v.Bind(true);
 

@@ -185,6 +185,7 @@ public:
     float debugGetPostProcessingTime();
     long int debugGetFrameNumber();
     int debugSetStageShaderUniform(const std::string& stage, const std::string& var, float val);
+    SShader* debugGetMainStageShader();
     
     /* shadow map debug*/
     AABB cameraFrustrumAABB[4];
