@@ -243,7 +243,7 @@ int DebugUI::InitDebugCommands()
         sc->cam.goPosition(vec4(0.0,0.0,0.0,0.0));
         sc->cam.rotEulerY(toRad(val_f));
     }));
-    d_console_cmd_handler->AddCommand("Actor.Rotate.Z", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
+    d_console_cmd_handler->AddCommand("Actor.RotateZ", ConsoleCommandHandler::StrCommand([=] (const std::string& name, std::vector < std::string > * arg_list ) -> void {
         UNUSED(name);
         const std::vector < std::string >& args = *arg_list;
         float val_f = std::stof(args[1]);

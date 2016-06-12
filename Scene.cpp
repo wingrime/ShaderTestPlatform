@@ -80,8 +80,6 @@ SScene::SScene(RectSizeInt v)
     ,d_RegenerateCubemap(true)
     ,d_dbgFrameNumber(0)
 
-
-    //,dbg_ui(this,v)
     
 {
     d_BloomFactor = 0.1;
@@ -542,18 +540,17 @@ SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
 }
-int SScene::UpdateScene(float dt) {
+int SScene::UpdateScene(double dt) {
     /*shadowmap*/
-    UNUSED(dt);
     UpdateShadowmap();
     if (d_play) {
-        cam.setViewMatrix(rec.Get());
+        cam.setViewMatrix(rec.Get().cam);
         if (rec.Empty())
             //d_play = false;
             rec.Rewind();
     }
     else
-        rec.Add(cam.getViewMatrix());
+        rec.Add(dt,cam.getViewMatrix());
     return 0;
 
 }
@@ -710,10 +707,13 @@ int inline SScene::RenderDirect(const RenderPipelineStageRuntime &runtime) {
 }
 int SScene::Render() {
     auto start = std::chrono::steady_clock::now();
+    static std::chrono::steady_clock::time_point last_t;
+    double dt = std::chrono::duration<double, std::milli> ( (std::chrono::steady_clock::now() - last_t) ).count();
+    last_t = std::chrono::steady_clock::now();
     glClearColor(0.0,0.0,0.0,1.0);
     //glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-    UpdateScene(0.01); /*add real ms*/
+    UpdateScene(dt); /*add real ms*/
     if (d_toggle_MSAA)
        msaa_pass.Bind();
     else

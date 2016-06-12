@@ -9,25 +9,30 @@
 /*inhertance, can't avoid*/
 #include "ProjectionMatrix.h"
 //TODO: fine time sampling
+struct RecordSample {  
+    double dt;
+    SMat4x4 cam;
+    /*todo more here*/
+};
 class Recorder {
 public:
     Recorder();
     int Erase();
     int Begin();
     int End();
-    int Add(const SMat4x4& s); /*new sample*/
+    int Add(double dt,const SMat4x4& s); /*new sample*/
 
     bool Empty();
 
     int Save(const std::string &fname);
     //open
     int Rewind();
-    const SMat4x4 Get();
+    const RecordSample Get();
 private:
-    std::vector<SMat4x4> r;
+    std::vector<RecordSample> r;
     bool d_recordEnabled = 0;
-    SMat4x4 d_lastSample;
-    std::vector<SMat4x4>::iterator d_sampleIterator;
+    RecordSample d_lastSample;
+    std::vector<RecordSample>::iterator d_sampleIterator;
     /*serialize support */
     friend class cereal::access;
     template <class Archive>

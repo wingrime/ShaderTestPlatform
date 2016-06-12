@@ -138,10 +138,13 @@ int Recorder::End()
     return ESUCCESS;
 }
 
-int Recorder::Add(const SMat4x4 &s)
+int Recorder::Add(double dt,const SMat4x4 &s)
 {
+    RecordSample sample;
     if (d_recordEnabled)
-        r.push_back(SMat4x4(s));
+        sample.dt = dt;
+        sample.cam = s;
+        r.push_back(sample);
     d_sampleIterator = r.end();
     return ESUCCESS;
 }
@@ -153,7 +156,7 @@ bool Recorder::Empty()
 
 int Recorder::Save(const std::string &fname)
 {
-
+    LOGE("NONIMPL!");
    // std::ofstream os(fname);
    //{
        /*use raii */
@@ -169,7 +172,7 @@ int Recorder::Rewind()
     return ESUCCESS;
 }
 
-const SMat4x4 Recorder::Get()
+const RecordSample Recorder::Get()
 {
     if (!r.empty()) {
         d_lastSample = (*d_sampleIterator);

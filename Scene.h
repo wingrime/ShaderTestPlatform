@@ -175,7 +175,7 @@ private:
    float d_BloomFactor;
 public:
     int ResetCfgLabel();
-    int UpdateScene(float dt);
+    int UpdateScene(double dt);
 private:
     DebugDraw d_debugDrawMgr;       
 public:
