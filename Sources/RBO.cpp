@@ -92,7 +92,7 @@ int RBO::attachRBOTextures()
 
     int rcode = glCheckFramebufferStatus(GL_FRAMEBUFFER) ;
     if(rcode != GL_FRAMEBUFFER_COMPLETE) {
-        LOGE(string_format("FBO error(!GL_FRAMEBUFFER_COMPLETE) %d\n",rcode));
+        LOGE("FBO error(!GL_FRAMEBUFFER_COMPLETE) %d\n",rcode);
         MASSERT(true);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         return EFAIL;

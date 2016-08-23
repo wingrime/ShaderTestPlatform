@@ -185,7 +185,9 @@ int imGuiSetup() {
     io.KeyMap[ImGuiKey_PageDown] = GLUT_KEY_PAGE_DOWN;
     io.KeyMap[ImGuiKey_Home] = GLUT_KEY_HOME;
     io.KeyMap[ImGuiKey_End] = GLUT_KEY_END;
+    #ifndef __APPLE__
     io.KeyMap[ImGuiKey_Delete] = GLUT_KEY_DELETE;
+    #endif
     io.KeyMap[ImGuiKey_Backspace] = 43;//GLUT_KEY_BACKSPACE;
     io.KeyMap[ImGuiKey_Enter] = 0x0D;//GLUT_KEY_ENTER;
     io.KeyMap[ImGuiKey_Escape] = 0x1B;//GLUT_KEY_ESCAPE;

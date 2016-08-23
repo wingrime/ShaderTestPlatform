@@ -9,7 +9,7 @@
 #include "string_format.h"
 #include "Log.h"
 int SCamera::Reflect() const{
-    LOGV(string_format("camera: %f %f %f <_> %f %f %f\n", xPos,yPos,zPos, xRot,yRot,zRot));
+    LOGV("camera: %f %f %f <_> %f %f %f\n", xPos,yPos,zPos, xRot,yRot,zRot);
     return 0;
 }
 int SCamera::goPosition(float x, float y ,float z) {

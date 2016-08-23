@@ -1,8 +1,7 @@
 #pragma once
 #include <unordered_map>
-#include <GL/glew.h>
 #ifdef __APPLE__
-#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
 #else
 #include <GL/gl.h>
 #include <GL/wglew.h>

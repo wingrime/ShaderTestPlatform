@@ -32,7 +32,7 @@ MTLParser::MTLParser(const std::string& fname) {
             }
         }
     } else {
-        LOGE(string_format("Unable open MTL file %s\n", fname.c_str()));
+        LOGE("Unable open MTL file %s\n", fname.c_str());
     }
 
     tst.close();

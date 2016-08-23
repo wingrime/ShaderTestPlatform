@@ -32,7 +32,7 @@ GLuint  SProg::LoadShader (const char * source, GLenum type, const std::string &
         glGetShaderInfoLog(shader,log_size,&ret_len, error_log);
         std::string e_log(error_log);
         free(error_log);
-        LOGE(std::string("Shader compile failed:")+fname + std::string("\n")+e_log);
+        LOGE("Shader compile failed: %s\n with %s\n",fname.c_str(),e_log.c_str());
         return EFAIL;      
         
     }
@@ -77,7 +77,7 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
         f_pname(fprog) ,
         g_pname(gprog)
     {
-    LOGV(string_format("Load shader: %s,%s,%s",vprog.c_str(),fprog.c_str(),gprog.c_str()));
+    LOGV("Load shader: %s,%s,%s",vprog.c_str(),fprog.c_str(),gprog.c_str());
 
     //shaders source
     GLint   linked;
@@ -141,7 +141,7 @@ SProg::SProg(const std::string& vprog,const std::string& fprog, const std::strin
         glGetProgramInfoLog(d_program,log_size,&ret_len, error_log);
         std::string err_m = std::string(error_log);
         free(error_log);
-        LOGE(std::string("Shader Link Failed, vfile:")+vprog+std::string(",ffile:")+fprog+std::string("\n")+err_m);
+        LOGE("Shader Link Failed, vfile: %s\n%s\n%s\n ",vprog.c_str() ,fprog.c_str(),err_m.c_str());
         delete frag;
         delete vert;
         IsReady = false;
@@ -157,7 +157,7 @@ SProg::~SProg(){
 int SProg::SetUniform(const std::string& name, float i) {
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        LOGW(std::string("No uniform float ")+name + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW((std::string("No uniform float ")+name + std::string(" in program: ") +v_pname + std::string(", ") + f_pname).c_str() );
         return EFAIL;
     }
 
@@ -167,7 +167,7 @@ int SProg::SetUniform(const std::string& name, float i) {
 int SProg::SetUniform(const std::string& name,int i) {
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        LOGW(std::string("No uniform int(or sampler) ")+name + std::string(" in  program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW("No uniform int(or sampler) %s %s %s ",name.c_str(),v_pname.c_str(),f_pname.c_str() );
         return EFAIL;
     }
 
@@ -179,7 +179,7 @@ int SProg::SetUniform( const std::string& name ,const SMat4x4& mat )
 
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        LOGW(string_format("No uniform mat4 \"%s\"", name.c_str()) + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW("No uniform mat4 \"%s\"", name.c_str() );
         return EFAIL;
     }
 
@@ -222,7 +222,7 @@ int SProg::SetUniform(const std::string& name, const vec4& vec)
 {
     int loc = LookupUniformLocation(name);
     if ( loc == EFAIL ) {
-        LOGW(string_format("No uniform vec4 \"%s\"", name.c_str())+ std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW("No uniform vec4 \"%s\"", name.c_str() );
         return EFAIL;
     }
     glUniform4fv(loc, 1, (float *)vec.raw);
@@ -240,7 +240,7 @@ int SProg::SetAttrib (const std::string& name, int numComponents, GLsizei stride
 
     if ( loc < 0 )
     {
-        LOGW("No Vertex Attibute Find in:"+ name + std::string(" in program: ") +v_pname + std::string(", ") + f_pname );
+        LOGW("No Vertex Attibute Find in:%s %s %s",name.c_str(),v_pname.c_str(),f_pname.c_str() );
          return EFAIL;
     }   
 

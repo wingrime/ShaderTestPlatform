@@ -19,11 +19,11 @@ public:
     Log(const std::string& fname): Log(L_WARNING, fname) {}
     ~Log();
     int LogW(const std::string& s);
-    int LogFmtW(const std::string& fmt_str, ...);
+    int LogFmtW(const char * fmt_str, ...);
     int LogE(const std::string& s);
-    int LogFmtE(const std::string& fmt_str, ...);
+    int LogFmtE(const char * fmt_str, ...);
     int LogV(const std::string& s);
-    int LogFmtV(const std::string& fmt_str, ...);
+    int LogFmtV(const char * fmt_str, ...);
 
     void SetCallback(std::function<void(Log::Verbosity v,const std::string& s)> callback );
 private:

@@ -58,13 +58,13 @@ int SObjModel::ConfigureProgram(SShader& sprog){
 
 SObjModel::SObjModel(const std::string&  fname)
 {
-    LOGV(std::string("Opening obj model ")+fname);
+    LOGV("Opening obj model %s" ,fname.c_str());
     CObjMeshParser parser;
     ObjCtx * ctx = parser.ParseFromFile(fname);
 
     if (!ctx)
         {
-            LOGE(std::string("Unable open model"));
+            LOGE("Unable open model");
             return;
         }
 
@@ -79,7 +79,7 @@ SObjModel::SObjModel(const std::string&  fname)
    }
     std::vector<std::string> mtlrefs = ctx->refMaterialFiles;
     CObjMeshParser::ReleaseContext(ctx);
-    LOGV(string_format("Mesh information: Submesh count:%d, Total mesh triangles:%d", d_sm.size(), total_triangles ));
+    LOGV("Mesh information: Submesh count:%d, Total mesh triangles:%d", d_sm.size(), total_triangles );
 
     LOGV("Load materials");
 
@@ -136,12 +136,12 @@ void SObjModel::LoadTextures() {
 
     texDiffuse = (new STexture("AssetBase/empty_texture.png"));
     if (!texDiffuse->IsReady) {
-        LOGE(std::string(" diffuse texture file not found"));
+        LOGE(" diffuse texture file not found");
         return;
     }
     texNormal = (new STexture("AssetBase/empty_normal.png",false));
     if (!texNormal->IsReady) {
-       LOGE(std::string("normal texture file not found"));
+       LOGE("normal texture file not found");
         return;
     }
 
@@ -149,7 +149,7 @@ void SObjModel::LoadTextures() {
 
         auto &submesh =  (*it);
         if (d_materials.find(submesh->m_name) == d_materials.end()) {
-           LOGE(std::string("no material found - ") + submesh->m_name);
+           LOGE("no material found - \"%s\" ",submesh->m_name.c_str());
         } else {
 
             auto &material = d_materials[submesh->m_name];
@@ -157,15 +157,15 @@ void SObjModel::LoadTextures() {
 
             std::string &diffuse = material.albedoTexFileName;
             if (d_textures.find(diffuse) == d_textures.end()) {
-                LOGV(string_format("material %s Diffuse %s Bump %s Alpha %s",submesh->m_name.c_str(),
+                LOGV("material %s Diffuse %s Bump %s Alpha %s",submesh->m_name.c_str(),
                                    material.albedoTexFileName.c_str(),
                                    material.bumpMapTexFileName.c_str(),
-                                   material.alphaMaskTexFileName.c_str()));
+                                   material.alphaMaskTexFileName.c_str());
 
                 d_materials[submesh->m_name].albedoTex =  new STexture(submesh->m_dir+diffuse);
                 d_textures[diffuse].reset( d_materials[submesh->m_name].albedoTex);
                 if (!d_textures[diffuse]->IsReady) {
-                   LOGE(string_format("OBJ:Diffuse texture load failed %s",(submesh->m_dir+diffuse).c_str()));
+                   LOGE("OBJ:Diffuse texture load failed %s",(submesh->m_dir+diffuse).c_str());
                 }
             }
 
@@ -174,7 +174,7 @@ void SObjModel::LoadTextures() {
                 d_materials[submesh->m_name].bumpMapTex =  new STexture(submesh->m_dir+bump,false);
                 d_textures[bump].reset(d_materials[submesh->m_name].bumpMapTex);
                 if (!d_textures[bump]->IsReady) {
-                  LOGE(string_format("OBJ:Bump texture load failed %s",(submesh->m_dir+bump).c_str()));
+                  LOGE("OBJ:Bump texture load failed %s",(submesh->m_dir+bump).c_str());
                 }
             }
             std::string &alpha = material.alphaMaskTexFileName;
@@ -182,7 +182,7 @@ void SObjModel::LoadTextures() {
                 d_materials[submesh->m_name].alphaMaskTex = new STexture(submesh->m_dir+alpha);
                 d_textures[alpha].reset(d_materials[submesh->m_name].alphaMaskTex);
                 if (!d_textures[alpha]->IsReady) {
-                   LOGE(string_format("OBJ:Alpha mask texture load failed %s",(submesh->m_dir+alpha).c_str()));
+                   LOGE("OBJ:Alpha mask texture load failed %s",(submesh->m_dir+alpha).c_str());
                 }
             }
 
@@ -222,6 +222,7 @@ void SObjModel::BindVAOs() {
             //MASSERT(submesh->vn.empty());
            // MASSERT(submesh->indexes.empty());
             //gl 4.5 without EXT
+            #ifndef __APPLE__
             glNamedBufferDataEXT(temp_vbo,submesh->vn.size() *sizeof(UVNVertex), submesh->vn.data(), GL_STATIC_DRAW);
             glNamedBufferDataEXT(temp_ibo,submesh->indexes.size() *sizeof(unsigned int), submesh->indexes.data(), GL_STATIC_DRAW);
             SubMeshIDs idx;
@@ -229,8 +230,11 @@ void SObjModel::BindVAOs() {
             idx.ibo = temp_ibo;
 
             submesh_idx[submesh->id] = idx;
-            //glBindBuffer(GL_ARRAY_BUFFER,0);
-            //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+            #else
+            //todo
+            #endif
+            glBindBuffer(GL_ARRAY_BUFFER,0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 
         }
         //glBindVertexArray(0);

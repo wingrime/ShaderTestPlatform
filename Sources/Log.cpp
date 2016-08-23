@@ -24,27 +24,27 @@ int Log::LogW(const std::string &s)
        d_callback(Log::L_WARNING,std::string("[WARN] ")+s+'\n');
     return ESUCCESS;
 }
-int Log::LogFmtW(const std::string& fmt_str, ...) 
+int Log::LogFmtW(const char * fmt_str, ...) 
 {
   va_list args;
   va_start(args, fmt_str);
-  int r = LogW(string_format(fmt_str,args));
+  int r = LogW(vastring_format(fmt_str,args));
   va_end(args);
   return r;
 }
-int Log::LogFmtE(const std::string& fmt_str, ...) 
+int Log::LogFmtE(const char * fmt_str, ...)
 {
   va_list args;
   va_start(args, fmt_str);
-  int r = LogE(string_format(fmt_str,args));
+  int r = LogE(vastring_format(fmt_str,args));
   va_end(args);
   return r;
 }
-int Log::LogFmtV(const std::string& fmt_str, ...) 
+int Log::LogFmtV(const char * fmt_str, ...)
 {
   va_list args;
   va_start(args, fmt_str);
-  int r = LogV(string_format(fmt_str,args));
+  int r = LogV(vastring_format(fmt_str,args));
   va_end(args);
   return r;
 }

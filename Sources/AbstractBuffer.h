@@ -7,6 +7,7 @@ public:
     void * buffer();
     int size();
     /*there better use private, but it need add set of 'setters' */
+	virtual ~AbstractBuffer() = default;
 protected:
     void *d_buffer;
     int d_size;

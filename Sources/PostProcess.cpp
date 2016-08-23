@@ -5,6 +5,9 @@
 #include "mat_math.h"
 #include "GenericTexture.h"
 
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#endif 
 SPostProcess::SPostProcess(SShader *prog, int w, int h,
                            const SGenericTexture* texSRC1,
                            const SGenericTexture *texSRC2,

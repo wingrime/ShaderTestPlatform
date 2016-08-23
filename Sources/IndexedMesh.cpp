@@ -32,7 +32,7 @@ namespace std
 }
 IndexedMesh *MeshIndexer::IndexNonIndexedMesh(const NonIndexedMesh *submesh)
 {
-    LOGV(string_format("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d ",submesh->name.c_str(),submesh->m_name.c_str(),submesh->id, submesh->vn.size()));
+    LOGV("Indexing submesh name=%s,m_name=%s, id= %d,triangles=%d",submesh->name.c_str(),submesh->m_name.c_str(),submesh->id, submesh->vn.size());
     IndexedMesh* mesh =  new IndexedMesh();
     mesh->m_name = submesh->m_name;
     mesh->name = submesh->name;
@@ -56,7 +56,7 @@ IndexedMesh *MeshIndexer::IndexNonIndexedMesh(const NonIndexedMesh *submesh)
         }
 
     }
-    LOGV(string_format("Indexing result: indepened_triangles=%d",mesh->vn.size()) );
+    LOGV("Indexing result: indepened_triangles=%d",mesh->vn.size()) ;
     return mesh;
 
 }

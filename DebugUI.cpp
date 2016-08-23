@@ -7,6 +7,10 @@
 #include <RBO.h>
 #include "MAssert.h"
 #include "IMGuiHooks.h"
+#include "c_config.h"
+
+extern  GlobalInputState g_InputState;
+
 DebugUI::DebugUI(RectSizeInt &_v)
     :fps_label(new UILabel(_v,0.8,0.02))
 {
@@ -23,6 +27,7 @@ DebugUI::DebugUI(RectSizeInt &_v)
 int DebugUI::ToggleFPSCounter(bool b) 
 {
     d_toggle_fps_view = b;
+	return 0;
 }
 int DebugUI::Draw()
 {
@@ -572,6 +577,13 @@ int DebugUI::DrawGUI()
     }
     /*Console */
     static bool s_guiConsleIs = false;
+	if (s_guiConsleIs || gImGuiTest) {
+		g_InputState = GlobalInputState::DEBUG_CONTROL;
+	}
+	else
+	{
+		g_InputState = GlobalInputState::ACTOR_CONTROL;
+	}
     ImGui::Checkbox("Debug Console",&s_guiConsleIs);
     if (s_guiConsleIs) {
         DrawConsoleUI(&s_guiConsleIs);
@@ -659,7 +671,7 @@ int DebugUI::DrawConsoleUI(bool *opened) {
         }
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4,1)); // Tighten spacing
         const std::vector<std::string> consoleData = *(con->getConsoleData());
-        for (unsigned int i = consoleData.size()-1; i > 0; i--)
+        for (unsigned int i = 0; i < consoleData.size() - 1; i++)
         {
             const char* item = consoleData[i].c_str();
             if (!filter.PassFilter(item))
@@ -672,25 +684,19 @@ int DebugUI::DrawConsoleUI(bool *opened) {
             ImGui::TextWrapped(item);
             ImGui::PopStyleColor();
         }
-        
-        if (ScrollToBottom)
-            ImGui::SetScrollHere();
-        ScrollToBottom = false;
+		ImGui::SetScrollHere();
         ImGui::PopStyleVar();
         ImGui::EndChild();
         ImGui::Separator();
-
-        // Command-line
-        char InputBuf[1024];
+		// Command-line
+		char InputBuf[1024];
+		
+     
         if (ImGui::InputText("Input", InputBuf, 1024, ImGuiInputTextFlags_EnterReturnsTrue))
         {
-            char* input_end = InputBuf+strlen(InputBuf);
-            while (input_end > InputBuf && input_end[-1] == ' ') input_end--; *input_end = 0;
-            //if (InputBuf[0])
-            //    ExecCommand(InputBuf);
-            strcpy(InputBuf, "");
+			con->HandleCommand(InputBuf);
+			strcpy(InputBuf, "");
         }
-        
 
         if (ImGui::IsItemHovered() || (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
             ImGui::SetKeyboardFocusHere(-1); // Auto focus

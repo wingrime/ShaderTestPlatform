@@ -1,11 +1,10 @@
 #pragma once
-#include <GL/glew.h>
 #ifdef __APPLE__
-#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
 #else
 #include <GL/gl.h>
-#include <GL/wglew.h>
 #endif
+
 /* enums can't forward */
 #include "RBOTexture.h"
 #include <vector>

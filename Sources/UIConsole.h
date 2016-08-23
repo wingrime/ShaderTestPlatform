@@ -15,7 +15,7 @@ class RBO;
 class UIConsole {
 public:
     UIConsole(RectSizeInt& v, AbstractCommandHandler* cmd_h);
-    ~UIConsole();
+    ~UIConsole(); 
     /*Draw console*/
     void Draw();
     /*Add simple message*/ 
@@ -27,10 +27,9 @@ public:
     int HandleNextHistoryCommand();
     void Cls();
     const std::vector<std::string> * getConsoleData();
-
+	int HandleCommand(const std::string& cmd);
 
 private:
-    int HandleCommand(const std::string& cmd);
     void RebuildOut();
     void HandleDelKey();
 

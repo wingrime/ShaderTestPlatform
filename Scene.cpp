@@ -539,6 +539,7 @@ SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
      mp->SetUniform("sunLightDirectionVector",w_sky->GetSunDirection());
     /*update SSAO projection matrix*/
     pp_stage_ssao->getShader()->SetUniform("m_P",cam.getProjMatrix() );
+	return 0;
 }
 int SScene::UpdateScene(double dt) {
     /*shadowmap*/
@@ -712,6 +713,7 @@ int SScene::Render() {
     last_t = std::chrono::steady_clock::now();
     glClearColor(0.0,0.0,0.0,1.0);
     //glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    // USELESS??
     glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
     UpdateScene(dt); /*add real ms*/
     if (d_toggle_MSAA)

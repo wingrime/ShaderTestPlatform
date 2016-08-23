@@ -125,7 +125,11 @@ int SRBOTexture::Bind(unsigned int sampler) const {
 
 int SRBOTexture::BindImage(unsigned int unit)
 {
+    #ifndef __APPLE__
     glBindImageTexture(unit, d_glTexID, 0,GL_TRUE, 0, GL_READ_WRITE, SRBOTexture::getRelatedGLType(type));
+    #else
+    //todo gl3 way
+    #endif 
     return ESUCCESS;
 }
 
@@ -181,7 +185,19 @@ SRBOTexture::SRBOTexture(RectSizeInt s, RTType t, unsigned int miplevel)
         t == RT_TEXTURE_RED  ||
         t == RT_TEXTURE_FLOAT_RED) {
         glBindTexture(GL_TEXTURE_2D,d_glTexID);
+        #ifndef __APPLE__
+        //gl4
         glTexStorage2D(GL_TEXTURE_2D, miplevel, SRBOTexture::getRelatedGLType(t), s.w, s.h);
+        #else
+        int width = s.w;
+        int height = s.h;
+        for (int i = 0; i < miplevel; i++) {
+
+            glTexImage2D(GL_TEXTURE_2D, i,GL_RGB, width, height, 0, GL_RGB, SRBOTexture::getRelatedGLType(t), NULL);
+            width = fmax(1, (width / 2));
+            height =fmax(1, (height / 2));
+        }
+        #endif
         ConfigureTexture(TEX_CLAMP);
         /* enable comparea mode for glsl sampler2Shadow*/
         //if (t == RT_TEXTURE_DEPTH) {
@@ -192,7 +208,12 @@ SRBOTexture::SRBOTexture(RectSizeInt s, RTType t, unsigned int miplevel)
         d_isMSAA  = false;
     } else if (t == RT_TEXTURE_MSAA || t  ==  RT_TEXTURE_DEPTH_MSAA) {
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,d_glTexID);
+        #ifndef __APPLE__
         glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 16, SRBOTexture::getRelatedGLType(t), s.w, s.h,true);
+        #else
+        //TODO
+        //glTexImage2D!!
+        #endif
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
         d_isMSAA  = true;
     }else if (t == RT_TEXTURE_CUBEMAP ) {

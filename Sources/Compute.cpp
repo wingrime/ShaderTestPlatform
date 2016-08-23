@@ -2,14 +2,16 @@
 #include "ErrorCodes.h"
 #include "Log.h"
 #include "MAssert.h"
-
 SSBuffer::SSBuffer(int sz) {
     UNUSED(sz);/*not impl*/
+    #ifndef __APPLE__
     glGenBuffers(1, &d_ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER,d_ssbo);
+    #endif
 }
 SCProg::SCProg(const std::string &src_file)
 {
+    #ifndef __APPLE__
      AbstractBuffer * src = new FileBuffer(std::string("./shaders/")+src_file);
 
     d_ready  = false;
@@ -20,7 +22,7 @@ SCProg::SCProg(const std::string &src_file)
 
     glShaderSource (d_shader,1 , &source, &len);
 
-    delete src; // bad
+    delete src; // bad 
 
     glCompileShader(d_shader);
 
@@ -36,7 +38,7 @@ SCProg::SCProg(const std::string &src_file)
         glGetShaderInfoLog(d_shader,compileLogsz,&logRecived, errorLog);
         std::string e_log(errorLog);
         free(errorLog);
-        LOGE(std::string("Compute shader build failed:\n")+e_log);
+        LOGE("Compute shader build failed:\n",e_log.c_str());
         /*TODO proper cleanup*/
         return;
     }
@@ -56,9 +58,10 @@ SCProg::SCProg(const std::string &src_file)
         glGetProgramInfoLog(d_program,linkLogsz,&logRecived, errorLog);
         std::string e_log(errorLog);
         free(errorLog);
-        LOGE(std::string("Compute shader link failed:\n")+e_log);
+        LOGE("Compute shader link failed: %s\n",e_log.c_str());
         return;
     }
+    #endif
     d_ready = true;
 }
 
@@ -89,11 +92,15 @@ int SCProg::Use()
     return ESUCCESS;
 }
 int SCProg::Dispatch(int numg_x , int numg_y , int numg_z) {
+    #ifndef __APPLE__
     glUseProgram(d_program);
     glDispatchCompute(numg_x, numg_y, numg_z);
+    #endif
     return ESUCCESS;
 }
 int SCProg::Barrier() {
+    #ifndef __APPLE__
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+    #endif
     return ESUCCESS;
 }

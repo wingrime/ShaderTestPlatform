@@ -9,26 +9,28 @@
 #include "FileBuffer.h"
 #include "Log.h"
 
+
 FileBuffer::FileBuffer(const std::string& srcfile)
     :d_path(srcfile)
 {
-    FILE *f_file;
-    f_file = fopen(srcfile.c_str(),"rb");
-    if (f_file == NULL)
-    {
-        LOGE(string_format("%s: File not found! %s",__func__, srcfile.c_str()));
-        return;
-    }
-    fseek(f_file,0,SEEK_END);
-    d_size  = ftell(f_file);
-    rewind(f_file);
-    d_buffer = (char *)calloc((d_size+1),sizeof(char));
-    fread((void *)d_buffer, sizeof(char), d_size,f_file);
-    fclose(f_file);
-    IsReady = true;
+	std::ifstream file(srcfile, std::ios::binary | std::ios::ate);
+	std::streamsize size = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	d_buffer = (void *)new char[size+1];
+	if (file.read((char *)d_buffer, size))
+	{
+		IsReady = true;
+		d_size = size;
+		((char *)d_buffer)[size] = '\0';
+	}
+	else
+		d_buffer = 0;
+    
 }
 FileBuffer::~FileBuffer() {
-    free((void *)d_buffer);
+	if (d_buffer)
+		delete[](char *)d_buffer;
 }
 
 std::string FileBuffer::getPath()

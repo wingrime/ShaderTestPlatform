@@ -4,15 +4,16 @@
 
 #include <memory>
 
-#include <GL/glew.h>
-
 #ifdef __APPLE__
-#include <OpenGL/gl.h>
+#include <GL/glew.h>
+#include <OpenGL/gl3.h>
 #include <GLUT/glut.h>
 #else
+#include <GL/glew.h>
+#include <GL/wglew.h>
 #include <GL/gl.h>
 #include <GL/freeglut.h>
-#include <GL/wglew.h>
+
 #endif
 
 #include "c_config.h"
@@ -25,7 +26,11 @@
 #include "oglGlutInit.h"
 #include <imgui.h>
 #include "IMGuiHooks.h"
-//#include "Scripting/Scriting.h"
+
+
+
+GlobalInputState g_InputState = GlobalInputState::ACTOR_CONTROL;
+
 void display ()
 {
     /* main engine loop */
@@ -74,7 +79,7 @@ void key_up ( unsigned char key, int x, int y )
     UNUSED(x);
     UNUSED(y);
     ImGuiIO& io = ImGui::GetIO();
-    //io.KeysDown[key] = false;
+    io.KeysDown[key] = false;
 }
 void special_up ( int key, int x, int y )
 {
@@ -94,51 +99,21 @@ void key ( unsigned char key, int x, int y )
     UNUSED(x);
     UNUSED(y);
     ImGuiIO& io = ImGui::GetIO();
-    io.AddInputCharacter(key);
-    //io.KeysDown[key] = true;
-    DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
-    //static int fullscreen = 0;
+	if (key == 27) {
+	#ifdef __APPLE__
+		exit(0);
+	#else
+		glutLeaveMainLoop();
+	#endif
+	}
 
-    static int console_mode = 0;
-    if (console_mode) {
-        if (key == 27)
-        {
-            console_mode = 0;
-            dbg_ui->con->Msg("Console close\n");
-            dbg_ui->con->HandleExitConsole();
-            return;
-        } else  if (key == 43) {
-            dbg_ui->con->HandlePrevHistoryCommand();
-            return;
-        }
-        // disable due "-" key better accessible
-        //} else  if (key == 43) {
-        //    sc->con->HandleNextHistoryCommand();
-       //     return;
-        //}
-        dbg_ui->con->HandleInputKey(key);
-
-
-
-        return;
-    }
-
-    if ( key == 27 || key == 'q' || key == 'Q' )
-    {
-#ifdef __APPLE__
-        exit(0);
-#else
-         glutLeaveMainLoop();
-#endif
-
-         return;
-    }
-
-/*backspace or plus goes to console*/
-else if (key == 8 || key == 43) {console_mode = 1; dbg_ui->con->Msg("Debug console, [ESC] for exit\n"); }
-else
-    Singltone<InputCommandHandler>::GetInstance()->HandleInputKey(key);
-
+	if (g_InputState == GlobalInputState::ACTOR_CONTROL) {
+		Singltone<InputCommandHandler>::GetInstance()->HandleInputKey(key);
+	}
+	else if (g_InputState == GlobalInputState::DEBUG_CONTROL ) {
+		io.AddInputCharacter(key);
+	}
+	return;
 }
 
 void mouse_move_passive (  int x , int y) {
@@ -233,8 +208,7 @@ int initGlutHooks() {
 }
 
 int initKeybindings() {
-
-    InputCommandHandler *s_input = Singltone<InputCommandHandler>::GetInstance();
+	InputCommandHandler *s_input = Singltone<InputCommandHandler>::GetInstance();
     SScene * sc = Singltone<SScene>::GetInstance();
     DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
 
@@ -272,7 +246,6 @@ int main ( int argc, char * argv [] )
 
     //Singltone<scripting::Scripting> mainScript("init.lua"); //TODO, from config or argv
     //scripting::Scripting * script = Singltone<scripting::Scripting>::GetInstance();
-
 
     Config * config = Singltone<Config>::GetInstance();
 

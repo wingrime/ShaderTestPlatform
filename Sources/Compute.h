@@ -1,10 +1,8 @@
 #pragma once
-#include <GL/glew.h>
 #ifdef __APPLE__
-#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
 #else
 #include <GL/gl.h>
-#include <GL/wglew.h>
 #endif
 
 #include <string>
@@ -16,7 +14,7 @@
 class SSBuffer :public AbstractBuffer {
 public:
     SSBuffer(int sz);
-    ~SSBuffer();
+	~SSBuffer() {};
 private:
     GLuint d_ssbo;
 };
