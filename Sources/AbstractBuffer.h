@@ -1,16 +1,16 @@
 #ifndef ABSTRACTBUFFER_H
 #define ABSTRACTBUFFER_H
 #pragma once
-
+#include <iosfwd>
 class AbstractBuffer {
 public:
     void * buffer();
-    int size();
+    std::size_t size();
     /*there better use private, but it need add set of 'setters' */
 	virtual ~AbstractBuffer() = default;
 protected:
     void *d_buffer;
-    int d_size;
+    std::size_t d_size;
 
 };
 #endif // ABSTRACTBUFFER_H

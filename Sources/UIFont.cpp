@@ -18,9 +18,9 @@ UIFont::UIFont(FT_Library &lib,const std::string& fnt_name,unsigned const int sz
     }
 
     FT_Set_Pixel_Sizes(face, sz, 0);
-    float size = sz, scale = 1000.0;
-    FT_Matrix matrix = { ( int)((1.0/scale) * 0x10000L), (int)((0.0)* 0x10000L),(int)((0.0) *0x10000L),( int)((1.0) * 0x10000L) };
-    FT_Set_Char_Size( face, (int)(size  *64), 0, 150 * scale, 150 );
+    float scale = 1000.0f;
+    FT_Matrix matrix = { ( int)((1.0f/scale) * 0x10000L), (int)((0.0f)* 0x10000L),(int)((0.0f) *0x10000L),( int)((1.0f) * 0x10000L) };
+    FT_Set_Char_Size( face, (int)(sz  *64), 0, 150 * (int)scale, 150 );
     FT_Set_Transform( face, &matrix, NULL );
 	/*init ui shaders*/
 
@@ -99,11 +99,11 @@ int UIFont::RenderText(const std::string& text, float x_uv, float y_uv, float vp
 
     if (!IsReady)
         return -1L;
-    float sx = 1.0 / vp_sx;
-    float sy = 1.0 / vp_sy;
+    float sx = 1.0f / vp_sx;
+    float sy = 1.0f / vp_sy;
 
-    float x = sx + (x_uv-0.5)*2 ;
-    float y = sy - (y_uv-0.5)*2;
+    float x = sx + (x_uv-0.5f)*2.0f ;
+    float y = sy - (y_uv-0.5f)*2.0f;
 
     float start_x = x;
     //float start_y = y;

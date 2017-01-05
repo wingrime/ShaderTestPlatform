@@ -8,6 +8,7 @@
 #include "MAssert.h"
 #include "string_format.h"
 #include "Log.h"
+#pragma warning(disable : 4996)  
 #define MACHINE_EPS 0.0001
 vec4 vec4::Normalize() const {
     float l = Length();
@@ -529,7 +530,7 @@ bool MESA_gluInvertMatrix(const float m[16], float invOut[16])
     if (det == 0)
         return false;
 
-    det = 1.0 / det;
+    det = 1.0f / det;
 
     for (i = 0; i < 16; i++)
         invOut[i] = inv[i] * det;

@@ -47,21 +47,21 @@ SolAng SWeatherSky::SolarAngleModel(float LT,float delta_GMT,float d, float long
     while (LT > 24)
         LT = LT - 24;
     float LSTM = toRad(15*delta_GMT);
-    float B = toRad((360/365)*(d-81));
-    float EoT = 9.87*sin(2*B)-7.53*cos(B)-1.5*sin(B);
+    float B = toRad((360.0f/365.0f)*(d-81.0f));
+    float EoT = 9.87f*sin(2*B)-7.53f*cos(B)-1.5f*sin(B);
     float TC = 4*(longtitude-LSTM)+ EoT; /*time correction*/
-    float LST = LT + TC/60; /* Local solar time*/
-    float HRA = toRad(15*(LST-12)); /*Hour angle*/
-    float declination = toRad(23.45)*sin(toRad((360/365)*(d-81)));
+    float LST = LT + TC/60.0f; /* Local solar time*/
+    float HRA = toRad(15*(LST-12.0f)); /*Hour angle*/
+    float declination = toRad(23.45f)*sin(toRad((360.0f/365.0f)*(d-81.0f)));
     //float cosElev = sin(attitude)*sin(declination) + cos(attitude)*cos(declination)*cos(HRA);
     //pos.Elev = acos(cosElev);
     pos.Elev = asin( sin(declination) *sin(attitude)+ cos(declination)*cos(attitude)*cos(HRA));
     //pos.Elev = toDeg(90)-pos.Elev;
     pos.Ath = acos((sin(declination)*cos(attitude)- cos(declination)*sin(attitude)*cos(HRA))/cos(pos.Elev));
-    pos.Elev = toRad(90.0)-pos.Elev;
+    pos.Elev = toRad(90.0f)-pos.Elev;
 
-    if (LST > 12 || HRA > 0)
-        pos.Ath = toRad(360.0)-pos.Ath;
+    if (LST > 12.0f || HRA > 0.0f)
+        pos.Ath = toRad(360.0f)-pos.Ath;
     
     //pos.Ath = acos((sin(declination)*cos(attitude) - cos(HRA)*cos(declination)*sin(attitude))/ cos(toDeg(90)-pos.Elev));
     return pos;
@@ -75,19 +75,19 @@ SWeatherSky::SWeatherSky() {
 
     sky_dome_model->ConfigureProgram( *sky_dome_prog);
     sky_dome_model->ConfigureProgram( *sky_dome_cubemap_prog);
-    sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0,1000.0,1000.0));
+    sky_dome_model->SetModelMat(SMat4x4().Scale(1000.0f,1000.0f,1000.0f));
 
     sky_dome_prog->SetUniform("sky_turbidity",sky_turbidity);
     sky_dome_prog->SetUniform("sky_sunsize",sky_disksize);
     sky_dome_prog->SetUniform("sky_sunpower",sky_sunpower);
     sky_dome_prog->SetUniform("sky_power",sky_power);
-    sky_dome_prog->SetUniform("sky_sunpos",vec4( 0.0,1.0,0.0,1.0 ));
+    sky_dome_prog->SetUniform("sky_sunpos",vec4( 0.0f,1.0f,0.0f,1.0f ));
 
     sky_dome_cubemap_prog->SetUniform("sky_turbidity",sky_turbidity);
     sky_dome_cubemap_prog->SetUniform("sky_sunsize",sky_disksize);
     sky_dome_cubemap_prog->SetUniform("sky_sunpower",sky_sunpower);
     sky_dome_cubemap_prog->SetUniform("sky_power",sky_power);
-    sky_dome_cubemap_prog->SetUniform("sky_sunpos",vec4( 0.0,1.0,0.0,1.0 ));
+    sky_dome_cubemap_prog->SetUniform("sky_sunpos",vec4( 0.0f,1.0f,0.0f,1.0f ));
 }
 
 SWeatherSky::~SWeatherSky()

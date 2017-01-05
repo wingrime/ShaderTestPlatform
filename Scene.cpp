@@ -73,7 +73,7 @@ int SScene::renderPipelineLink()
 }
 
 SScene::SScene(RectSizeInt v)
-    :cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0)))
+    :cam(SMat4x4(),SPerspectiveProjectionMatrix(100.0f, 7000.0f,1.0f,toRad(26.0f)))
     ,normal_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::DISABLED )
     ,msaa_pass(RenderPass::LESS_OR_EQUAL,RenderPass::ENABLED,RenderPass::ENABLED)
     ,ui_pass(RenderPass::NEVER, RenderPass::DISABLED,RenderPass::DISABLED)
@@ -82,7 +82,7 @@ SScene::SScene(RectSizeInt v)
 
     
 {
-    d_BloomFactor = 0.1;
+    d_BloomFactor = 0.1f;
     /*Weather system*/
     w_sky = new SWeatherSky();
     /*scene noise*/
@@ -295,7 +295,7 @@ int SScene::Reshape(RectSizeInt v) {
         /* there should be internal buffer recreation code but ?? */
         glViewport( 0, 0, (GLsizei)v.w, (GLsizei)v.h );
         /*fix aspect ratio*/
-        cam.setProjMatrix( SPerspectiveProjectionMatrix(100.0f, 10000.0f,(float)v.h / (float)v.w,toRad(26.0)) );
+        cam.setProjMatrix( SPerspectiveProjectionMatrix(100.0f, 10000.0f,(float)v.h / (float)v.w,toRad(26.0f)) );
 
         return ESUCCESS;
 }
@@ -432,14 +432,14 @@ BBox PSRProjectionPointSet(const std::vector <Point> & p_list , const SMat4x4 &s
  *
 */
 SMat4x4 PSRFocusSMSTransformMatrix(const BBox &psr ) {
-    float s_x = 2.0 / ( psr.max_point.x - psr.min_point.x);
-    float o_x = -(s_x *(psr.max_point.x + psr.min_point.x))/2.0;
-    float s_y = 2.0 / ( psr.max_point.y - psr.min_point.y);
-    float o_y = -(s_y *(psr.max_point.y + psr.min_point.y))/2.0;
-    return  SMat4x4(s_x,0.0,0.0,o_x,
-                    0.0,s_y,0.0,o_y,
-                    0.0,0.0,1.0,0.0,
-                    0.0,0.0,0.0,1.0);
+    float s_x = 2.0f / ( psr.max_point.x - psr.min_point.x);
+    float o_x = -(s_x *(psr.max_point.x + psr.min_point.x))/2.0f;
+    float s_y = 2.0f / ( psr.max_point.y - psr.min_point.y);
+    float o_y = -(s_y *(psr.max_point.y + psr.min_point.y))/2.0f;
+    return  SMat4x4(s_x,0.0f,0.0f,o_x,
+                    0.0f,s_y,0.0f,o_y,
+                    0.0f,0.0f,1.0f,0.0f,
+                    0.0f,0.0f,0.0f,1.0f);
 }
 
 SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
@@ -447,32 +447,32 @@ SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
     vec4 zaxis = vec4::Normalize(forward); /*direction to view point*/
     vec4 xaxis = vec4::Normalize(vec4::Cross3(vec4::Normalize(up),zaxis)); /* left vector*/
     vec4 yaxis(vec4::Normalize(vec4::Cross3(zaxis,xaxis))); /* new up vector */
-    vec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0);
-    vec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0);
-    vec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0);
-    vec4 v4 (0.0,0.0,0.0,1.0);
+    vec4 v1 (xaxis.x , yaxis.x , zaxis.x,0.0f);
+    vec4 v2 (xaxis.y , yaxis.y , zaxis.y,0.0f);
+    vec4 v3 (xaxis.z , yaxis.z , zaxis.z,0.0f);
+    vec4 v4 (0.0f,0.0f,0.0f,1.0f);
     SMat4x4 l = SMat4x4(v1,v2,v3,v4);
     return l;
 
 }int SScene::UpdateShadowmap()
 {
-    SMat4x4 Bias = SMat4x4( 0.5,0.0,0.0,0.0,
-                            0.0,0.5,0.0,0.0,
-                            0.0,0.0,0.5,0.0,
-                            0.5,0.5,0.5,1.0).Transpose(); //small todo
+    SMat4x4 Bias = SMat4x4( 0.5f,0.0f,0.0f,0.0f,
+                            0.0f,0.5f,0.0f,0.0f,
+                            0.0f,0.0f,0.5f,0.0f,
+                            0.5f,0.5f,0.5f,1.0f).Transpose(); //small todo
 
     /*fit AABB*/
     //float shadowCascadeDiv[] = { 100.0,290.0, 840.0, 2420.0,7000.0};
 
     SMat4x4 PV = cam.getViewProjectMatrix();
     std::vector <Point> psrPoints;// = FrustumPoints(PV); - add view-frustum as PSR
-    AABB psrAABB =AABB(Point(-2000.0,-100,-1300.0), Point(2000.0,1300.0,1300.0) ); //Scene PSR
+    AABB psrAABB =AABB(Point(-2000.0,-100.0f,-1300.0f), Point(2000.0f,1300.0f,1300.0f) ); //Scene PSR
 
     std::vector <Point> aabbPoints = AABBPoints(psrAABB);
     psrPoints.insert(psrPoints.end(),aabbPoints.begin(),aabbPoints.end()); /*JOIN - better solution, convex hull*/
 
     //vec4 cam_up = vec4::Normalize(cam.getViewMatrix().ExtractUpVector());
-    vec4 cam_up = vec4(0.0,1.0,0.0,1.0);
+    vec4 cam_up = vec4(0.0f,1.0f,0.0f,1.0f);
     vec4 sunDirection = w_sky->GetSunDirection();
     SMat4x4 shadowMapViewMatrix = LookAtMatrix(sunDirection,cam_up); /*new basis*/
     int min_idx;
@@ -501,13 +501,13 @@ SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
     shadowMapDistance = fabs(max_z-min_z);
     Point p = psrPoints[max_idx];
 
-    vec4 pos = vec4(p.x,p.y,p.z,1.0);
+    vec4 pos = vec4(p.x,p.y,p.z,1.0f);
 
 
     SMat4x4 shadowMapFinalProjectionMatrix[4];
     for (int i = 0; i < 4; i++ ){
 
-        SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix(0.1, shadowMapDistance,1.0f,1.0,-1.0,-1.0);
+        SMat4x4 shadowMapProjectionMatrix = SOrtoProjectionMatrix(0.1f, shadowMapDistance,1.0f,1.0f,-1.0f,-1.0f);
 
         SMat4x4 shadowMapPVMatrix = shadowMapProjectionMatrix*shadowMapViewMatrix*SMat4x4().Move(-pos);
         SMat4x4 shadowPostPerspectiveScale = PSRFocusSMSTransformMatrix(PSRProjectionPointSet(psrPoints,shadowMapPVMatrix));
@@ -520,7 +520,7 @@ SMat4x4 LookAtMatrix(const vec4 &forward, const vec4 &up ) {
 
 
     d_debugDrawMgr.ClearAll();
-    d_debugDrawMgr.AddCross(pos,200);
+    d_debugDrawMgr.AddCross(pos,200.0f);
     d_debugDrawMgr.AddAABB(psrAABB);
     d_debugDrawMgr.AddCameraFrustrum(d_shadowmap_cam[0].getViewProjectMatrix());
     d_debugDrawMgr.Update();
@@ -624,8 +624,8 @@ int SScene::RenderCubemap()
        normal_pass.Bind();
 
     rtCubemap->Bind();
-    SMat4x4 pos = SMat4x4().Move(0,-500.0,0.0);
-    SMat4x4 cube_projection = SPerspectiveProjectionMatrix(10,10000,1,toRad(90.0));
+    SMat4x4 pos = SMat4x4().Move(0.0f,-500.0f,0.0f);
+    SMat4x4 cube_projection = SPerspectiveProjectionMatrix(10.0f,10000.0f,1,toRad(90.0f));
     RenderContext r_ctx(cubemap_prog_generator,pos,cube_projection);
 
     /*Sky support*/
@@ -774,8 +774,8 @@ int SScene::Render() {
     auto end = std::chrono::steady_clock::now();
 
 
-    d_dbgRenderTimeMs =(float)rtime.getTime()*(1.0/ 1000000.0);
-    d_dbgPostProcessingTimeMs =(float)pp_time.getTime()*(1.0/ 1000000.0);
+    d_dbgRenderTimeMs =(float)rtime.getTime()*(1.0f/ 1000000.0f);
+    d_dbgPostProcessingTimeMs =(float)pp_time.getTime()*(1.0f/ 1000000.0f);
     d_dbgFrameNumber++;
     return true;
 }

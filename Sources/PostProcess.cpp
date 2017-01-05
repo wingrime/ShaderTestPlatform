@@ -5,6 +5,7 @@
 #include "mat_math.h"
 #include "GenericTexture.h"
 #include "OGL.h"
+#pragma warning(disable : 4996)  
 SPostProcess::SPostProcess(SShader *prog, int w, int h,
                            const SGenericTexture* texSRC1,
                            const SGenericTexture *texSRC2,
@@ -67,7 +68,7 @@ void SPostProcess::InitUniforms(RectSizeInt s)
             p_prog->SetUniform(buf,i);
     }
     /*configure outbuffer size*/
-    p_prog->SetUniform("vp",vec4(s.w,s.h,0,0));
+    p_prog->SetUniform("vp",vec4((float)s.w,(float)s.h,0.0f,0.0f));
 
 }
 void SPostProcess::Draw() {

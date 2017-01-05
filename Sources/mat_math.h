@@ -4,6 +4,8 @@
 #ifndef M_PI
 #define M_PI           3.14159265358979323846
 #endif
+#define M_PIf 3.14159265358979f
+
 #include <string>
 #define MATH_SERIALIZE
 #ifdef MATH_SERIALIZE
@@ -24,13 +26,13 @@ template <typename T>
 T inline toRad(T deg){
 
     static_assert(std::is_floating_point<T>::value , "It's Error using non floating point here");
-    return (M_PI/180.0f) * deg;
+    return (M_PIf /180.0f) * deg;
 }
 
 template <typename T>
 T inline toDeg(T rad){
     static_assert(std::is_floating_point<T>::value , "It's Error using non floating point here");
-    return (180.0f/M_PI) * rad;
+    return (180.0f/ M_PIf) * rad;
 }
 
 
@@ -229,20 +231,33 @@ public:
     UnitQuaterion operator*(const UnitQuaterion& qt) const;
     UnitQuaterion operator*(float s) const;
     UnitQuaterion operator+(const UnitQuaterion& qt) const;
-    constexpr static float CheckDelta = 1e-6;
+    constexpr static float CheckDelta = 1e-6f;
+};
+/* integer rectangle size in D2*/
+struct RectSizeInt {
+	RectSizeInt(int _h, int _w) :h(_h), w(_w) {}
+	RectSizeInt() :h(0), w(0) {}
+	//RectSizeInt(const RectSize& rs) :h((int)rs.h), w((int)rs.w) {}
+	union {
+		struct { int h, w; };
+		struct { int y, x; };
+	};
+
+
+};
+struct RectSize {
+	RectSize(float _h, float _w) :h(_h), w(_w) {}
+	RectSize() :h(0), w(0) {}
+	RectSize(const RectSizeInt& rs) :h((float)rs.h), w((float)rs.w) {}
+	union {
+		struct { float h, w; };
+		struct { float y, x; };
+	};
+
+
 };
 
-/* intger rectangle size in D2*/
-struct RectSizeInt  {
-    RectSizeInt(int _h,int _w) :h(_h),w(_w) {}
-    RectSizeInt () :h(0.0),w(0.0) {}
-    union {
-        struct {int h,w;};
-        struct {int y,x;};
-          };
 
-
-};
 /* AABB in 2d */
 
 
@@ -358,14 +373,16 @@ public:
     vec2 min_point;
     vec2 max_point;
 };
-struct Point  {
+class Point  {
+public:
     Point(float _x,float _y,float _z) :x(_x),y(_y),z(_z) {}
     Point (vec4 a) :x(a.x),y(a.y),z(a.z) {}
     Point (vec3 a) :x(a.x),y(a.y),z(a.z) {}
     Point () :x(0.0),y(0.0),z(0.0) {}
     float x,y,z;
 };
-struct Line {
+class Line{
+public:
     Line() :p1(),p2() {}
     Line(Point _p1,Point _p2) :p1(_p1),p2(_p2) {}
     Point p1;

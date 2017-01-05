@@ -5,7 +5,7 @@
 
 Point AABB::Center()
 {
-    return Point((max_point.x - min_point.x)/2.0  ,(max_point.y-min_point.y)/2.0,(max_point.z-min_point.z)/2.0);
+    return Point((max_point.x - min_point.x)/2.0f  ,(max_point.y-min_point.y)/2.0f,(max_point.z-min_point.z)/2.0f);
 }
 
 /*todo: move to some place*/

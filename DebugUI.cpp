@@ -8,11 +8,11 @@
 #include "MAssert.h"
 #include "IMGuiHooks.h"
 #include "c_config.h"
-
+#pragma warning(disable : 4996)  
 extern  GlobalInputState g_InputState;
 
-DebugUI::DebugUI(RectSizeInt &_v)
-    :fps_label(new UILabel(_v,0.8,0.02))
+DebugUI::DebugUI(RectSize &_v)
+    :fps_label(new UILabel(_v,0.8f,0.02f))
 {
     /*Setup error handler*/
     d_console_cmd_handler = new ConsoleCommandHandler();
@@ -36,7 +36,7 @@ int DebugUI::Draw()
         char buf [120];
         float pptime = sc->debugGetPostProcessingTime();
         float rtime = sc->debugGetRenderTime();
-        float fps = 1000.0/(pptime+rtime);
+        float fps = 1000.0f/(pptime+rtime);
         long int frameNumber = sc->debugGetFrameNumber();
         sprintf(buf,"DRAW:%4.3f ms\nPP: %4.3f ms\nFPS: %4.3f\nframe:%d\n", rtime ,pptime, fps, frameNumber );
         fps_label->setText(buf);
@@ -53,7 +53,7 @@ int DebugUI::Draw()
 
 }
 
-int DebugUI::Reshape(const RectSizeInt &v)
+int DebugUI::Reshape(const RectSize &v)
 {
     /*ImGui hook*/
     ImGuiIO& io = ImGui::GetIO();
@@ -373,14 +373,14 @@ int DebugUI::DrawGUI()
     }
 
     /*Base post-processing configuration*/
-    static float tmc_A =  0.22;
+    static float tmc_A =  0.22f;
     static float tmc_B = 0.30f;
     static float tmc_C = 0.10f;
     static float tmc_D = 0.20f;
     static float tmc_E = 0.01f;
     static float tmc_F = 0.3f;
     static float tmc_LW = 1.2f;
-    static float eyeAdoptSpeed = 0.008;
+    static float eyeAdoptSpeed = 0.008f;
     if (ImGui::CollapsingHeader("Tonemapping"))
     {
         ImGui::Text("Fimlic curve");
@@ -411,14 +411,14 @@ int DebugUI::DrawGUI()
         }
         if (ImGui::Button("Reset Tonemapping"))
             {
-                tmc_A = 0.22;
-                tmc_B = 0.30;
-                tmc_C = 0.10;
-                tmc_D = 0.20;
-                tmc_E = 0.01;
-                tmc_F = 0.30;
-                tmc_LW = 1.2;
-                eyeAdoptSpeed = 0.008;
+                tmc_A = 0.22f;
+                tmc_B = 0.30f;
+                tmc_C = 0.10f;
+                tmc_D = 0.20f;
+                tmc_E = 0.01f;
+                tmc_F = 0.30f;
+                tmc_LW = 1.2f;
+                eyeAdoptSpeed = 0.008f;
                 sc->debugSetStageShaderUniform("Tonemap","A",tmc_A);
                 sc->debugSetStageShaderUniform("Tonemap","B",tmc_B);
                 sc->debugSetStageShaderUniform("Tonemap","C",tmc_C);
@@ -430,9 +430,9 @@ int DebugUI::DrawGUI()
             }
 
     }
-    static float ssao_Size = 0.3;
-    static float ssaoLevelClamp = 0.21;
-    static float ssaoblurSize = 0.021;
+    static float ssao_Size = 0.3f;
+    static float ssaoLevelClamp = 0.21f;
+    static float ssaoblurSize = 0.021f;
     if (ImGui::CollapsingHeader("SSAO Config")) {
         if (ImGui::SliderFloat("ssaoSize", &ssao_Size, 0.0f, 2.0f)) {
             sc->pp_stage_ssao->getShader()->SetUniform("ssaoSize",ssao_Size);
@@ -446,9 +446,9 @@ int DebugUI::DrawGUI()
         }
         if (ImGui::Button("Reset SSAO"))
         {
-            ssao_Size = 0.3;
-            ssaoLevelClamp = 0.21;
-            ssaoblurSize = 0.021;
+            ssao_Size = 0.3f;
+            ssaoLevelClamp = 0.21f;
+            ssaoblurSize = 0.021f;
             sc->pp_stage_ssao->getShader()->SetUniform("ssaoSize",ssao_Size);
             sc->pp_stage_ssao->getShader()->SetUniform("ssaoLevelClamp",ssaoLevelClamp);
 
@@ -528,10 +528,10 @@ int DebugUI::DrawGUI()
     }
 
 
-    static float shIntensity = 5.2;
-    static float materialBRDFAlpha = 0.4;
-    static float materialBRDFressnel = 0.04;
-    static float lightIntensity = 1.0;
+    static float shIntensity = 5.2f;
+    static float materialBRDFAlpha = 0.4f;
+    static float materialBRDFressnel = 0.04f;
+    static float lightIntensity = 1.0f;
 
     if (ImGui::CollapsingHeader("Lighting")) {
         if (ImGui::SliderFloat("shIntensity", &shIntensity, 0.0f, 20.2f)) {
@@ -550,10 +550,10 @@ int DebugUI::DrawGUI()
 
         if (ImGui::Button("Reset Lighting"))
         {
-            shIntensity = 5.2;
-            materialBRDFAlpha = 0.4;
-            materialBRDFressnel = 0.04;
-            lightIntensity = 1.0;
+            shIntensity = 5.2f;
+            materialBRDFAlpha = 0.4f;
+            materialBRDFressnel = 0.04f;
+            lightIntensity = 1.0f;
             mp->SetUniform("shIntensity",shIntensity);
             mp->SetUniform("materialBRDFAlpha",materialBRDFAlpha);
             mp->SetUniform("materialBRDFressnel",materialBRDFressnel);

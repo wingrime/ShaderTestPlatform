@@ -48,20 +48,20 @@ private:
     SShader  *sky_dome_cubemap_prog;
 
 
-    SMat4x4 matrix_projection = SInfinityFarProjectionMatrix(100.0f,1.0f,toRad(26.0));
+    SMat4x4 matrix_projection = SInfinityFarProjectionMatrix(100.0f,1.0f,toRad(26.0f));
 
-    vec4 sun_light_direction = vec4(0.5,0.5,0.0,1.0);
+    vec4 sun_light_direction = vec4(0.5f,0.5f,0.0f,1.0f);
 
 
     /*Sun location model*/
-    float local_att = toRad(56.0);
-    float local_long = toRad(60.0);
-    float local_GMT_delta = -5;
-    float local_day_of_year = 150;
+    float local_att = toRad(56.0f);
+    float local_long = toRad(60.0f);
+    float local_GMT_delta = -5.0f;
+    float local_day_of_year = 150.0f;
     /*Sky model*/
-    float sky_turbidity = 2.0;
-    float sky_disksize = 100.0;
-    float sky_sunpower  = 10.0;
-    float sky_power = 2.0;
+    float sky_turbidity = 2.0f;
+    float sky_disksize = 100.0f;
+    float sky_sunpower  = 10.0f;
+    float sky_power = 2.0f;
 
 };

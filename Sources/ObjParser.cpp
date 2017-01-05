@@ -8,40 +8,40 @@ UVNVertex inline CObjMeshParser::BuildVert(const vec3 &p, const vec2 &tc, const 
 
 int CObjMeshParser::BuildVerts(const std::vector<vec3> &glv, const std::vector<vec2> &glt , const CObjFace& face,std::vector<UVNVertex>* res) {
     //std::vector<CObjVertex> res;
-    vec3 normal = CalcNormal(glv[ face.f[0].v_idx - 1.0 ],glv[ face.f[1].v_idx - 1.0 ],glv[ face.f[2].v_idx - 1.0 ]);
+    vec3 normal = CalcNormal(glv[ face.f[0].v_idx - 1 ],glv[ face.f[1].v_idx - 1 ],glv[ face.f[2].v_idx - 1 ]);
     if (face.f[0].vt_idx == 0) /* no texture coords case*/  {
         vec2 empty_v2;
 
         if ( face.f[3].v_idx == 0 ) {
         // consider this is single triangle
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2 ,normal) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  , empty_v2 ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  , empty_v2 ,normal) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  , empty_v2 ,normal ) );
         } else {
         // consider this is face
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2 ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  , empty_v2 ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  , empty_v2 ,normal ) );
 
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  , empty_v2 ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1.0 ]  , empty_v2 ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1 ]  , empty_v2 ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  , empty_v2 ,normal ) );
         }
     } else {
                 if ( face.f[3].v_idx == 0 ) {
         // consider this is single triangle
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ] ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ] ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ] ,normal) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,glt[ face.f[0].vt_idx - 1 ] ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  ,glt[ face.f[1].vt_idx - 1 ] ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,glt[ face.f[2].vt_idx - 1 ] ,normal) );
         } else {
         // consider this is face
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ] ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ]  ,normal) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ]  ,normal) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,glt[ face.f[0].vt_idx - 1 ] ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  ,glt[ face.f[1].vt_idx - 1 ]  ,normal) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,glt[ face.f[2].vt_idx - 1 ]  ,normal) );
 
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ] ,normal ) );
-            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1.0 ]  ,glt[ face.f[3].vt_idx - 1.0 ]  ,normal) );
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ]  ,normal) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,glt[ face.f[2].vt_idx - 1 ] ,normal ) );
+            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1 ]  ,glt[ face.f[3].vt_idx - 1 ]  ,normal) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,glt[ face.f[0].vt_idx - 1 ]  ,normal) );
         }
     }
     return 0;
@@ -55,35 +55,35 @@ int CObjMeshParser::BuildVertsN(const std::vector<vec3> &glv, const std::vector<
             vec2 empty_v2;
         if ( face.f[3].v_idx == 0 ) {
             // consider this is single triangle
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,empty_v2, gln[ face.f[0].n_idx - 1.0 ]  ) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,empty_v2 , gln[ face.f[1].n_idx - 1.0 ]  ) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,empty_v2 , gln[ face.f[2].n_idx - 1.0 ]  ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,empty_v2, gln[ face.f[0].n_idx - 1 ]  ) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  ,empty_v2 , gln[ face.f[1].n_idx - 1 ]  ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,empty_v2 , gln[ face.f[2].n_idx - 1 ]  ) );
         } else {
             // consider this is face
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,empty_v2  , gln[ face.f[0].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,empty_v2  , gln[ face.f[1].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,empty_v2  , gln[ face.f[2].n_idx - 1.0 ] ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,empty_v2  , gln[ face.f[0].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  ,empty_v2  , gln[ face.f[1].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,empty_v2  , gln[ face.f[2].n_idx - 1 ] ) );
 
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,empty_v2 , gln[ face.f[2].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1.0 ]  ,empty_v2   , gln[ face.f[3].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,empty_v2  , gln[ face.f[0].n_idx - 1.0 ] ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,empty_v2 , gln[ face.f[2].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1 ]  ,empty_v2   , gln[ face.f[3].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,empty_v2  , gln[ face.f[0].n_idx - 1 ] ) );
         }
 
     } else {
         if ( face.f[3].v_idx == 0 ) {
             // consider this is single triangle
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ] , gln[ face.f[0].n_idx - 1.0 ]  ) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ] , gln[ face.f[1].n_idx - 1.0 ]  ) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ] , gln[ face.f[2].n_idx - 1.0 ]  ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,glt[ face.f[0].vt_idx - 1 ] , gln[ face.f[0].n_idx - 1 ]  ) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  ,glt[ face.f[1].vt_idx - 1 ] , gln[ face.f[1].n_idx - 1 ]  ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,glt[ face.f[2].vt_idx - 1 ] , gln[ face.f[2].n_idx - 1 ]  ) );
         } else {
             // consider this is face
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ]  , gln[ face.f[0].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1.0 ]  ,glt[ face.f[1].vt_idx - 1.0 ]  , gln[ face.f[1].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ]  , gln[ face.f[2].n_idx - 1.0 ] ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,glt[ face.f[0].vt_idx - 1 ]  , gln[ face.f[0].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[1].v_idx - 1 ]  ,glt[ face.f[1].vt_idx - 1 ]  , gln[ face.f[1].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,glt[ face.f[2].vt_idx - 1 ]  , gln[ face.f[2].n_idx - 1 ] ) );
 
-            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1.0 ]  ,glt[ face.f[2].vt_idx - 1.0 ]  , gln[ face.f[2].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1.0 ]  ,glt[ face.f[3].vt_idx - 1.0 ]  , gln[ face.f[3].n_idx - 1.0 ] ) );
-            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1.0 ]  ,glt[ face.f[0].vt_idx - 1.0 ]  , gln[ face.f[0].n_idx - 1.0 ] ) );
+            res->push_back(BuildVert(glv[ face.f[2].v_idx - 1 ]  ,glt[ face.f[2].vt_idx - 1 ]  , gln[ face.f[2].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[3].v_idx - 1 ]  ,glt[ face.f[3].vt_idx - 1 ]  , gln[ face.f[3].n_idx - 1 ] ) );
+            res->push_back(BuildVert(glv[ face.f[0].v_idx - 1 ]  ,glt[ face.f[0].vt_idx - 1 ]  , gln[ face.f[0].n_idx - 1 ] ) );
         }
     }
     return 0;
@@ -201,10 +201,10 @@ vec2 CObjMeshParser::ParseVt(const std::string &v_desc) {
     const char * rw = s+3;
     while (*s != 0 && s != rw ) {s++;} //fast forward
     while (*s != 0 && isblank(*s) ) {s++;} //forward value
-    obj.u = atof(s);
+    obj.u = (float)atof(s);
     while (*s != 0 && !isblank(*s) ) {s++;} //forward nonblank (value)
     while (*s != 0 && isblank(*s) ) {s++;} //forward spaces then
-    obj.v = atof(s);
+    obj.v = (float)atof(s);
     return obj;
 }
 
@@ -216,13 +216,13 @@ vec3 CObjMeshParser::ParseV(const std::string &v_desc) {
     const char * rw = s+2;
     while (*s != 0 && s != rw ) {s++;} //fast forward
     while (*s != 0 && isblank(*s) ) {s++;} //forward value
-    obj.x = atof(s);
+    obj.x = (float)atof(s);
     while (*s != 0 && !isblank(*s) ) {s++;} //forward nonblank (value)
     while (*s != 0 && isblank(*s) ) {s++;} //forward spaces then
-    obj.y = atof(s);
+    obj.y = (float)atof(s);
     while (*s != 0 && !isblank(*s) ) {s++;} //forward nonblank (value)
     while (*s != 0 && isblank(*s) ) {s++;} //forward spaces then
-    obj.z = atof(s);
+    obj.z = (float)atof(s);
 
 
 
@@ -236,13 +236,13 @@ vec3 CObjMeshParser::ParseVn(const std::string &v_desc) {
     const char * rw = s+3;
     while (*s != 0 && s != rw ) {s++;} //fast forward
     while (*s != 0 && isblank(*s) ) {s++;} //forward value
-    obj.x = atof(s);
+    obj.x = (float)atof(s);
     while (*s != 0 && !isblank(*s) ) {s++;} //forward nonblank (value)
     while (*s != 0 && isblank(*s) ) {s++;} //forward spaces then
-    obj.y = atof(s);
+    obj.y = (float)atof(s);
     while (*s != 0 && !isblank(*s) ) {s++;} //forward nonblank (value)
     while (*s != 0 && isblank(*s) ) {s++;} //forward spaces then
-    obj.z = atof(s);
+    obj.z = (float)atof(s);
     return obj;
 }
 

@@ -7,6 +7,7 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
+#pragma warning(disable : 4996)  
 MTLParser::MTLParser(const std::string& fname) {
     std::ifstream tst;
     std::hash<std::string> hash_fn;

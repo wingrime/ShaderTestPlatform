@@ -8,10 +8,10 @@ public:
 
    UIConsole *con;
 
-    DebugUI(RectSizeInt &v);
+    DebugUI(RectSize &v);
 
     int Draw();
-    int Reshape(const RectSizeInt &v);
+    int Reshape(const RectSize &v);
     int InitDebugCommands();
     int ToggleFPSCounter(bool b);
 

@@ -14,7 +14,7 @@ FileBuffer::FileBuffer(const std::string& srcfile)
     :d_path(srcfile)
 {
 	std::ifstream file(srcfile, std::ios::binary | std::ios::ate);
-	std::streamsize size = file.tellg();
+	std::size_t size = (std::size_t)file.tellg();
 	file.seekg(0, std::ios::beg);
 
 	d_buffer = (void *)new char[size+1];

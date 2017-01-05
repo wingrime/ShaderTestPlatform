@@ -138,7 +138,7 @@ public:
 
 private:
     bool d_RegenerateCubemap;
-    SMat4x4 infFarMatrix = SInfinityFarProjectionMatrix(100,1.0,toRad(26.0));
+    SMat4x4 infFarMatrix = SInfinityFarProjectionMatrix(100.0f,1.0f,toRad(26.0f));
 
     /* prepass prog*/
     SShader *  prepass_prog;

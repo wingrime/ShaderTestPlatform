@@ -9,15 +9,15 @@
 
 class UILabel {
 public:
-    UILabel(RectSizeInt &v) :UILabel(v, 0.0, 0.5) {}
-    UILabel(RectSizeInt &v, float x, float y) ;
+    UILabel(RectSize &v) :UILabel(v, 0.0, 0.5) {}
+    UILabel(RectSize &v, float x, float y) ;
     /*Draw console*/
     void Draw();
     /*Add simple message*/
     void setText(const std::string& msg);
 private:
     UIFontFactory ft;
-    RectSizeInt v_port;
+    RectSize v_port;
 
     UIFont * fnt;
     std::string con;

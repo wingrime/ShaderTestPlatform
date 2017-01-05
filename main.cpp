@@ -138,8 +138,8 @@ void mouse_move (  int x , int y) {
         y_base = y;
     }
     else {
-        x_rm += (x_o-x_base)*0.5;
-        y_rm +=(y_o-y_base)*0.5;
+        x_rm += (x_o-x_base)*0.5f;
+        y_rm +=(y_o-y_base)*0.5f;
         x_base = x;
         y_base = y;
     }
@@ -210,7 +210,7 @@ int initKeybindings() {
     s_input->BindKey('w',"forward");
 
     s_input->AddCommand("back", InputCommandHandler::InputCommand([=] (void) -> void {
-        sc->cam.goForward(-25.1);
+        sc->cam.goForward(-25.1f);
     }));
     s_input->BindKey('s',"back");
 
@@ -258,7 +258,7 @@ int main ( int argc, char * argv [] )
     /* Main Scene */
     Singltone<SScene> msc(RectSizeInt(h,w));
     SScene * sc = Singltone<SScene>::GetInstance();
-    Singltone<DebugUI> dbg(RectSizeInt(h,w));
+    Singltone<DebugUI> dbg(RectSize((float)h,(float)w));
     DebugUI *dbg_ui = Singltone<DebugUI>::GetInstance();
 
     Singltone<InputCommandHandler> input_handler;
@@ -271,7 +271,7 @@ int main ( int argc, char * argv [] )
     //Singltone<sel::State>  g_script_state(&state);
 
 
-    dbg_ui->ToggleFPSCounter(config->operator []("scene.toggle_debug_viewport_fps").GetInt());
+    dbg_ui->ToggleFPSCounter((bool)config->operator []("scene.toggle_debug_viewport_fps").GetInt());
 
     sc->toggleMSAA((bool)config->operator []("scene.toggle_msaa").GetInt());
     sc->toggleBrightPass((bool)config->operator []("scene.toggle_brightpass").GetInt());

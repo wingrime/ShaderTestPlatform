@@ -6,7 +6,7 @@ int UIConsole::HandleExitConsole() {
     RebuildOut();
     return 0;
 }
-UIConsole::UIConsole(RectSizeInt &v, AbstractCommandHandler *cmd_h)
+UIConsole::UIConsole(RectSize &v, AbstractCommandHandler *cmd_h)
     :d_cmd_handler(cmd_h)
 {
 
@@ -19,7 +19,7 @@ UIConsole::~UIConsole()
     ft.Release(fnt);
 }
 void UIConsole::Draw() {
-    fnt->RenderText(d_output_cache,0.0,0.05,    v_port.w, v_port.h);
+    fnt->RenderText(d_output_cache,0.0f,0.05f,    v_port.w, v_port.h);
 }
 
 const std::vector<std::string> * UIConsole::getConsoleData() {
@@ -111,7 +111,7 @@ void UIConsole::RebuildOut()
         unsigned int n;
 
 
-        for (it = con.begin(),n = 0; ((n < d_con_sz) && -(it < con.end())); n++,it++ ) {
+        for (it = con.begin(),n = 0; ((n < d_con_sz) && (it < con.end())); n++,it++ ) {
              d_output_cache += *it;
         }
     }
