@@ -1,17 +1,8 @@
 #pragma once
 #ifndef __OGL_INIT__
 #define __OGL_INIT__
-#include <GL/glew.h>
+#include "OGL.h"
 
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <GLUT/glut.h>
-#else
-#include <GL/freeglut.h>
-#include <GL/gl.h>
-#include <GL/wglew.h>
-#include <windows.h>
-#endif
 #include "Log.h"
 
 #ifndef __APPLE__

@@ -1,11 +1,5 @@
 #include "r_perfman.h"
-#include <GL/glew.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#include <GL/wglew.h>
-#endif
+#include "OGL.h"
 #include "ErrorCodes.h"
 SPerfMan::SPerfMan() {
 	glGenQueries(1,&q);

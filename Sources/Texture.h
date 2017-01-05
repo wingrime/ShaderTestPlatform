@@ -2,13 +2,7 @@
 
 #include <string.h>
 #include <fstream>
-
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#else
-#include <GL/gl.h>
-#endif
-
+#include "OGL.h"
 /*serialization*/
 #include <cereal/access.hpp>
 #include <cereal/types/memory.hpp>

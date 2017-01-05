@@ -1,0 +1,1 @@
+gcc -O3 -flto -shared -static -Wall -o backtrace.dll backtrace.c -Wl,-Bstatic -lbfd -liberty -limagehlp -lintl -liconv  -static-libstdc++ -Wl,-Bdynamic -llibz 

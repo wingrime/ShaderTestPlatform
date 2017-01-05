@@ -1,13 +1,5 @@
 #include <imgui.h>
-#include <GL/glew.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <GLUT/glut.h>
-#else
-#include <GL/gl.h>
-#include <GL/wglew.h>
-#include <GL/freeglut.h>
-#endif
+#include "OGL.h"
 #include "ErrorCodes.h"
 static GLuint       g_FontTexture = 0;
 static int          g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;

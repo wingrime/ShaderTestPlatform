@@ -6,25 +6,47 @@ set(EXECUTABLE_OUTPUT_PATH,"${PROJECT_SOURCE_DIR}/Build")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
+#add_definitions(-DFREEGLUT_LIB_PRAGMAS=0)
+#add_definitions(-DFREEGLUT_STATIC)
+#add_definitions(-D_LIB)
+
+add_subdirectory( External/freeglut/freeglut/freeglut )
+set(FREEGLUT_INCLUDES "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/include")
+include_directories(${FREEGLUT_INCLUDES})
+link_directories( "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/lib/Debug")
+link_directories( "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/lib")
+
+
+#GLEW
+set(GLEW_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/External/glew/include")
+include_directories(${GLEW_INCLUDE_DIR})
+#link_directories("${PROJECT_SOURCE_DIR}/lib/Debug")
+
+
+
+
+add_subdirectory( External/glew )
+
 option(DEBUG_BUILD "Build test programs" ON)
 if (APPLE)
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
-else()
-#windows static build
-if(DEBUG_BUILD)
-#set(CMAKE_VERBOSE_MAKEFILE TRUE)
-set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -g -ggdb -gdwarf-2 -O0 -static-libstdc++ -Wall -Wextra -Wl,-Bstatic -lwinpthread  ${CMAKE_CXX_FLAGS}")
-else()
-add_definitions(-D__BUILD_DROP_ASSERT__)
-set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -static-libstdc++ -Wl,-Bstatic -lwinpthread -O3 -flto -msse2  -mfpmath=sse,387 -msse -fomit-frame-pointer ${CMAKE_CXX_FLAGS}")
+	set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+	SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
+elseif(MINGW)
 
-#set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Werror -g -Wextra -Wshadow -pedantic ${CMAKE_CXX_FLAGS}")
+	if(DEBUG_BUILD)
+		set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -g -ggdb -gdwarf-2 -O0 -static-libstdc++ -Wall -Wextra -Wl,-Bstatic -lwinpthread  ${CMAKE_CXX_FLAGS}")
+	else()
+		set(CMAKE_CXX_FLAGS "-std=c++11 -static -static-libstdc++ -static-libstdc++ -Wl,-Bstatic -lwinpthread -O3 -flto -msse2  -mfpmath=sse,387 -msse -fomit-frame-pointer ${CMAKE_CXX_FLAGS}")
+		add_definitions(-D__BUILD_DROP_ASSERT__)
+	endif()
+
+
+elseif(MSVC)
+ set(CMAKE_CXX_FLAGS "-std=c++11  ${CMAKE_CXX_FLAGS}")
+ #add_definitions(-D_CRT_NO_VA_START_VALIDATION)
+
+
 endif()
-endif(APPLE) 
-
-
-
 
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -36,26 +58,30 @@ if(NOT DEFINED ENV{FREETYPE_DIR})
 	set(ENV{FREETYPE_DIR} "${PROJECT_SOURCE_DIR}/External/freetype")
 endif()
 
+
 #to do try fix find
 if (APPLE)
-else()
+elseif(MINGW)
 set(GLEW_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/External/glew/include")
 set(GLEW_LIBRARY "${PROJECT_SOURCE_DIR}/External/glew/lib")
-endif(APPLE)
+elseif (MSVC)
+endif()
+
+
 #to do try fix find
-set(FREEGLUT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/include")
-set(FREEGLUT_LIBRARY "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/lib")
+
+#set(FREEGLUT_LIBRARY "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/lib")
 #lua
 set(LUA_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/External/lua/src")
 set(LUA_LIBRARIES "${PROJECT_SOURCE_DIR}/External/lua")
 
 
 find_package(Freetype REQUIRED)
-find_package(glew REQUIRED)
+#find_package(glew REQUIRED)
 if (APPLE)
 find_package(glut REQUIRED)
 else()
-find_package(freeglut REQUIRED)
+#find_package(freeglut REQUIRED)
 
 endif (APPLE)
 find_package(lua REQUIRED)
@@ -65,16 +91,16 @@ if(FREETYPE_FOUND)
 		link_directories(${FREETYPE_LINK_DIRS})
 		list(APPEND CORE_LINK_LIBS ${FREETYPE_LIBRARY})
 endif()
-if(GLEW_FOUND)
-		include_directories(${GLEW_INCLUDE_DIRS})
-		link_directories(${GLEW_LINK_DIRS})
-		list(APPEND CORE_LINK_LIBS ${GLEW_LIBRARY})
-endif()
-if(FREEGLUT_FOUND)
-		include_directories(${FREEGLUT_INCLUDE_DIRS})
-		link_directories(${FREEGLUT_LINK_DIRS})
-		list(APPEND CORE_LINK_LIBS ${FREEGLUT_LIBRARY})
-endif()
+#if(GLEW_FOUND)
+#		include_directories(${GLEW_INCLUDE_DIRS})
+#		link_directories(${GLEW_LINK_DIRS})
+#		list(APPEND CORE_LINK_LIBS ${GLEW_LIBRARY})
+#endif()
+#if(FREEGLUT_FOUND)
+#		include_directories(${FREEGLUT_INCLUDE_DIRS})
+#		link_directories(${FREEGLUT_LINK_DIRS})
+#		list(APPEND CORE_LINK_LIBS ${FREEGLUT_LIBRARY})
+#endif()
 if(LUA_FOUND)
                 include_directories(${LUA_INCLUDE_DIR})
                 list(APPEND CORE_LINK_LIBS ${LUA_LIBRARIES})
@@ -136,43 +162,48 @@ add_executable("main" main.cpp ${CORE_SRC}  ${RENDER_HEADERS} ${LUA_BUILDIN_SRC}
 if(APPLE)
 target_link_libraries(main ${FREETYPE_LIBRARIES})
 target_link_libraries(main ${GLEW_LIBRARY})
-
+target_link_libraries(main ${FREEGLUT_LIBRARY} )
 include_directories( ${GLUT_INCLUDE_DIRS} )
 
-target_link_libraries(main ${GLUT_LIBRARY} )
-
-
-else()
+elseif(MINGW)
 target_link_libraries(main "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
 target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
 target_link_libraries(main OpenGL32)
 target_link_libraries(main "${FREETYPE_LIBRARY}")
 #target_link_libraries(main "${LUA_LIBRARIES}/liblua.dll.a" ) #build in lua
-endif(APPLE)
+elseif(MSVC)
+#target_link_libraries(main "${PROJECT_SOURCE_DIR}/External/freeglut/freeglut/freeglut/lib/Debug/freeglutd.lib" )
+
+target_link_libraries(main "${PROJECT_SOURCE_DIR}/lib/Debug/libglew_sharedd.lib")
+#target_link_libraries(main "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
+#target_link_libraries(main OpenGL32)
+
+target_link_libraries(main "${FREETYPE_LIBRARY}")
+#target_link_libraries(main "${LUA_LIBRARIES}/liblua.dll.a" ) #build in lua
+endif()
 
 
 set_target_properties( main PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Build")
-if (APPLE)
-else()
-add_custom_command(TARGET main
-          POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy "${FREEGLUT_LIBRARY}/../bin/libfreeglut.dll" "${PROJECT_SOURCE_DIR}/Build/"
-          COMMAND ${CMAKE_COMMAND} -E copy "$ENV{FREETYPE_DIR}/bin/freetype6.dll" "${PROJECT_SOURCE_DIR}/Build/"
-          COMMAND ${CMAKE_COMMAND} -E copy "${GLEW_LIBRARY}/../bin/libglew.dll" "${PROJECT_SOURCE_DIR}/Build/"
-          COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
-          COMMAND ${CMAKE_COMMAND} -E copy "${LUA_LIBRARIES}/liblua.dll" "${PROJECT_SOURCE_DIR}/Build/"   #to link lua
-          )
+#if (APPLE)
+#else()
+#add_custom_command(TARGET main
+#          POST_BUILD
+#          COMMAND ${CMAKE_COMMAND} -E copy "${FREEGLUT_LIBRARY}/../bin/libfreeglut.dll" "${PROJECT_SOURCE_DIR}/Build/"
+#          COMMAND ${CMAKE_COMMAND} -E copy "$ENV{FREETYPE_DIR}/bin/freetype6.dll" "${PROJECT_SOURCE_DIR}/Build/"
+##          COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/PreBuild" "${PROJECT_SOURCE_DIR}/Build/"
+#          COMMAND ${CMAKE_COMMAND} -E copy "${LUA_LIBRARIES}/liblua.dll" "${PROJECT_SOURCE_DIR}/Build/"   #to link lua
+#          )
 
-add_executable("tests" ${CORE_SRC} ${LUA_BUILDIN_SRC} "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
-set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Build")
-target_link_libraries(tests "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
-target_link_libraries(tests "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
-target_link_libraries(tests OpenGL32)
-target_link_libraries(tests "${FREETYPE_LIBRARY}")
+#add_executable("tests" ${CORE_SRC} ${LUA_BUILDIN_SRC} "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest_main.cc" "${PROJECT_SOURCE_DIR}/External/gtest/src/gtest-all.cc" "${RENDER_TESTS}" "${RENDER_HEADERS}")
+#set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Build")
+#target_link_libraries(tests "${GLEW_LIBRARY}/liblibglew_shared.dll.a")
+#target_link_libraries(tests "${FREEGLUT_LIBRARY}/libfreeglut.dll.a")
+#target_link_libraries(tests OpenGL32)
+#target_link_libraries(tests "${FREETYPE_LIBRARY}")
 #run tests
-add_custom_command(TARGET tests
-          POST_BUILD
-          COMMAND "${PROJECT_SOURCE_DIR}/Build/tests.exe"
-          WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/Build"
-          )
-endif(APPLE)
+#add_custom_command(TARGET tests
+#          POST_BUILD
+#          COMMAND "${PROJECT_SOURCE_DIR}/Build/tests.exe"
+#          WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/Build"
+#          )
+#endif(APPLE)

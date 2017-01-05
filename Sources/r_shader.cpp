@@ -3,6 +3,7 @@
 #include "Log.h"
 #include "mat_math.h"
 #include "string_format.h"
+#include "FileBuffer.h"
 
 int SProg::Bind() {
     if (IsReady) {

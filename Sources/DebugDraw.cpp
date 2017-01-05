@@ -1,9 +1,7 @@
 #include "DebugDraw.h"
 #include "r_shader.h"
 #include "ErrorCodes.h"
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#endif 
+#include "OGL.h"
 DebugDraw::DebugDraw()
 {
     d_prog = new  SProg("Debug/Lines.vert","Debug/Lines.frag");

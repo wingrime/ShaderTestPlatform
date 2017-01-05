@@ -1,13 +1,6 @@
 #pragma once
 #include <unordered_map>
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#else
-#include <GL/gl.h>
-#include <GL/wglew.h>
-#endif
-#include "FileBuffer.h"
-
+#include "OGL.h"
 class vec4;
 class SMat4x4;
 /*LowLevel interface to shader program*/

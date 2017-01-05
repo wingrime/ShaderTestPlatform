@@ -6,12 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <map>
-#include <GL/glew.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
+#include "OGL.h"
 
 /* shader class*/
 #include "Shader.h"
