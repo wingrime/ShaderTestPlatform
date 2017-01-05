@@ -97,11 +97,10 @@ void key ( unsigned char key, int x, int y )
 	#endif
 	}
 
+	io.KeysDown[key] = true;
+	io.AddInputCharacter(key);
 	if (g_InputState == GlobalInputState::ACTOR_CONTROL) {
 		Singltone<InputCommandHandler>::GetInstance()->HandleInputKey(key);
-	}
-	else if (g_InputState == GlobalInputState::DEBUG_CONTROL ) {
-		io.AddInputCharacter(key);
 	}
 	return;
 }
@@ -224,6 +223,9 @@ int initKeybindings() {
         dbg_ui->con->Cls();
     }));
     s_input->BindKey('c',"clear_console");
+
+
+
     return 0;
 }
 
@@ -242,9 +244,9 @@ int main ( int argc, char * argv [] )
     LOGV("GIT REVISION:"  GIT_SHA1 );
 
     /*backtrace on windows*/
-#ifndef __APPLE__
-    LoadLibraryA("backtrace.dll");
-#endif
+	#ifdef _WIN32
+		LoadLibraryA("backtrace.dll");
+	#endif
     int h = config->operator []("launch.h").GetInt();
     int w = config->operator []("launch.w").GetInt();
 

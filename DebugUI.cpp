@@ -689,7 +689,7 @@ int DebugUI::DrawConsoleUI(bool *opened) {
         ImGui::EndChild();
         ImGui::Separator();
 		// Command-line
-		char InputBuf[1024];
+		static char InputBuf[1024];
 		
      
         if (ImGui::InputText("Input", InputBuf, 1024, ImGuiInputTextFlags_EnterReturnsTrue))

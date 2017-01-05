@@ -155,7 +155,7 @@ add_definitions( -DGIT_SHA1="${VERSION}" )
 message ("${VERSION}")
 message ("GIT OUTPUT")
 
-set(CORE_SRC External/imgui/imgui.cpp Scene.cpp DebugUI.cpp IMGuiHooks.cpp  )
+set(CORE_SRC External/imgui/imgui.cpp External/imgui/imgui_draw.cpp External/imgui/imgui_demo.cpp Scene.cpp DebugUI.cpp IMGuiHooks.cpp  )
 
 add_executable("main" main.cpp ${CORE_SRC}  ${RENDER_HEADERS} ${LUA_BUILDIN_SRC}  )
 
