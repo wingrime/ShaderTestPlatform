@@ -144,7 +144,7 @@ void SObjModel::LoadTextures() {
 
         auto &submesh =  (*it);
         if (d_materials.find(submesh->m_name) == d_materials.end()) {
-           LOGE("no material found - \"%s\" ",submesh->m_name.c_str());
+           LOGE("Material not Found - \"%s\" ",submesh->m_name.c_str());
         } else {
 
             auto &material = d_materials[submesh->m_name];
@@ -169,7 +169,7 @@ void SObjModel::LoadTextures() {
                 d_materials[submesh->m_name].bumpMapTex =  new STexture(submesh->m_dir+bump,false);
                 d_textures[bump].reset(d_materials[submesh->m_name].bumpMapTex);
                 if (!d_textures[bump]->IsReady) {
-                  LOGE("OBJ:Bump texture load failed %s",(submesh->m_dir+bump).c_str());
+                  LOGE("OBJ:Bump texture load failed at:\"%s\" name:\"%s\"",submesh->m_dir.c_str(),bump.c_str());
                 }
             }
             std::string &alpha = material.alphaMaskTexFileName;
@@ -177,7 +177,7 @@ void SObjModel::LoadTextures() {
                 d_materials[submesh->m_name].alphaMaskTex = new STexture(submesh->m_dir+alpha);
                 d_textures[alpha].reset(d_materials[submesh->m_name].alphaMaskTex);
                 if (!d_textures[alpha]->IsReady) {
-                   LOGE("OBJ:Alpha mask texture load failed %s",(submesh->m_dir+alpha).c_str());
+					LOGE("OBJ:Mask(alpha) texture load failed at:\"%s\" name:\"%s\"", submesh->m_dir.c_str(), alpha.c_str());
                 }
             }
 
