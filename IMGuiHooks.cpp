@@ -211,15 +211,17 @@ int imGuiSetup() {
     io.DeltaTime = 1.0f / 60.0f;
     io.IniFilename = "uicfg.ini";
     io.RenderDrawListsFn = ImGui_Impl_RenderDrawLists;
-    io.KeyMap[ImGuiKey_Tab] = 0x9;             
-    io.KeyMap[ImGuiKey_LeftArrow] = GLUT_KEY_LEFT;
-    io.KeyMap[ImGuiKey_RightArrow] = GLUT_KEY_RIGHT;
-    io.KeyMap[ImGuiKey_UpArrow] = GLUT_KEY_UP;
-    io.KeyMap[ImGuiKey_DownArrow] = GLUT_KEY_DOWN;
-    io.KeyMap[ImGuiKey_PageUp] = GLUT_KEY_PAGE_UP;
-    io.KeyMap[ImGuiKey_PageDown] = GLUT_KEY_PAGE_DOWN;
-    io.KeyMap[ImGuiKey_Home] = GLUT_KEY_HOME;
-    io.KeyMap[ImGuiKey_End] = GLUT_KEY_END;
+    io.KeyMap[ImGuiKey_Tab] = 0x9;         
+	//hack - try fix code mismatch
+#define GLUT_SK_HACK 200
+    io.KeyMap[ImGuiKey_LeftArrow] = GLUT_SK_HACK +GLUT_KEY_LEFT;
+    io.KeyMap[ImGuiKey_RightArrow] = GLUT_SK_HACK + GLUT_KEY_RIGHT;
+    io.KeyMap[ImGuiKey_UpArrow] = GLUT_SK_HACK + GLUT_KEY_UP;
+    io.KeyMap[ImGuiKey_DownArrow] = GLUT_SK_HACK + GLUT_KEY_DOWN;
+    io.KeyMap[ImGuiKey_PageUp] = GLUT_SK_HACK + GLUT_KEY_PAGE_UP;
+    io.KeyMap[ImGuiKey_PageDown] = GLUT_SK_HACK + GLUT_KEY_PAGE_DOWN;
+    io.KeyMap[ImGuiKey_Home] = GLUT_SK_HACK + GLUT_KEY_HOME;
+    io.KeyMap[ImGuiKey_End] = GLUT_SK_HACK + GLUT_KEY_END;
     #ifndef __APPLE__
     io.KeyMap[ImGuiKey_Delete] = GLUT_KEY_DELETE;
     #endif

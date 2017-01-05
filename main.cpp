@@ -71,18 +71,21 @@ void key_up ( unsigned char key, int x, int y )
     ImGuiIO& io = ImGui::GetIO();
     io.KeysDown[key] = false;
 }
+#define GLUT_SK_HACK 200
 void special_up ( int key, int x, int y )
 {
     UNUSED(x);
     UNUSED(y);
     ImGuiIO& io = ImGui::GetIO();
-    io.KeysDown[key] = false;
+	//hack for glew
+    io.KeysDown[GLUT_SK_HACK +key] = false;
 }
 void special(int key, int x, int y){
     UNUSED(x);
     UNUSED(y);
     ImGuiIO& io = ImGui::GetIO();
-    io.KeysDown[key] = true;
+	//hack for glew 
+    io.KeysDown[GLUT_SK_HACK + key] = true;
 }
 void key ( unsigned char key, int x, int y )
 {
